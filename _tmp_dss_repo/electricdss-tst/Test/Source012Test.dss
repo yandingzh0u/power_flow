@@ -1,0 +1,47 @@
+﻿Clear
+Set DefaultBaseFrequency=60
+
+New Circuit.source012Test
+~ Base=0.24 Z1=[1.9775  1.3431]  Z2=[0.1203  0.3623]  Z0=[1 0]
+// ~ seq=neg    ! do this to change the source to neg seq rather than pos seq
+// ~ puZ1=[0 0.27 ]  puZ0 = [0  100]  puZ2=[0 0.20 ]
+
+// --------------------------------------------
+// Test of example in Kersting's book, p 311ff
+// --------------------------------------------
+//NOTE (DSS-Extensions): added MVAsc1=105 to allow running this script (didn't check the book)
+New Vsource.VA phases=1 Bus1=BusV.1 basekV=.235  angle=0      MVASc3=100 MVAsc1=105
+New Vsource.VB phases=1 Bus1=BusV.2 basekV=.240  angle=-117.9 MVASc3=100 MVAsc1=105
+New Vsource.VC phases=1 Bus1=BusV.3 basekV=.245  angle=120    MVASc3=100 MVAsc1=105
+
+// convert to Delta voltages
+New Transformer.TYD  Xhl=0.02 %LoadLoss=0.02
+~ buses=[BusV loadbus]
+~ kVs=[.41569219 .240]  kVAs=[25 25] conns=[wye Delta]
+
+New Reactor.KerstingMotor  phases=3 Bus1=LoadBus.1.2.3 Bus2=LoadBus2.0.0.0  Z1=[1.9775  1.3431]  Z2=[0.1203  0.3623]  Z0=[1 0]
+
+Set voltageb=[115, 0.41569  0.24]
+calcv
+
+Solve
+
+// Show v ln n
+// Show v ll n
+// Show Currents Elements
+
+// Solve mode=fault
+// show fault
+
+// // ----------------- Alternate Scripts -----------------------
+// // Test of example in Kersting's book, p 311ff
+// // Delta Connected Source
+// New Vsource.VA phases=1 Bus1=BusV.1 Bus2=BusV.2 basekV=.235  angle=0      MVASc3=100 
+// New Vsource.VB phases=1 Bus1=BusV.2 Bus2=BusV.3 basekV=.240  angle=-117.9 MVASc3=100 
+// New Vsource.VC phases=1 Bus1=BusV.3 Bus2=BusV.1 basekV=.245  angle=120    MVASc3=100 
+
+// New Reactor.KerstingMotor  phases=3 Bus1=BusV.1.2.3 Bus2=LoadBus2.0.0.0  Z1=[1.9775  1.3431]  Z2=[0.1203  0.3623]  Z0=[1 0]
+
+// Solve 
+
+// Show currents elem

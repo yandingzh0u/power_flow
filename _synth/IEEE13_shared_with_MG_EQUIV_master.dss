@@ -1,0 +1,7 @@
+Clear
+cd "/home/y/Desktop/power_flow/_ieee13_cache"
+Redirect "IEEE13Nodeckt.dss"
+Set ControlMode=OFF
+// ---- Attach Microgrid Equivalent at 671 via MV/LV transformer ----
+New Transformer.MGXFMR Phases=3 Windings=2 Conns=[wye wye] Buses=[671.1.2.3, PCC_LV.1.2.3] kVs=[2.402 0.231] kVAs=[1000 1000] Xhl=6
+New Generator.MG_EQUIV Phases=3 Bus1=PCC_LV.1.2.3 kV=0.4 kW=0 kvar=0 model=1
