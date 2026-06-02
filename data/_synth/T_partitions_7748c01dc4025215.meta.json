@@ -1,5 +1,5 @@
 {
-  "t_json": "/home/y/Desktop/power_flow/_synth/case_ACTIVSg25k_plus_500D_ieee.json",
+  "t_json": "/home/y/Desktop/power_flow/data/_synth/case_ACTIVSg25k_plus_500D_ieee.json",
   "t_json_sha1": "8010929473f5a2a9a888245a23714b5ac3160b18",
   "partition_algo_version": 4,
   "n_parts": 4,
@@ -506,5 +506,5 @@
     71676,
     71677
   ],
-  "digest": "8ec90182d4026347"
+  "digest": "7748c01dc4025215"
 }

@@ -1,0 +1,126 @@
+"""External API-style request adapter and compact response helpers."""
+
+from typing import Any, Dict, Optional
+
+from .core import (
+    SERVICE_SCHEMA_VERSION,
+    default_run_gmss_solver_config,
+    describe_gmss_service_contract,
+    make_gmss_service_request,
+    normalize_run_gmss_solver_config,
+    run_gmss_service,
+    run_gmss_service_from_configs,
+)
+
+DATASET_KEYS = (
+    "t_case_file",
+    "nD",
+    "mg_per_D",
+    "mg_bus_count",
+    "target_total_nodes",
+    "mv_level_kv",
+    "pcc_bus",
+    "randomize_mg",
+    "random_seed",
+    "d_bus_count_hint",
+    "prefer_balanced_mix",
+    "reuse_if_match",
+    "force_rebuild",
+)
+
+SOLVER_KEYS = (
+    "t_solver",
+    "t_partition_mode",
+    "t_admm_max_iter",
+    "t_admm_tol_vm",
+    "t_admm_tol_va_deg",
+    "t_use_monolithic_warm_start",
+    "tol_dS_MW",
+    "tol_dV_pu",
+    "alpha",
+    "beta",
+    "parallel",
+    "mg_parallel",
+    "t_local_parallel",
+    "q_v_slope_mvar_per_pu",
+    "q_cap_mvar",
+    "target_buses_per_part",
+)
+
+
+def make_api_request(payload: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    """Normalize a compact external payload into the internal GMSS request."""
+    payload = dict(payload or {})
+    dataset_config = dict(payload.get("dataset_config") or {})
+    solver_config = dict(payload.get("solver_config") or {})
+
+    for key in DATASET_KEYS:
+        if key in payload:
+            dataset_config[key] = payload[key]
+
+    if "n_parts" in payload:
+        solver_config["t_n_parts"] = payload["n_parts"]
+    if "t_n_parts" in payload:
+        solver_config["t_n_parts"] = payload["t_n_parts"]
+    if "max_iter" in payload:
+        solver_config["max_iter"] = payload["max_iter"]
+    for key in SOLVER_KEYS:
+        if key in payload:
+            solver_config[key] = payload[key]
+
+    # Stable API defaults. Computational functions remain available for explicit soft mode.
+    solver_config.setdefault("t_solver", "partitioned")
+    solver_config.setdefault("t_partition_mode", "hard")
+
+    request = make_gmss_service_request(dataset_config=dataset_config, solver_config=solver_config)
+    request["task_id"] = str(payload.get("task_id", ""))
+    request["model_id"] = str(payload.get("model_id", ""))
+    request["scenario_id"] = str(payload.get("scenario_id", ""))
+    return request
+
+
+def simplify_response(response: Dict[str, Any], api_request: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    """Return the compact fields expected by an external caller."""
+    request = response.get("request", {})
+    api_request = api_request or {}
+    gmss_result = response.get("gmss_result", {})
+    node_summary = gmss_result.get("node_summary", {})
+    solver_config = gmss_result.get("solver_config", {})
+    return {
+        "schema_version": SERVICE_SCHEMA_VERSION,
+        "status": response.get("status", "unknown"),
+        "task_id": api_request.get("task_id", request.get("task_id", "")),
+        "model_id": api_request.get("model_id", request.get("model_id", "")),
+        "scenario_id": api_request.get("scenario_id", request.get("scenario_id", "")),
+        "summary": {
+            "nD": node_summary.get("nD"),
+            "total_mg": node_summary.get("total_mg"),
+            "total_nodes": node_summary.get("total_nodes"),
+            "t_solver": solver_config.get("t_solver"),
+            "t_partition_mode": solver_config.get("t_partition_mode"),
+            "t_n_parts": solver_config.get("t_n_parts"),
+        },
+        "result": gmss_result.get("last_state", {}),
+        "artifacts": response.get("artifacts", {}),
+    }
+
+
+def run_api_request(payload: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    request = make_api_request(payload)
+    return simplify_response(run_gmss_service(request), request)
+
+
+__all__ = [
+    "SERVICE_SCHEMA_VERSION",
+    "DATASET_KEYS",
+    "SOLVER_KEYS",
+    "default_run_gmss_solver_config",
+    "normalize_run_gmss_solver_config",
+    "make_gmss_service_request",
+    "describe_gmss_service_contract",
+    "run_gmss_service",
+    "run_gmss_service_from_configs",
+    "make_api_request",
+    "simplify_response",
+    "run_api_request",
+]
