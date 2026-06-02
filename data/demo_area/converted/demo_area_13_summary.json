@@ -10,6 +10,7 @@
     }
   },
   "base_mva": 1000.0,
+  "bpa_bus_metadata_preserved": true,
   "card_counts": {
     "B ": 2071,
     "BE": 49,

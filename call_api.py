@@ -30,6 +30,14 @@ def post_json(url: str, payload: dict, timeout: float) -> dict:
 def preview_value(value):
     if isinstance(value, list):
         return value[:3]
+    if isinstance(value, dict):
+        preview = dict(value)
+        partitions = preview.get("partitions")
+        if isinstance(partitions, list):
+            preview["partition_count"] = len(partitions)
+            preview["partitions_preview"] = partitions[:3]
+            preview.pop("partitions", None)
+        return preview
     return value
 
 
@@ -42,6 +50,8 @@ def main() -> None:
     parser.add_argument("--full", action="store_true", help="print full API response")
     parser.add_argument("--timeout", type=float, default=7200.0)
     parser.add_argument("--max-iter", type=int, default=10)
+    parser.add_argument("--time-point", default="", help="demo_area feeder profile time, e.g. 13:00 or 14:15")
+    parser.add_argument("--no-feeder-profiles", action="store_true", help="disable demo_area feeder XLS profiles")
     args = parser.parse_args()
 
     payload = {
@@ -57,6 +67,13 @@ def main() -> None:
             "model_id": "demo_area_pandapower",
             "t_solver": "pandapower_direct",
             "t_partition_mode": "none",
+            "d_solver": "partitioned",
+            "d_partition_mode": "physical_component",
+            "d_n_parts": 0,
+            "d_local_parallel": True,
+            "d_target_buses_per_part": 400,
+            "time_point": args.time_point,
+            "use_feeder_profiles": not args.no_feeder_profiles,
         })
     else:
         payload.update({
@@ -93,11 +110,18 @@ def main() -> None:
                 "mg_per_D": "3 each" if len(set(dataset.get("mg_per_D", []))) == 1 else dataset.get("mg_per_D", [])[:10],
                 "mg_bus_count": dataset.get("mg_bus_count"),
                 "target_total_nodes": dataset.get("target_total_nodes"),
+                "time_point": dataset.get("time_point"),
+                "use_feeder_profiles": dataset.get("use_feeder_profiles"),
             },
             "solver_config": {
                 "t_solver": solver.get("t_solver"),
                 "t_partition_mode": solver.get("t_partition_mode"),
                 "t_n_parts": solver.get("t_n_parts"),
+                "d_solver": solver.get("d_solver"),
+                "d_partition_mode": solver.get("d_partition_mode"),
+                "d_n_parts": solver.get("d_n_parts"),
+                "d_local_parallel": solver.get("d_local_parallel"),
+                "d_target_buses_per_part": solver.get("d_target_buses_per_part"),
                 "max_iter": solver.get("max_iter"),
                 "alpha": solver.get("alpha"),
                 "beta": solver.get("beta"),

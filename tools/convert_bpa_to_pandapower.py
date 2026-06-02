@@ -280,17 +280,37 @@ def build_ppc(base_mva: float, buses: list[BusCard], branches: list[BranchCard])
     )
 
 
+def attach_bpa_bus_metadata(net: Any, buses: list[BusCard]) -> None:
+    """Restore BPA bus labels after pandapower's PPC conversion."""
+    if "name" not in net.bus.columns:
+        net.bus["name"] = ""
+    for column in ("bpa_name", "bpa_kv", "bpa_zone", "bpa_subtype"):
+        if column not in net.bus.columns:
+            net.bus[column] = ""
+
+    for idx, bus in enumerate(buses, start=1):
+        if idx not in net.bus.index:
+            continue
+        net.bus.at[idx, "name"] = bus.name
+        net.bus.at[idx, "bpa_name"] = bus.name
+        net.bus.at[idx, "bpa_kv"] = float(bus.kv)
+        net.bus.at[idx, "bpa_zone"] = bus.zone
+        net.bus.at[idx, "bpa_subtype"] = bus.subtype.strip() or "B"
+
+
 def convert(dat_path: Path) -> tuple[Any, dict[str, Any]]:
     structure_check = check_dat_structure(dat_path)
     base_mva, buses, branches, card_counts, zero_adjustments = parse_dat(dat_path)
     ppc, zones = build_ppc(base_mva, buses, branches)
     net = from_ppc(ppc, f_hz=50.0)
     net.name = dat_path.stem
+    attach_bpa_bus_metadata(net, buses)
 
     summary: dict[str, Any] = {
         "input_file": str(dat_path),
         "structure_check": structure_check,
         "base_mva": base_mva,
+        "bpa_bus_metadata_preserved": True,
         "card_counts": card_counts,
         "zone_count": len(zones),
         "bpa_counts": {

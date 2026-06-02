@@ -3,7 +3,7 @@
 Generated from power_flow_fixed.ipynb cell 0.
 """
 
-import numpy as np, copy, math, json, os, shutil, subprocess, random, yaml, io, re, hashlib, importlib.util, multiprocessing as mp, pickle, heapq, contextlib, warnings, time
+import numpy as np, copy, math, json, os, shutil, subprocess, random, yaml, io, re, hashlib, importlib.util, multiprocessing as mp, pickle, heapq, contextlib, warnings, time, itertools
 from dataclasses import dataclass, field, asdict
 from typing import Dict, Any, Tuple, List, Optional
 from pathlib import Path
@@ -501,6 +501,17 @@ def _solve_t_part_worker(t_json: str,
     bf = {int(b): (float(vm), float(va)) for b, (vm, va) in boundary_fixed.items()}
     res = _local_pf_solver_pp(net_full, part, bf, use_soft_boundary=use_soft_boundary)
     return int(part_id), res
+
+
+def _solve_demo_d_part_worker(net_full: pp.pandapowerNet,
+                              part_id: int,
+                              part_buses: List[int],
+                              boundary_fixed: Dict[int, Tuple[float, float]]):
+    part = PartitionSpec(id=int(part_id), buses=[int(b) for b in part_buses])
+    bf = {int(b): (float(vm), float(va)) for b, (vm, va) in boundary_fixed.items()}
+    res = _local_pf_solver_pp(net_full, part, bf, use_soft_boundary=False)
+    return int(part_id), res
+
 
 def _init_voltage_pp(net: pp.pandapowerNet) -> Dict[int, Tuple[float, float]]:
     return {int(b): (1.0, 0.0) for b in _pp_bus_ids(net)}
@@ -1161,6 +1172,8 @@ def synthesize_T_plus_multiD(t_net: pp.pandapowerNet, out_json: Path, map_yaml: 
 class MultiConfig:
     dataset_id: str = "synthetic"
     scenario_id: str = "default_snapshot"
+    time_point: str = ""
+    use_feeder_profiles: bool = True
     nD: int = 3
     mg_per_D: List[int] = field(default_factory=lambda: [2, 1, 3])
     mv_level_kv: float = 4.16
@@ -1211,6 +1224,8 @@ def build_tr66_list_for_D(i: int,
 def _config_to_manifest(cfg: MultiConfig) -> Dict[str, Any]:
     return {
         "mg_cache_version": int(MG_CACHE_VERSION),
+        "time_point": str(cfg.time_point or ""),
+        "use_feeder_profiles": bool(cfg.use_feeder_profiles),
         "nD": int(cfg.nD),
         "mg_per_D": [int(x) for x in cfg.mg_per_D],
         "mv_level_kv": float(cfg.mv_level_kv),
@@ -2043,7 +2058,12 @@ def run_gmss_multi(max_iter=50, tol_dS_MW=1e-3, tol_dV_pu=1e-4,
                    q_v_slope_mvar_per_pu: float = 0.10,
                    q_cap_mvar: float = 0.10,
                    target_buses_per_part: int = 2500,
-                   t_local_parallel: bool = True):
+                   t_local_parallel: bool = True,
+                   d_solver: str = "partitioned",
+                   d_partition_mode: str = "physical_component",
+                   d_n_parts: int = 0,
+                   d_local_parallel: bool = True,
+                   d_target_buses_per_part: int = 400):
     idx_path = DATA_DIR / "INDEX_synth_multi.json"
     if not idx_path.exists():
         raise FileNotFoundError(f"未找到合成索引 {idx_path}，请先运行合成。")
@@ -2303,17 +2323,1059 @@ def _safe_max(series: Any) -> Optional[float]:
         return None
 
 
+def _normalize_demo_area_time_point(time_point: str, scenario_label: str) -> str:
+    raw = str(time_point or "").strip() or str(scenario_label or "").strip()
+    text = raw.replace("：", ":").replace(" ", "").lower()
+    match = re.match(r"^(\d{1,2}):(\d{1,2})$", text)
+    if match:
+        hour = int(match.group(1))
+        minute = int(match.group(2) or "0")
+    else:
+        match = re.match(r"^(\d{1,2})(?:点|时)(?:(\d{1,2})分?)?$", text)
+        if not match:
+            match = re.match(r"^(\d{1,2})$", text)
+        if not match:
+            raise ValueError(f"无法识别示范区 time_point: {raw!r}，请使用 13:00 或 20:00 这类格式。")
+        hour = int(match.group(1))
+        minute = int(match.group(2) or "0")
+    if not (0 <= hour <= 23 and minute in {0, 15, 30, 45}):
+        raise ValueError(f"示范区 time_point 必须是 0:00-23:45 的 15 分钟点，当前为: {raw!r}")
+    return f"{hour:02d}:{minute:02d}"
+
+
+def _demo_area_bus_name_lookup(net: pp.pandapowerNet) -> Dict[str, int]:
+    lookup: Dict[str, int] = {}
+    for idx, row in net.bus.iterrows():
+        for column in ("bpa_name", "name"):
+            if column not in net.bus.columns:
+                continue
+            name = str(row.get(column) or "").strip()
+            if name:
+                lookup.setdefault(name.upper(), int(idx))
+    return lookup
+
+
+def _set_load_at_bus(net: pp.pandapowerNet, bus_idx: int, p_mw: float, q_mvar: float, name: str) -> Tuple[bool, int]:
+    load_indices = net.load.index[net.load.bus.astype(int) == int(bus_idx)].tolist() if len(net.load) else []
+    if load_indices:
+        first = load_indices[0]
+        net.load.at[first, "p_mw"] = float(p_mw)
+        net.load.at[first, "q_mvar"] = float(q_mvar)
+        if "name" in net.load.columns:
+            net.load.at[first, "name"] = name
+        for extra in load_indices[1:]:
+            net.load.at[extra, "p_mw"] = 0.0
+            net.load.at[extra, "q_mvar"] = 0.0
+        return False, max(0, len(load_indices) - 1)
+
+    if abs(float(p_mw)) > 1e-12 or abs(float(q_mvar)) > 1e-12:
+        pp.create_load(net, bus=int(bus_idx), p_mw=float(p_mw), q_mvar=float(q_mvar), name=name)
+        return True, 0
+    return False, 0
+
+
+def _demo_feeder_row_candidates(row: Dict[str, Any]) -> List[str]:
+    bus_name = str(row.get("bus_name") or "").strip()
+    candidates = [str(x).strip() for x in (row.get("bus_aliases") or []) if str(x).strip()]
+    if bus_name and bus_name not in candidates:
+        candidates.append(bus_name)
+    return candidates
+
+
+def _apply_demo_feeder_profiles(
+    net: pp.pandapowerNet,
+    feeder_json: Path,
+    time_point: str,
+    scenario_label: str,
+) -> Dict[str, Any]:
+    if not feeder_json.exists():
+        raise FileNotFoundError(
+            f"未找到示范区馈线负荷 JSON: {feeder_json}。请先运行 tools/convert_demo_feeders.py。"
+        )
+
+    data = json.loads(feeder_json.read_text(encoding="utf-8"))
+    labels = [str(x) for x in data.get("time_labels", [])]
+    normalized_time = _normalize_demo_area_time_point(time_point, scenario_label)
+    label_lookup = {_normalize_demo_area_time_point(label, scenario_label): idx for idx, label in enumerate(labels)}
+    if normalized_time not in label_lookup:
+        raise ValueError(f"馈线负荷数据中没有 time_point={normalized_time}。可用时刻数: {len(labels)}")
+    time_idx = int(label_lookup[normalized_time])
+
+    bus_lookup = _demo_area_bus_name_lookup(net)
+    bus_profiles: Dict[int, Tuple[float, float]] = {}
+    bus_names: Dict[int, List[str]] = {}
+    matched_rows = 0
+    unmatched_rows = 0
+    empty_bus_name_rows = 0
+    unmatched_samples: List[str] = []
+
+    for feeder in data.get("feeders", []):
+        for row in feeder.get("rows", []):
+            bus_name = str(row.get("bus_name") or "").strip()
+            candidates = _demo_feeder_row_candidates(row)
+            if not candidates:
+                empty_bus_name_rows += 1
+                continue
+            matched_name = ""
+            bus_idx = None
+            for candidate in candidates:
+                bus_idx = bus_lookup.get(candidate.upper())
+                if bus_idx is not None:
+                    matched_name = candidate
+                    break
+            if bus_idx is None:
+                unmatched_rows += 1
+                if len(unmatched_samples) < 10:
+                    unmatched_samples.append("/".join(candidates[:3]))
+                continue
+            p_values = row.get("p_mw") or []
+            q_values = row.get("q_mvar") or []
+            p_mw = float(p_values[time_idx]) if time_idx < len(p_values) else 0.0
+            q_mvar = float(q_values[time_idx]) if time_idx < len(q_values) else 0.0
+            old_p, old_q = bus_profiles.get(bus_idx, (0.0, 0.0))
+            bus_profiles[bus_idx] = (old_p + p_mw, old_q + q_mvar)
+            bus_names.setdefault(bus_idx, []).append(matched_name or bus_name or f"bus_{bus_idx}")
+            matched_rows += 1
+
+    created_loads = 0
+    zeroed_extra_loads = 0
+    for bus_idx, (p_mw, q_mvar) in bus_profiles.items():
+        first_name = bus_names.get(bus_idx, [f"bus_{bus_idx}"])[0]
+        created, zeroed = _set_load_at_bus(
+            net,
+            bus_idx,
+            p_mw,
+            q_mvar,
+            name=f"FEEDER_PROFILE_{first_name}_{normalized_time}",
+        )
+        created_loads += int(created)
+        zeroed_extra_loads += int(zeroed)
+
+    return {
+        "enabled": True,
+        "source_json": str(feeder_json),
+        "time_point": normalized_time,
+        "time_index": time_idx,
+        "feeder_count": int(data.get("summary", {}).get("feeder_count", len(data.get("feeders", [])))),
+        "profile_row_count": int(data.get("summary", {}).get("row_count", 0)),
+        "matched_rows": int(matched_rows),
+        "unmatched_rows": int(unmatched_rows),
+        "empty_bus_name_rows": int(empty_bus_name_rows),
+        "updated_buses": int(len(bus_profiles)),
+        "created_loads": int(created_loads),
+        "zeroed_extra_loads": int(zeroed_extra_loads),
+        "unmatched_samples": unmatched_samples,
+    }
+
+
+def _demo_bus_label(net: pp.pandapowerNet, bus_idx: int) -> str:
+    bus_idx = int(bus_idx)
+    if bus_idx not in net.bus.index:
+        return f"bus_{bus_idx}"
+    for column in ("bpa_name", "name"):
+        if column in net.bus.columns:
+            name = str(net.bus.at[bus_idx, column] or "").strip()
+            if name:
+                return name
+    return f"bus_{bus_idx}"
+
+
+def _demo_supply_area_key(net: pp.pandapowerNet, feeder_part: Dict[str, Any]) -> str:
+    feeder_code = str(feeder_part.get("feeder_code") or "").strip().upper()
+    boundary_names = [_demo_bus_label(net, int(b)) for b in feeder_part.get("boundary_buses", [])]
+    candidates = []
+    for name in boundary_names:
+        compact = re.sub(r"\s+", "", str(name or "")).upper()
+        if not compact:
+            continue
+        if feeder_code and compact.startswith(feeder_code):
+            continue
+        candidates.append(compact)
+    if not candidates:
+        candidates = [re.sub(r"\s+", "", str(x or "")).upper() for x in boundary_names if str(x or "").strip()]
+    if not candidates:
+        return str(feeder_part.get("feeder_code") or f"part_{feeder_part.get('id', 0)}").upper()
+    return re.sub(r"\d+$", "", candidates[0]) or candidates[0]
+
+
+def _build_demo_feeder_partitions(net: pp.pandapowerNet, feeder_json: Path) -> List[Dict[str, Any]]:
+    if not feeder_json.exists():
+        raise FileNotFoundError(
+            f"未找到示范区馈线负荷 JSON: {feeder_json}。请先运行 tools/convert_demo_feeders.py。"
+        )
+
+    data = json.loads(feeder_json.read_text(encoding="utf-8"))
+    bus_lookup = _demo_area_bus_name_lookup(net)
+    graph = _build_pp_graph(net)
+    partitions: List[Dict[str, Any]] = []
+
+    for pid, feeder in enumerate(data.get("feeders", []), start=1):
+        internal_buses: set[int] = set()
+        matched_rows = 0
+        unmatched_rows = 0
+        empty_rows = 0
+        unmatched_samples: List[str] = []
+
+        for row in feeder.get("rows", []):
+            candidates = _demo_feeder_row_candidates(row)
+            if not candidates:
+                empty_rows += 1
+                continue
+            bus_idx = None
+            for candidate in candidates:
+                bus_idx = bus_lookup.get(candidate.upper())
+                if bus_idx is not None:
+                    break
+            if bus_idx is None:
+                unmatched_rows += 1
+                if len(unmatched_samples) < 5:
+                    unmatched_samples.append("/".join(candidates[:3]))
+                continue
+            internal_buses.add(int(bus_idx))
+            matched_rows += 1
+
+        if not internal_buses:
+            continue
+
+        boundary_buses: set[int] = set()
+        for bus_idx in internal_buses:
+            if bus_idx not in graph:
+                continue
+            for nbr in graph.neighbors(bus_idx):
+                nbr = int(nbr)
+                if nbr not in internal_buses:
+                    boundary_buses.add(nbr)
+
+        boundary_fixed: Dict[int, Tuple[float, float]] = {}
+        for bus_idx in sorted(boundary_buses):
+            if "res_bus" in net and bus_idx in net.res_bus.index:
+                boundary_fixed[int(bus_idx)] = (
+                    float(net.res_bus.at[bus_idx, "vm_pu"]),
+                    float(net.res_bus.at[bus_idx, "va_degree"]),
+                )
+
+        partitions.append(
+            {
+                "id": int(pid),
+                "feeder_id": str(feeder.get("feeder_id", "")),
+                "display_name": str(feeder.get("display_name", "")),
+                "feeder_code": str(feeder.get("feeder_code", "")),
+                "internal_buses": sorted(int(x) for x in internal_buses),
+                "boundary_buses": sorted(int(x) for x in boundary_buses),
+                "part_buses": sorted(int(x) for x in (internal_buses | boundary_buses)),
+                "boundary_fixed": boundary_fixed,
+                "matched_rows": int(matched_rows),
+                "unmatched_rows": int(unmatched_rows),
+                "empty_rows": int(empty_rows),
+                "unmatched_samples": unmatched_samples,
+            }
+        )
+
+    return partitions
+
+
+def _compute_demo_partition_boundary(net: pp.pandapowerNet, internal_buses: set[int]) -> Tuple[List[int], Dict[int, Tuple[float, float]]]:
+    graph = _build_pp_graph(net)
+    boundary_buses: set[int] = set()
+    for bus_idx in internal_buses:
+        if bus_idx not in graph:
+            continue
+        for nbr in graph.neighbors(bus_idx):
+            nbr = int(nbr)
+            if nbr not in internal_buses:
+                boundary_buses.add(nbr)
+
+    boundary_fixed: Dict[int, Tuple[float, float]] = {}
+    for bus_idx in sorted(boundary_buses):
+        if "res_bus" in net and bus_idx in net.res_bus.index:
+            boundary_fixed[int(bus_idx)] = (
+                float(net.res_bus.at[bus_idx, "vm_pu"]),
+                float(net.res_bus.at[bus_idx, "va_degree"]),
+            )
+    return sorted(int(x) for x in boundary_buses), boundary_fixed
+
+
+def _merge_demo_partitions_by_supply_area(net: pp.pandapowerNet, feeder_parts: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    grouped: Dict[str, Dict[str, Any]] = {}
+    for part in feeder_parts:
+        key = _demo_supply_area_key(net, part)
+        group = grouped.setdefault(
+            key,
+            {
+                "supply_area": key,
+                "feeder_ids": [],
+                "display_names": [],
+                "feeder_codes": [],
+                "internal_buses": set(),
+                "matched_rows": 0,
+                "unmatched_rows": 0,
+                "empty_rows": 0,
+                "unmatched_samples": [],
+            },
+        )
+        group["feeder_ids"].append(str(part.get("feeder_id", "")))
+        group["display_names"].append(str(part.get("display_name", "")))
+        group["feeder_codes"].append(str(part.get("feeder_code", "")))
+        group["internal_buses"].update(int(x) for x in part.get("internal_buses", []))
+        group["matched_rows"] += int(part.get("matched_rows", 0))
+        group["unmatched_rows"] += int(part.get("unmatched_rows", 0))
+        group["empty_rows"] += int(part.get("empty_rows", 0))
+        for sample in part.get("unmatched_samples", []):
+            if len(group["unmatched_samples"]) < 10:
+                group["unmatched_samples"].append(sample)
+
+    merged: List[Dict[str, Any]] = []
+    for pid, (key, group) in enumerate(sorted(grouped.items()), start=1):
+        internal_buses = set(int(x) for x in group["internal_buses"])
+        boundary_buses, boundary_fixed = _compute_demo_partition_boundary(net, internal_buses)
+        merged.append(
+            {
+                "id": int(pid),
+                "supply_area": key,
+                "feeder_id": ",".join(group["feeder_ids"]),
+                "display_name": f"{key}供电区域",
+                "feeder_code": ",".join(group["feeder_codes"]),
+                "feeders": group["display_names"],
+                "internal_buses": sorted(int(x) for x in internal_buses),
+                "boundary_buses": boundary_buses,
+                "part_buses": sorted(int(x) for x in (internal_buses | set(boundary_buses))),
+                "boundary_fixed": boundary_fixed,
+                "matched_rows": int(group["matched_rows"]),
+                "unmatched_rows": int(group["unmatched_rows"]),
+                "empty_rows": int(group["empty_rows"]),
+                "unmatched_samples": group["unmatched_samples"],
+            }
+        )
+    return merged
+
+
+def _auto_choose_demo_graph_n_parts(n_internal_buses: int,
+                                    requested_n_parts: int = 0,
+                                    target_buses_per_part: int = 400) -> int:
+    if int(requested_n_parts or 0) > 0:
+        return max(1, int(requested_n_parts))
+    n_internal = max(1, int(n_internal_buses))
+    target = max(100, int(target_buses_per_part or 400))
+    return int(max(2, min(8, math.ceil(n_internal / target))))
+
+
+def _demo_augmented_distribution_graph(
+    net: pp.pandapowerNet,
+    feeder_parts: List[Dict[str, Any]],
+) -> Tuple[nx.Graph, set[int]]:
+    full_graph = _build_pp_graph(net)
+    internal_all = set(
+        int(bus)
+        for part in feeder_parts
+        for bus in part.get("internal_buses", [])
+    )
+    graph = nx.Graph()
+    for bus in internal_all:
+        graph.add_node(int(bus), virtual=False)
+
+    for u, v in full_graph.edges():
+        u = int(u)
+        v = int(v)
+        if u in internal_all and v in internal_all:
+            graph.add_edge(u, v, weight=1.0)
+
+    connectors = []
+    for part in feeder_parts:
+        area = _demo_supply_area_key(net, part)
+        connector = f"SUPPLY::{area}"
+        connectors.append(connector)
+        graph.add_node(connector, virtual=True)
+        boundary_set = set(int(x) for x in part.get("boundary_buses", []))
+        adjacent_internal = set()
+        for bus in [int(x) for x in part.get("internal_buses", [])]:
+            if bus not in full_graph:
+                continue
+            for nbr in full_graph.neighbors(bus):
+                if int(nbr) in boundary_set:
+                    adjacent_internal.add(bus)
+        if not adjacent_internal:
+            adjacent_internal = set(int(x) for x in part.get("internal_buses", [])[:1])
+        for bus in adjacent_internal:
+            graph.add_edge(connector, int(bus), weight=8.0)
+
+    for i, left in enumerate(connectors):
+        for right in connectors[i + 1:]:
+            graph.add_edge(left, right, weight=0.02)
+    return graph, internal_all
+
+
+def _fallback_balanced_bisection(nodes: set[Any], internal_all: set[int], graph: nx.Graph) -> Tuple[set[Any], set[Any]]:
+    actual = sorted(int(n) for n in nodes if isinstance(n, (int, np.integer)) and int(n) in internal_all)
+    midpoint = max(1, len(actual) // 2)
+    left_actual = set(actual[:midpoint])
+    right_actual = set(actual[midpoint:])
+    if not right_actual and len(left_actual) > 1:
+        right_actual.add(left_actual.pop())
+
+    left = set(left_actual)
+    right = set(right_actual)
+    for node in nodes:
+        if node in left or node in right:
+            continue
+        left_score = sum(float(graph[node][nbr].get("weight", 1.0)) for nbr in graph.neighbors(node) if nbr in left_actual)
+        right_score = sum(float(graph[node][nbr].get("weight", 1.0)) for nbr in graph.neighbors(node) if nbr in right_actual)
+        if left_score > right_score:
+            left.add(node)
+        elif right_score > left_score:
+            right.add(node)
+        elif len(left_actual) <= len(right_actual):
+            left.add(node)
+        else:
+            right.add(node)
+    return left, right
+
+
+def _kl_bisect_demo_graph(graph: nx.Graph, nodes: set[Any], internal_all: set[int]) -> Tuple[set[Any], set[Any]]:
+    subgraph = graph.subgraph(nodes).copy()
+    actual_count = sum(1 for node in nodes if isinstance(node, (int, np.integer)) and int(node) in internal_all)
+    if actual_count <= 1 or len(nodes) <= 2:
+        return _fallback_balanced_bisection(nodes, internal_all, graph)
+    try:
+        left, right = nx.algorithms.community.kernighan_lin_bisection(
+            subgraph,
+            weight="weight",
+            seed=42,
+        )
+        left = set(left)
+        right = set(right)
+    except Exception:
+        left, right = _fallback_balanced_bisection(nodes, internal_all, graph)
+
+    left_actual = {int(n) for n in left if isinstance(n, (int, np.integer)) and int(n) in internal_all}
+    right_actual = {int(n) for n in right if isinstance(n, (int, np.integer)) and int(n) in internal_all}
+    if not left_actual or not right_actual:
+        left, right = _fallback_balanced_bisection(nodes, internal_all, graph)
+    return left, right
+
+
+def _recursive_kl_partitions(graph: nx.Graph, nodes: set[Any], internal_all: set[int], n_parts: int) -> List[set[Any]]:
+    actual_count = sum(1 for node in nodes if isinstance(node, (int, np.integer)) and int(node) in internal_all)
+    if int(n_parts) <= 1 or actual_count <= 1:
+        return [set(nodes)]
+    left, right = _kl_bisect_demo_graph(graph, set(nodes), internal_all)
+    k_left = max(1, int(n_parts) // 2)
+    k_right = max(1, int(n_parts) - k_left)
+    return (
+        _recursive_kl_partitions(graph, left, internal_all, k_left)
+        + _recursive_kl_partitions(graph, right, internal_all, k_right)
+    )
+
+
+def _demo_graph_cut_metrics(full_graph: nx.Graph, internal_buses: set[int], all_internal_buses: set[int]) -> Dict[str, Any]:
+    cut_edges = set()
+    for bus in internal_buses:
+        if bus not in full_graph:
+            continue
+        for nbr in full_graph.neighbors(bus):
+            nbr = int(nbr)
+            if nbr in all_internal_buses and nbr not in internal_buses:
+                cut_edges.add(tuple(sorted((int(bus), nbr))))
+    return {"inter_partition_cut_edge_count": int(len(cut_edges))}
+
+
+def _demo_main_distribution_sets(
+    net: pp.pandapowerNet,
+    main_voltage_threshold_kv: float = 35.0,
+) -> Tuple[set[int], set[int]]:
+    main_buses: set[int] = set()
+    distribution_buses: set[int] = set()
+    for idx, row in net.bus.iterrows():
+        bus_idx = int(idx)
+        vn_kv = float(row.get("vn_kv", 0.0) or 0.0)
+        if vn_kv >= float(main_voltage_threshold_kv):
+            main_buses.add(bus_idx)
+        else:
+            distribution_buses.add(bus_idx)
+    return main_buses, distribution_buses
+
+
+def _demo_td_transformer_pairs(
+    net: pp.pandapowerNet,
+    main_buses: set[int],
+    distribution_buses: set[int],
+) -> Dict[int, Dict[str, int]]:
+    pairs: Dict[int, Dict[str, int]] = {}
+    if "trafo" not in net or len(net.trafo) == 0:
+        return pairs
+    for idx, row in net.trafo.iterrows():
+        hv = int(row.hv_bus)
+        lv = int(row.lv_bus)
+        if hv in main_buses and lv in distribution_buses:
+            pairs[int(idx)] = {"main_bus": hv, "distribution_bus": lv}
+        elif lv in main_buses and hv in distribution_buses:
+            pairs[int(idx)] = {"main_bus": lv, "distribution_bus": hv}
+    return pairs
+
+
+def _demo_main_distribution_summary(
+    net: pp.pandapowerNet,
+    main_voltage_threshold_kv: float = 35.0,
+) -> Dict[str, Any]:
+    main_buses, distribution_buses = _demo_main_distribution_sets(
+        net,
+        main_voltage_threshold_kv=main_voltage_threshold_kv,
+    )
+    td_pairs = _demo_td_transformer_pairs(net, main_buses, distribution_buses)
+    td_distribution_buses = sorted({int(pair["distribution_bus"]) for pair in td_pairs.values()})
+    td_main_buses = sorted({int(pair["main_bus"]) for pair in td_pairs.values()})
+    distribution_graph = _build_pp_graph(net).subgraph(distribution_buses).copy()
+    distribution_component_count = int(sum(1 for _ in nx.connected_components(distribution_graph)))
+    return {
+        "main_voltage_threshold_kv": float(main_voltage_threshold_kv),
+        "main_bus_count": int(len(main_buses)),
+        "distribution_bus_count": int(len(distribution_buses)),
+        "td_transformer_count": int(len(td_pairs)),
+        "td_boundary_bus_count": int(len(td_distribution_buses)),
+        "td_main_boundary_bus_count": int(len(td_main_buses)),
+        "distribution_component_count": distribution_component_count,
+    }
+
+
+def _component_sort_key(net: pp.pandapowerNet, buses: set[int]) -> Tuple[int, str, int]:
+    labels = [_demo_bus_label(net, int(bus)) for bus in buses]
+    first_label = min(labels) if labels else ""
+    return (-len(buses), first_label, min(int(bus) for bus in buses))
+
+
+def _build_demo_physical_component_partitions(
+    net: pp.pandapowerNet,
+    feeder_parts: List[Dict[str, Any]],
+    main_voltage_threshold_kv: float = 35.0,
+) -> List[Dict[str, Any]]:
+    full_graph = _build_pp_graph(net)
+    main_buses, distribution_buses = _demo_main_distribution_sets(
+        net,
+        main_voltage_threshold_kv=main_voltage_threshold_kv,
+    )
+    distribution_graph = full_graph.subgraph(distribution_buses).copy()
+    components = [
+        set(int(bus) for bus in comp)
+        for comp in nx.connected_components(distribution_graph)
+        if comp
+    ]
+    components.sort(key=lambda comp: _component_sort_key(net, comp))
+    td_pairs = _demo_td_transformer_pairs(net, main_buses, distribution_buses)
+
+    partitions: List[Dict[str, Any]] = []
+    for pid, internal_buses in enumerate(components, start=1):
+        boundary_buses: set[int] = set()
+        boundary_main_buses: set[int] = set()
+        boundary_trafo_indices: List[int] = []
+        for trafo_idx, pair in td_pairs.items():
+            d_bus = int(pair["distribution_bus"])
+            if d_bus not in internal_buses:
+                continue
+            boundary_buses.add(d_bus)
+            boundary_main_buses.add(int(pair["main_bus"]))
+            boundary_trafo_indices.append(int(trafo_idx))
+
+        for bus_idx in internal_buses:
+            if bus_idx not in full_graph:
+                continue
+            for nbr in full_graph.neighbors(bus_idx):
+                nbr = int(nbr)
+                if nbr in main_buses:
+                    boundary_buses.add(int(bus_idx))
+                    boundary_main_buses.add(nbr)
+
+        boundary_fixed: Dict[int, Tuple[float, float]] = {}
+        for bus_idx in sorted(boundary_buses):
+            if "res_bus" in net and bus_idx in net.res_bus.index:
+                boundary_fixed[int(bus_idx)] = (
+                    float(net.res_bus.at[bus_idx, "vm_pu"]),
+                    float(net.res_bus.at[bus_idx, "va_degree"]),
+                )
+
+        member_feeders: List[str] = []
+        member_codes: List[str] = []
+        member_ids: List[str] = []
+        supply_areas: List[str] = []
+        matched_rows = 0
+        unmatched_rows = 0
+        empty_rows = 0
+        unmatched_samples: List[str] = []
+        for feeder_part in feeder_parts:
+            feeder_internal = set(int(x) for x in feeder_part.get("internal_buses", []))
+            if not (feeder_internal & internal_buses):
+                continue
+            display_name = str(feeder_part.get("display_name", "")).strip()
+            feeder_code = str(feeder_part.get("feeder_code", "")).strip()
+            feeder_id = str(feeder_part.get("feeder_id", "")).strip()
+            if display_name:
+                member_feeders.append(display_name)
+            if feeder_code:
+                member_codes.append(feeder_code)
+            if feeder_id:
+                member_ids.append(feeder_id)
+            supply_areas.append(_demo_supply_area_key(net, feeder_part))
+            matched_rows += int(feeder_part.get("matched_rows", 0))
+            unmatched_rows += int(feeder_part.get("unmatched_rows", 0))
+            empty_rows += int(feeder_part.get("empty_rows", 0))
+            for sample in feeder_part.get("unmatched_samples", []):
+                if len(unmatched_samples) < 10:
+                    unmatched_samples.append(sample)
+
+        partitions.append(
+            {
+                "id": int(pid),
+                "partition_type": "distribution_physical_component",
+                "supply_area": ",".join(sorted(set(supply_areas))),
+                "feeder_id": ",".join(member_ids),
+                "display_name": f"D_COMPONENT_{pid:03d}",
+                "feeder_code": ",".join(member_codes),
+                "feeders": member_feeders,
+                "internal_buses": sorted(int(x) for x in internal_buses),
+                "boundary_buses": sorted(int(x) for x in boundary_buses),
+                "boundary_main_buses": sorted(int(x) for x in boundary_main_buses),
+                "boundary_trafo_indices": sorted(int(x) for x in boundary_trafo_indices),
+                "part_buses": sorted(int(x) for x in internal_buses),
+                "boundary_fixed": boundary_fixed,
+                "matched_rows": int(matched_rows),
+                "unmatched_rows": int(unmatched_rows),
+                "empty_rows": int(empty_rows),
+                "unmatched_samples": unmatched_samples,
+                "main_voltage_threshold_kv": float(main_voltage_threshold_kv),
+                "boundary_transformer_count": int(len(boundary_trafo_indices)),
+                "boundary_main_bus_count": int(len(boundary_main_buses)),
+                "physical_component_count": int(len(components)),
+                "inter_partition_cut_edge_count": 0,
+            }
+        )
+    return partitions
+
+
+def _demo_boundary_distance_weight(full_graph: nx.Graph, left_bounds: List[int], right_bounds: List[int]) -> float:
+    best = math.inf
+    for left in left_bounds:
+        if int(left) not in full_graph:
+            continue
+        try:
+            dist_map = nx.single_source_shortest_path_length(full_graph, int(left), cutoff=12)
+        except Exception:
+            continue
+        for right in right_bounds:
+            d = dist_map.get(int(right))
+            if d is not None and d < best:
+                best = float(d)
+    if not math.isfinite(best):
+        return 0.01
+    return float(1.0 / (1.0 + best))
+
+
+def _build_demo_coarse_area_graph(net: pp.pandapowerNet, area_units: List[Dict[str, Any]]) -> nx.Graph:
+    full_graph = _build_pp_graph(net)
+    coarse = nx.Graph()
+    for idx, unit in enumerate(area_units):
+        coarse.add_node(
+            int(idx),
+            weight=int(len(unit.get("internal_buses", []))),
+            supply_area=str(unit.get("supply_area", "")),
+        )
+    for i, left in enumerate(area_units):
+        for j in range(i + 1, len(area_units)):
+            right = area_units[j]
+            weight = _demo_boundary_distance_weight(
+                full_graph,
+                [int(x) for x in left.get("boundary_buses", [])],
+                [int(x) for x in right.get("boundary_buses", [])],
+            )
+            coarse.add_edge(int(i), int(j), weight=float(weight))
+    return coarse
+
+
+def _score_demo_coarse_assignment(coarse: nx.Graph, labels: Tuple[int, ...], n_parts: int) -> Tuple[float, Dict[str, Any]]:
+    weights = [0.0] * int(n_parts)
+    for idx, label in enumerate(labels):
+        weights[int(label)] += float(coarse.nodes[int(idx)].get("weight", 0))
+    total_weight = sum(weights)
+    target = total_weight / max(1, int(n_parts))
+    balance_norm = sum((w - target) ** 2 for w in weights) / max(1.0, target * target * int(n_parts))
+    max_to_min = max(weights) / max(1.0, min(weights))
+    cut_weight = 0.0
+    for u, v, attrs in coarse.edges(data=True):
+        if labels[int(u)] != labels[int(v)]:
+            cut_weight += float(attrs.get("weight", 1.0))
+    # Balance is the primary constraint; graph cut breaks ties among similarly balanced plans.
+    score = float(balance_norm + 0.03 * cut_weight)
+    return score, {
+        "partition_weights": [int(x) for x in weights],
+        "balance_ratio_max_to_min": float(max_to_min),
+        "coarse_cut_weight": float(cut_weight),
+    }
+
+
+def _partition_demo_coarse_graph(coarse: nx.Graph, n_parts: int) -> Tuple[List[List[int]], Dict[str, Any]]:
+    n_units = int(len(coarse.nodes))
+    n_parts_eff = max(1, min(int(n_parts), n_units))
+    if n_parts_eff == 1:
+        return [list(range(n_units))], {
+            "partition_weights": [int(sum(coarse.nodes[i].get("weight", 0) for i in range(n_units)))],
+            "balance_ratio_max_to_min": 1.0,
+            "coarse_cut_weight": 0.0,
+        }
+
+    best_labels = None
+    best_score = math.inf
+    best_metrics: Dict[str, Any] = {}
+    if n_units <= 12 and n_parts_eff <= 6:
+        for tail in itertools.product(range(n_parts_eff), repeat=max(0, n_units - 1)):
+            labels = (0,) + tuple(int(x) for x in tail)
+            if len(set(labels)) != n_parts_eff:
+                continue
+            score, metrics = _score_demo_coarse_assignment(coarse, labels, n_parts_eff)
+            if score < best_score:
+                best_score = score
+                best_labels = labels
+                best_metrics = metrics
+    else:
+        labels = [-1] * n_units
+        weights = [0.0] * n_parts_eff
+        for idx in sorted(range(n_units), key=lambda i: float(coarse.nodes[i].get("weight", 0)), reverse=True):
+            label = min(range(n_parts_eff), key=lambda k: weights[k])
+            labels[idx] = int(label)
+            weights[label] += float(coarse.nodes[idx].get("weight", 0))
+        best_labels = tuple(labels)
+        _, best_metrics = _score_demo_coarse_assignment(coarse, best_labels, n_parts_eff)
+
+    groups: List[List[int]] = [[] for _ in range(n_parts_eff)]
+    for idx, label in enumerate(best_labels or ()):
+        groups[int(label)].append(int(idx))
+    return groups, best_metrics
+
+
+def _build_demo_graph_partitions(
+    net: pp.pandapowerNet,
+    feeder_parts: List[Dict[str, Any]],
+    n_parts: int = 0,
+    target_buses_per_part: int = 400,
+) -> List[Dict[str, Any]]:
+    area_units = _merge_demo_partitions_by_supply_area(net, feeder_parts)
+    internal_all = set(
+        int(bus)
+        for unit in area_units
+        for bus in unit.get("internal_buses", [])
+    )
+    n_parts_eff = _auto_choose_demo_graph_n_parts(
+        len(internal_all),
+        requested_n_parts=int(n_parts or 0),
+        target_buses_per_part=int(target_buses_per_part or 400),
+    )
+    coarse = _build_demo_coarse_area_graph(net, area_units)
+    coarse_groups, coarse_metrics = _partition_demo_coarse_graph(coarse, n_parts_eff)
+    full_graph = _build_pp_graph(net)
+
+    partitions: List[Dict[str, Any]] = []
+    for pid, unit_indices in enumerate(coarse_groups, start=1):
+        units = [area_units[int(idx)] for idx in unit_indices]
+        internal_buses = set(
+            int(bus)
+            for unit in units
+            for bus in unit.get("internal_buses", [])
+        )
+        if not internal_buses:
+            continue
+
+        boundary_buses, boundary_fixed = _compute_demo_partition_boundary(net, internal_buses)
+        member_feeders = [
+            str(feeder)
+            for unit in units
+            for feeder in unit.get("feeders", [])
+        ]
+        member_codes = [
+            str(code)
+            for unit in units
+            for code in str(unit.get("feeder_code", "")).split(",")
+            if str(code).strip()
+        ]
+        member_ids = [
+            str(fid)
+            for unit in units
+            for fid in str(unit.get("feeder_id", "")).split(",")
+            if str(fid).strip()
+        ]
+        supply_areas = [str(unit.get("supply_area", "")) for unit in units]
+        matched_rows = sum(int(unit.get("matched_rows", 0)) for unit in units)
+        unmatched_rows = sum(int(unit.get("unmatched_rows", 0)) for unit in units)
+        empty_rows = sum(int(unit.get("empty_rows", 0)) for unit in units)
+        unmatched_samples: List[str] = []
+        for unit in units:
+            for sample in unit.get("unmatched_samples", []):
+                if len(unmatched_samples) < 10:
+                    unmatched_samples.append(sample)
+
+        cut_metrics = _demo_graph_cut_metrics(full_graph, internal_buses, internal_all)
+        partitions.append(
+            {
+                "id": int(pid),
+                "supply_area": ",".join(sorted(set(supply_areas))),
+                "feeder_id": ",".join(member_ids),
+                "display_name": f"GRAPH_PART_{pid}",
+                "feeder_code": ",".join(member_codes),
+                "feeders": member_feeders,
+                "internal_buses": sorted(int(x) for x in internal_buses),
+                "boundary_buses": boundary_buses,
+                "part_buses": sorted(int(x) for x in (internal_buses | set(boundary_buses))),
+                "boundary_fixed": boundary_fixed,
+                "matched_rows": int(matched_rows),
+                "unmatched_rows": int(unmatched_rows),
+                "empty_rows": int(empty_rows),
+                "unmatched_samples": unmatched_samples,
+                "graph_algorithm": "coarsened_weighted_k_way",
+                "coarse_unit_count": int(len(area_units)),
+                "coarse_partition_weights": coarse_metrics.get("partition_weights", []),
+                "coarse_cut_weight": float(coarse_metrics.get("coarse_cut_weight", 0.0)),
+                **cut_metrics,
+            }
+        )
+    return partitions
+
+
+def _build_demo_distribution_partitions(
+    net: pp.pandapowerNet,
+    feeder_json: Path,
+    partition_mode: str,
+    n_parts: int = 0,
+    target_buses_per_part: int = 400,
+) -> List[Dict[str, Any]]:
+    feeder_parts = _build_demo_feeder_partitions(net, feeder_json)
+    mode = str(partition_mode or "supply_area").strip().lower()
+    if mode == "feeder":
+        return feeder_parts
+    if mode in {"supply_area", "area", "region", "station"}:
+        return _merge_demo_partitions_by_supply_area(net, feeder_parts)
+    if mode in {"physical_component", "component", "td_component", "physical"}:
+        return _build_demo_physical_component_partitions(net, feeder_parts)
+    if mode in {"graph", "topology", "graph_partition"}:
+        return _build_demo_graph_partitions(
+            net,
+            feeder_parts,
+            n_parts=int(n_parts or 0),
+            target_buses_per_part=int(target_buses_per_part or 400),
+        )
+    raise ValueError(f"示范区配网分区不支持 d_partition_mode={partition_mode!r}")
+
+
+def _summarize_demo_distribution_partition_result(
+    net: pp.pandapowerNet,
+    part_meta: Dict[str, Any],
+    solve_result: Optional[Dict[int, Tuple[float, float]]],
+    error: str = "",
+) -> Dict[str, Any]:
+    internal_buses = [int(x) for x in part_meta.get("internal_buses", [])]
+    boundary_buses = [int(x) for x in part_meta.get("boundary_buses", [])]
+    converged = solve_result is not None and not error
+    max_vm_delta = None
+    max_va_delta = None
+    if converged:
+        max_vm = 0.0
+        max_va = 0.0
+        for bus_idx in internal_buses:
+            if bus_idx not in solve_result or bus_idx not in net.res_bus.index:
+                continue
+            vm_local, va_local = solve_result[bus_idx]
+            max_vm = max(max_vm, abs(float(vm_local) - float(net.res_bus.at[bus_idx, "vm_pu"])))
+            max_va = max(max_va, angle_diff_deg(float(va_local), float(net.res_bus.at[bus_idx, "va_degree"])))
+        max_vm_delta = float(max_vm)
+        max_va_delta = float(max_va)
+
+    return {
+        "id": int(part_meta["id"]),
+        "partition_type": part_meta.get("partition_type", ""),
+        "supply_area": part_meta.get("supply_area", ""),
+        "feeder_id": part_meta.get("feeder_id", ""),
+        "display_name": part_meta.get("display_name", ""),
+        "feeder_code": part_meta.get("feeder_code", ""),
+        "feeders": list(part_meta.get("feeders", [])),
+        "converged": bool(converged),
+        "internal_bus_count": int(len(internal_buses)),
+        "boundary_bus_count": int(len(boundary_buses)),
+        "matched_rows": int(part_meta.get("matched_rows", 0)),
+        "unmatched_rows": int(part_meta.get("unmatched_rows", 0)),
+        "empty_rows": int(part_meta.get("empty_rows", 0)),
+        "boundary_bus_names": [_demo_bus_label(net, b) for b in boundary_buses[:10]],
+        "boundary_main_bus_count": int(part_meta.get("boundary_main_bus_count", 0)),
+        "boundary_main_bus_names": [_demo_bus_label(net, int(b)) for b in part_meta.get("boundary_main_buses", [])[:10]],
+        "boundary_transformer_count": int(part_meta.get("boundary_transformer_count", 0)),
+        "inter_partition_cut_edge_count": int(part_meta.get("inter_partition_cut_edge_count", 0)),
+        "max_vm_delta_vs_full_pu": max_vm_delta,
+        "max_va_delta_vs_full_deg": max_va_delta,
+        "unmatched_samples": list(part_meta.get("unmatched_samples", [])),
+        "error": str(error or ""),
+    }
+
+
+def _run_demo_distribution_partitions(
+    net: pp.pandapowerNet,
+    feeder_json: Path,
+    partition_mode: str = "physical_component",
+    n_parts: int = 0,
+    target_buses_per_part: int = 400,
+    local_parallel: bool = True,
+) -> Dict[str, Any]:
+    mode = str(partition_mode or "physical_component").strip().lower()
+    partitions_meta = _build_demo_distribution_partitions(
+        net,
+        feeder_json,
+        mode,
+        n_parts=int(n_parts or 0),
+        target_buses_per_part=int(target_buses_per_part or 400),
+    )
+    if not partitions_meta:
+        return {
+            "enabled": True,
+            "status": "empty",
+            "mode": mode,
+            "n_parts": 0,
+            "parallel": False,
+            "partitions": [],
+        }
+
+    max_workers = min(len(partitions_meta), max(1, os.cpu_count() or 1))
+    use_pool = bool(local_parallel) and max_workers > 1 and _can_pickle_callable(_solve_demo_d_part_worker)
+    raw_results: Dict[int, Dict[int, Tuple[float, float]]] = {}
+    errors: Dict[int, str] = {}
+
+    if use_pool:
+        pool = make_process_pool(max_workers)
+        try:
+            futures = {
+                pool.submit(
+                    _solve_demo_d_part_worker,
+                    net,
+                    int(part["id"]),
+                    [int(x) for x in part["part_buses"]],
+                    {int(b): tuple(v) for b, v in part["boundary_fixed"].items()},
+                ): int(part["id"])
+                for part in partitions_meta
+            }
+            for fut, pid in futures.items():
+                try:
+                    part_id, res = fut.result()
+                    raw_results[int(part_id)] = res
+                except Exception as exc:
+                    errors[int(pid)] = str(exc)
+        finally:
+            pool.shutdown(wait=True)
+
+    if (not use_pool) or errors:
+        if errors:
+            raw_results.clear()
+            errors.clear()
+        for part in partitions_meta:
+            pid = int(part["id"])
+            try:
+                _, res = _solve_demo_d_part_worker(
+                    net,
+                    pid,
+                    [int(x) for x in part["part_buses"]],
+                    {int(b): tuple(v) for b, v in part["boundary_fixed"].items()},
+                )
+                raw_results[pid] = res
+            except Exception as exc:
+                errors[pid] = str(exc)
+
+    partition_results = [
+        _summarize_demo_distribution_partition_result(
+            net,
+            part,
+            raw_results.get(int(part["id"])),
+            errors.get(int(part["id"]), ""),
+        )
+        for part in partitions_meta
+    ]
+    converged_count = sum(1 for part in partition_results if bool(part.get("converged")))
+    part_sizes = [int(part.get("internal_bus_count", 0)) for part in partition_results]
+    total_cut_edges = int(sum(int(part.get("inter_partition_cut_edge_count", 0)) for part in partition_results) // 2)
+    min_part_size = int(min(part_sizes)) if part_sizes else 0
+    max_part_size = int(max(part_sizes)) if part_sizes else 0
+    balance_ratio = float(max_part_size / max(1, min_part_size)) if part_sizes else None
+    unique_internal_buses = set(
+        int(bus)
+        for part in partitions_meta
+        for bus in part.get("internal_buses", [])
+    )
+    unique_boundary_buses = set(
+        int(bus)
+        for part in partitions_meta
+        for bus in part.get("boundary_buses", [])
+    )
+    unique_boundary_main_buses = set(
+        int(bus)
+        for part in partitions_meta
+        for bus in part.get("boundary_main_buses", [])
+    )
+    total_boundary_transformers = int(
+        sum(int(part.get("boundary_transformer_count", 0)) for part in partitions_meta)
+    )
+    max_vm_delta = _safe_max(
+        np.array(
+            [
+                part["max_vm_delta_vs_full_pu"]
+                for part in partition_results
+                if part.get("max_vm_delta_vs_full_pu") is not None
+            ],
+            dtype=float,
+        )
+    )
+    max_va_delta = _safe_max(
+        np.array(
+            [
+                part["max_va_delta_vs_full_deg"]
+                for part in partition_results
+                if part.get("max_va_delta_vs_full_deg") is not None
+            ],
+            dtype=float,
+        )
+    )
+
+    return {
+        "enabled": True,
+        "status": "ok" if converged_count == len(partition_results) else "partial",
+        "mode": mode,
+        "n_parts": int(len(partition_results)),
+        "parallel": bool(use_pool),
+        "converged_partitions": int(converged_count),
+        "failed_partitions": int(len(partition_results) - converged_count),
+        "unique_internal_bus_count": int(len(unique_internal_buses)),
+        "unique_boundary_bus_count": int(len(unique_boundary_buses)),
+        "unique_boundary_main_bus_count": int(len(unique_boundary_main_buses)),
+        "total_boundary_transformer_count": total_boundary_transformers,
+        "total_inter_partition_cut_edge_count": total_cut_edges,
+        "min_partition_bus_count": min_part_size,
+        "max_partition_bus_count": max_part_size,
+        "balance_ratio_max_to_min": balance_ratio,
+        "max_vm_delta_vs_full_pu": max_vm_delta,
+        "max_va_delta_vs_full_deg": max_va_delta,
+        "partitions": partition_results,
+    }
+
+
 def run_demo_area_service(dataset_cfg: MultiConfig, solver_cfg: Dict[str, Any]) -> Tuple[Dict[str, Any], Dict[str, Any], Dict[str, str]]:
     scenario_label, scenario_key = _normalize_demo_area_scenario(dataset_cfg.scenario_id)
     converted_dir = DATA_DIR / "demo_area" / "converted"
     raw_dir = DATA_DIR / "demo_area" / "raw"
     pp_json = converted_dir / f"demo_area_{scenario_key}_pandapower.json"
     summary_json = converted_dir / f"demo_area_{scenario_key}_summary.json"
+    feeder_json = converted_dir / "demo_area_feeders.json"
+    d_partition_json = converted_dir / f"demo_area_{scenario_key}_distribution_partitions.json"
     raw_dat = raw_dir / f"{scenario_key}点sim2合并anony.dat"
     if not pp_json.exists():
         raise FileNotFoundError(f"未找到示范区 pandapower JSON: {pp_json}。请先运行 tools/convert_bpa_to_pandapower.py。")
 
     net = pp.from_json(str(pp_json))
+    feeder_profile = {"enabled": False}
+    if bool(dataset_cfg.use_feeder_profiles):
+        feeder_profile = _apply_demo_feeder_profiles(
+            net,
+            feeder_json=feeder_json,
+            time_point=dataset_cfg.time_point,
+            scenario_label=scenario_label,
+        )
     pp.runpp(
         net,
         algorithm="nr",
@@ -2325,12 +3387,42 @@ def run_demo_area_service(dataset_cfg: MultiConfig, solver_cfg: Dict[str, Any]) 
         trafo_model="t",
     )
 
+    d_solver = str(solver_cfg.get("d_solver", "partitioned")).strip().lower()
+    d_partition_mode = str(solver_cfg.get("d_partition_mode", "physical_component")).strip().lower()
+    d_n_parts = int(solver_cfg.get("d_n_parts", 0))
+    d_target_buses_per_part = int(solver_cfg.get("d_target_buses_per_part", 400))
+    d_local_parallel = _coerce_bool(solver_cfg.get("d_local_parallel", True))
+    distribution_partition = {"enabled": False, "status": "disabled", "mode": "none", "n_parts": 0}
+    if d_solver in {"partitioned", "feeder", "feeder_partitioned", "distribution_partitioned"}:
+        if d_partition_mode not in {
+            "physical_component", "component", "td_component", "physical",
+            "graph", "topology", "graph_partition",
+            "supply_area", "area", "region", "station",
+            "feeder",
+        }:
+            raise ValueError(
+                "示范区配网分区目前支持 d_partition_mode='physical_component'、'graph'、'supply_area' 或 'feeder'，"
+                f"当前为: {d_partition_mode!r}"
+            )
+        distribution_partition = _run_demo_distribution_partitions(
+            net,
+            feeder_json=feeder_json,
+            partition_mode=d_partition_mode,
+            n_parts=d_n_parts,
+            target_buses_per_part=d_target_buses_per_part,
+            local_parallel=d_local_parallel,
+        )
+        d_partition_json.write_text(json.dumps(distribution_partition, ensure_ascii=False, indent=2), encoding="utf-8")
+    elif d_solver not in {"none", "disabled", "direct", "pandapower_direct"}:
+        raise ValueError(f"不支持的示范区 d_solver={d_solver!r}，请使用 'partitioned' 或 'none'。")
+
     vm = net.res_bus.vm_pu
     va = net.res_bus.va_degree
     line_loading = net.res_line.loading_percent if "res_line" in net and len(net.res_line) else None
     trafo_loading = net.res_trafo.loading_percent if "res_trafo" in net and len(net.res_trafo) else None
     ext_p = float(net.res_ext_grid.p_mw.sum()) if len(net.res_ext_grid) else 0.0
     ext_q = float(net.res_ext_grid.q_mvar.sum()) if len(net.res_ext_grid) else 0.0
+    md_summary = _demo_main_distribution_summary(net)
 
     node_summary = {
         "dataset_id": "demo_area",
@@ -2342,9 +3434,25 @@ def run_demo_area_service(dataset_cfg: MultiConfig, solver_cfg: Dict[str, Any]) 
         "sgen_count": int(len(net.sgen)),
         "gen_count": int(len(net.gen)),
         "ext_grid_count": int(len(net.ext_grid)),
+        "main_voltage_threshold_kv": md_summary["main_voltage_threshold_kv"],
+        "main_bus_count": md_summary["main_bus_count"],
+        "distribution_bus_count": md_summary["distribution_bus_count"],
+        "td_transformer_count": md_summary["td_transformer_count"],
+        "td_boundary_bus_count": md_summary["td_boundary_bus_count"],
+        "td_main_boundary_bus_count": md_summary["td_main_boundary_bus_count"],
+        "distribution_component_count": md_summary["distribution_component_count"],
         "total_nodes": int(len(net.bus)),
         "nD": 0,
         "total_mg": 0,
+        "time_point": feeder_profile.get("time_point"),
+        "feeder_profile_enabled": bool(feeder_profile.get("enabled", False)),
+        "feeder_profile_matched_rows": int(feeder_profile.get("matched_rows", 0)),
+        "feeder_profile_updated_buses": int(feeder_profile.get("updated_buses", 0)),
+        "d_partition_enabled": bool(distribution_partition.get("enabled", False)),
+        "d_partition_mode": distribution_partition.get("mode"),
+        "d_n_parts": int(distribution_partition.get("n_parts", 0)),
+        "d_partition_converged": int(distribution_partition.get("converged_partitions", 0)),
+        "d_partition_failed": int(distribution_partition.get("failed_partitions", 0)),
     }
     last_state = {
         "converged": bool(net.converged),
@@ -2358,6 +3466,8 @@ def run_demo_area_service(dataset_cfg: MultiConfig, solver_cfg: Dict[str, Any]) 
         "ext_grid_p_mw": ext_p,
         "ext_grid_q_mvar": ext_q,
         "sample_bus_vm_pu": [float(x) for x in vm.head(10).tolist()],
+        "feeder_profile": feeder_profile,
+        "distribution_partition": distribution_partition,
     }
 
     dataset_index = {
@@ -2366,12 +3476,18 @@ def run_demo_area_service(dataset_cfg: MultiConfig, solver_cfg: Dict[str, Any]) 
         "raw_dat": str(raw_dat),
         "pandapower_json": str(pp_json),
         "conversion_summary_json": str(summary_json),
+        "feeder_profile_json": str(feeder_json) if feeder_profile.get("enabled", False) else "",
+        "distribution_partition_json": str(d_partition_json) if distribution_partition.get("enabled", False) else "",
         "node_summary": node_summary,
     }
     artifacts = {
         "pandapower_json": str(pp_json),
         "conversion_summary_json": str(summary_json),
     }
+    if feeder_profile.get("enabled", False):
+        artifacts["feeder_profile_json"] = str(feeder_json)
+    if distribution_partition.get("enabled", False):
+        artifacts["distribution_partition_json"] = str(d_partition_json)
     gmss_result = {
         "node_summary": node_summary,
         "last_state": last_state,
@@ -2379,6 +3495,12 @@ def run_demo_area_service(dataset_cfg: MultiConfig, solver_cfg: Dict[str, Any]) 
             **solver_cfg,
             "t_solver": "pandapower_direct",
             "t_partition_mode": "none",
+            "t_n_parts": 0,
+            "d_solver": d_solver,
+            "d_partition_mode": distribution_partition.get("mode", "none"),
+            "d_n_parts": int(distribution_partition.get("n_parts", 0)),
+            "d_local_parallel": bool(d_local_parallel),
+            "d_target_buses_per_part": int(d_target_buses_per_part),
         },
     }
     return dataset_index, gmss_result, artifacts
@@ -2431,6 +3553,8 @@ def multi_config_from_payload(payload: Optional[Dict[str, Any]] = None) -> Multi
     return MultiConfig(
         dataset_id=str(merged.get("dataset_id", defaults["dataset_id"])),
         scenario_id=str(merged.get("scenario_id", defaults["scenario_id"])),
+        time_point=str(merged.get("time_point", defaults["time_point"])),
+        use_feeder_profiles=_coerce_bool(merged.get("use_feeder_profiles", defaults["use_feeder_profiles"])),
         nD=nD_eff,
         mg_per_D=mg_per_d_eff,
         mv_level_kv=float(merged.get("mv_level_kv", defaults["mv_level_kv"])),
@@ -2466,6 +3590,11 @@ def default_run_gmss_solver_config() -> Dict[str, Any]:
         "q_cap_mvar": 0.10,
         "target_buses_per_part": 2500,
         "t_local_parallel": True,
+        "d_solver": "partitioned",
+        "d_partition_mode": "physical_component",
+        "d_n_parts": 0,
+        "d_local_parallel": True,
+        "d_target_buses_per_part": 400,
     }
 
 def normalize_run_gmss_solver_config(payload: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
@@ -2491,6 +3620,11 @@ def normalize_run_gmss_solver_config(payload: Optional[Dict[str, Any]] = None) -
         "q_cap_mvar": float(merged.get("q_cap_mvar", defaults["q_cap_mvar"])),
         "target_buses_per_part": int(merged.get("target_buses_per_part", defaults["target_buses_per_part"])),
         "t_local_parallel": _coerce_bool(merged.get("t_local_parallel", defaults["t_local_parallel"])),
+        "d_solver": str(merged.get("d_solver", defaults["d_solver"])).strip().lower(),
+        "d_partition_mode": str(merged.get("d_partition_mode", defaults["d_partition_mode"])).strip().lower(),
+        "d_n_parts": int(merged.get("d_n_parts", defaults["d_n_parts"])),
+        "d_local_parallel": _coerce_bool(merged.get("d_local_parallel", defaults["d_local_parallel"])),
+        "d_target_buses_per_part": int(merged.get("d_target_buses_per_part", defaults["d_target_buses_per_part"])),
     }
 
 def make_gmss_service_request(dataset_config: Optional[Dict[str, Any]] = None,
