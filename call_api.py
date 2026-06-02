@@ -68,10 +68,10 @@ def main() -> None:
             "t_solver": "pandapower_direct",
             "t_partition_mode": "none",
             "d_solver": "partitioned",
-            "d_partition_mode": "physical_component",
+            "d_partition_mode": "metis",
             "d_n_parts": 0,
             "d_local_parallel": True,
-            "d_target_buses_per_part": 400,
+            "d_target_buses_per_part": 150,
             "time_point": args.time_point,
             "use_feeder_profiles": not args.no_feeder_profiles,
         })

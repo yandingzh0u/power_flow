@@ -1,178 +1,701 @@
 {
   "enabled": true,
   "status": "ok",
-  "mode": "physical_component",
-  "n_parts": 49,
+  "mode": "metis",
+  "n_parts": 64,
   "parallel": true,
-  "converged_partitions": 49,
+  "converged_partitions": 64,
   "failed_partitions": 0,
   "unique_internal_bus_count": 2054,
-  "unique_boundary_bus_count": 49,
+  "unique_boundary_bus_count": 84,
   "unique_boundary_main_bus_count": 55,
   "total_boundary_transformer_count": 70,
-  "total_inter_partition_cut_edge_count": 0,
+  "total_inter_partition_cut_edge_count": 15,
+  "graph_algorithm": "METIS_KWAY",
+  "metis_partition_count": 64,
+  "metis_split_component_count": 5,
+  "metis_total_edge_cuts": 6801,
+  "metis_connectivity_repairs": 9,
+  "metis_tiny_group_merges": 1,
   "min_partition_bus_count": 2,
-  "max_partition_bus_count": 381,
-  "balance_ratio_max_to_min": 190.5,
-  "max_vm_delta_vs_full_pu": 3.2604067223829247e-09,
-  "max_va_delta_vs_full_deg": 9.744448564674713e-05,
+  "max_partition_bus_count": 153,
+  "balance_ratio_max_to_min": 76.5,
+  "max_vm_delta_vs_full_pu": 3.5994210367817914e-07,
+  "max_va_delta_vs_full_deg": 7.309649654985151e-05,
   "partitions": [
     {
       "id": 1,
-      "partition_type": "distribution_physical_component",
+      "partition_type": "distribution_metis_subpartition",
       "supply_area": "VOEY",
       "feeder_id": "5联络线数量分类/YE  村线.xls,7线路长度分类/JK  2线.xls",
-      "display_name": "D_COMPONENT_001",
+      "display_name": "METIS_C001_P01",
       "feeder_code": "YE,JKA",
       "feeders": [
         "YE  村线",
         "JK  2线"
       ],
       "converged": true,
-      "internal_bus_count": 381,
+      "internal_bus_count": 134,
       "boundary_bus_count": 1,
       "matched_rows": 276,
       "unmatched_rows": 0,
       "empty_rows": 0,
       "boundary_bus_names": [
-        "VOEB2"
+        "YE4"
+      ],
+      "boundary_main_bus_count": 0,
+      "boundary_main_bus_names": [],
+      "boundary_transformer_count": 0,
+      "inter_partition_cut_edge_count": 1,
+      "graph_algorithm": "METIS_KWAY",
+      "metis_component_id": 1,
+      "metis_component_edge_cuts": 1298,
+      "metis_connectivity_repairs": 3,
+      "metis_tiny_group_merges": 0,
+      "max_vm_delta_vs_full_pu": 1.120891934824897e-09,
+      "max_va_delta_vs_full_deg": 2.473410631864681e-08,
+      "unmatched_samples": [],
+      "error": ""
+    },
+    {
+      "id": 2,
+      "partition_type": "distribution_metis_subpartition",
+      "supply_area": "VOEY",
+      "feeder_id": "5联络线数量分类/YE  村线.xls,7线路长度分类/JK  2线.xls",
+      "display_name": "METIS_C001_P02",
+      "feeder_code": "YE,JKA",
+      "feeders": [
+        "YE  村线",
+        "JK  2线"
+      ],
+      "converged": true,
+      "internal_bus_count": 106,
+      "boundary_bus_count": 1,
+      "matched_rows": 276,
+      "unmatched_rows": 0,
+      "empty_rows": 0,
+      "boundary_bus_names": [
+        "YE149"
+      ],
+      "boundary_main_bus_count": 0,
+      "boundary_main_bus_names": [],
+      "boundary_transformer_count": 0,
+      "inter_partition_cut_edge_count": 1,
+      "graph_algorithm": "METIS_KWAY",
+      "metis_component_id": 1,
+      "metis_component_edge_cuts": 1298,
+      "metis_connectivity_repairs": 3,
+      "metis_tiny_group_merges": 0,
+      "max_vm_delta_vs_full_pu": 3.4494629375103614e-13,
+      "max_va_delta_vs_full_deg": 1.0373923942097463e-11,
+      "unmatched_samples": [],
+      "error": ""
+    },
+    {
+      "id": 3,
+      "partition_type": "distribution_metis_subpartition",
+      "supply_area": "VOEY",
+      "feeder_id": "5联络线数量分类/YE  村线.xls,7线路长度分类/JK  2线.xls",
+      "display_name": "METIS_C001_P03",
+      "feeder_code": "YE,JKA",
+      "feeders": [
+        "YE  村线",
+        "JK  2线"
+      ],
+      "converged": true,
+      "internal_bus_count": 65,
+      "boundary_bus_count": 2,
+      "matched_rows": 276,
+      "unmatched_rows": 0,
+      "empty_rows": 0,
+      "boundary_bus_names": [
+        "JKA16",
+        "JKA19"
+      ],
+      "boundary_main_bus_count": 0,
+      "boundary_main_bus_names": [],
+      "boundary_transformer_count": 0,
+      "inter_partition_cut_edge_count": 2,
+      "graph_algorithm": "METIS_KWAY",
+      "metis_component_id": 1,
+      "metis_component_edge_cuts": 1298,
+      "metis_connectivity_repairs": 3,
+      "metis_tiny_group_merges": 0,
+      "max_vm_delta_vs_full_pu": 1.071365218763276e-12,
+      "max_va_delta_vs_full_deg": 1.7337242752546445e-12,
+      "unmatched_samples": [],
+      "error": ""
+    },
+    {
+      "id": 4,
+      "partition_type": "distribution_metis_subpartition",
+      "supply_area": "VOEY",
+      "feeder_id": "5联络线数量分类/YE  村线.xls,7线路长度分类/JK  2线.xls",
+      "display_name": "METIS_C001_P04",
+      "feeder_code": "YE,JKA",
+      "feeders": [
+        "YE  村线",
+        "JK  2线"
+      ],
+      "converged": true,
+      "internal_bus_count": 37,
+      "boundary_bus_count": 2,
+      "matched_rows": 276,
+      "unmatched_rows": 0,
+      "empty_rows": 0,
+      "boundary_bus_names": [
+        "YE143",
+        "YE180"
+      ],
+      "boundary_main_bus_count": 0,
+      "boundary_main_bus_names": [],
+      "boundary_transformer_count": 0,
+      "inter_partition_cut_edge_count": 2,
+      "graph_algorithm": "METIS_KWAY",
+      "metis_component_id": 1,
+      "metis_component_edge_cuts": 1298,
+      "metis_connectivity_repairs": 3,
+      "metis_tiny_group_merges": 0,
+      "max_vm_delta_vs_full_pu": 2.0372592501871623e-13,
+      "max_va_delta_vs_full_deg": 3.439026841078885e-12,
+      "unmatched_samples": [],
+      "error": ""
+    },
+    {
+      "id": 5,
+      "partition_type": "distribution_metis_subpartition",
+      "supply_area": "VOEY",
+      "feeder_id": "5联络线数量分类/YE  村线.xls,7线路长度分类/JK  2线.xls",
+      "display_name": "METIS_C001_P05",
+      "feeder_code": "YE,JKA",
+      "feeders": [
+        "YE  村线",
+        "JK  2线"
+      ],
+      "converged": true,
+      "internal_bus_count": 32,
+      "boundary_bus_count": 5,
+      "matched_rows": 276,
+      "unmatched_rows": 0,
+      "empty_rows": 0,
+      "boundary_bus_names": [
+        "VOE21",
+        "VOE11",
+        "YE5",
+        "YE145",
+        "JKA17"
       ],
       "boundary_main_bus_count": 2,
       "boundary_main_bus_names": [
         "VOE21",
         "VOE11"
       ],
-      "boundary_transformer_count": 2,
-      "inter_partition_cut_edge_count": 0,
-      "max_vm_delta_vs_full_pu": 1.372429503376793e-09,
-      "max_va_delta_vs_full_deg": 1.455067888400663e-07,
+      "boundary_transformer_count": 4,
+      "inter_partition_cut_edge_count": 3,
+      "graph_algorithm": "METIS_KWAY",
+      "metis_component_id": 1,
+      "metis_component_edge_cuts": 1298,
+      "metis_connectivity_repairs": 3,
+      "metis_tiny_group_merges": 0,
+      "max_vm_delta_vs_full_pu": 7.976606819504184e-09,
+      "max_va_delta_vs_full_deg": 1.6875759456524975e-07,
       "unmatched_samples": [],
       "error": ""
     },
     {
-      "id": 2,
-      "partition_type": "distribution_physical_component",
+      "id": 6,
+      "partition_type": "distribution_metis_subpartition",
+      "supply_area": "VOEY",
+      "feeder_id": "5联络线数量分类/YE  村线.xls,7线路长度分类/JK  2线.xls",
+      "display_name": "METIS_C001_P06",
+      "feeder_code": "YE,JKA",
+      "feeders": [
+        "YE  村线",
+        "JK  2线"
+      ],
+      "converged": true,
+      "internal_bus_count": 7,
+      "boundary_bus_count": 1,
+      "matched_rows": 276,
+      "unmatched_rows": 0,
+      "empty_rows": 0,
+      "boundary_bus_names": [
+        "JKA18"
+      ],
+      "boundary_main_bus_count": 0,
+      "boundary_main_bus_names": [],
+      "boundary_transformer_count": 0,
+      "inter_partition_cut_edge_count": 1,
+      "graph_algorithm": "METIS_KWAY",
+      "metis_component_id": 1,
+      "metis_component_edge_cuts": 1298,
+      "metis_connectivity_repairs": 3,
+      "metis_tiny_group_merges": 0,
+      "max_vm_delta_vs_full_pu": 9.63895629979561e-13,
+      "max_va_delta_vs_full_deg": 1.1937117960769683e-12,
+      "unmatched_samples": [],
+      "error": ""
+    },
+    {
+      "id": 7,
+      "partition_type": "distribution_metis_subpartition",
       "supply_area": "TYNY",
       "feeder_id": "3馈线变压器容量分类/YW  厂线.xls,5联络线数量分类/VH  线.xls",
-      "display_name": "D_COMPONENT_002",
+      "display_name": "METIS_C002_P01",
       "feeder_code": "YW,VH",
       "feeders": [
         "YW  厂线",
         "VH  线"
       ],
       "converged": true,
-      "internal_bus_count": 350,
+      "internal_bus_count": 153,
+      "boundary_bus_count": 2,
+      "matched_rows": 345,
+      "unmatched_rows": 0,
+      "empty_rows": 0,
+      "boundary_bus_names": [
+        "YW6",
+        "YW143"
+      ],
+      "boundary_main_bus_count": 0,
+      "boundary_main_bus_names": [],
+      "boundary_transformer_count": 0,
+      "inter_partition_cut_edge_count": 2,
+      "graph_algorithm": "METIS_KWAY",
+      "metis_component_id": 2,
+      "metis_component_edge_cuts": 2744,
+      "metis_connectivity_repairs": 4,
+      "metis_tiny_group_merges": 1,
+      "max_vm_delta_vs_full_pu": 8.104084070481576e-11,
+      "max_va_delta_vs_full_deg": 7.904816357040545e-09,
+      "unmatched_samples": [],
+      "error": ""
+    },
+    {
+      "id": 8,
+      "partition_type": "distribution_metis_subpartition",
+      "supply_area": "TYNY",
+      "feeder_id": "3馈线变压器容量分类/YW  厂线.xls,5联络线数量分类/VH  线.xls",
+      "display_name": "METIS_C002_P02",
+      "feeder_code": "YW,VH",
+      "feeders": [
+        "YW  厂线",
+        "VH  线"
+      ],
+      "converged": true,
+      "internal_bus_count": 133,
       "boundary_bus_count": 1,
       "matched_rows": 345,
       "unmatched_rows": 0,
       "empty_rows": 0,
       "boundary_bus_names": [
-        "TYNB1"
+        "TYNY1"
+      ],
+      "boundary_main_bus_count": 0,
+      "boundary_main_bus_names": [],
+      "boundary_transformer_count": 0,
+      "inter_partition_cut_edge_count": 1,
+      "graph_algorithm": "METIS_KWAY",
+      "metis_component_id": 2,
+      "metis_component_edge_cuts": 2744,
+      "metis_connectivity_repairs": 4,
+      "metis_tiny_group_merges": 1,
+      "max_vm_delta_vs_full_pu": 9.836575998178887e-14,
+      "max_va_delta_vs_full_deg": 4.888534022029489e-12,
+      "unmatched_samples": [],
+      "error": ""
+    },
+    {
+      "id": 9,
+      "partition_type": "distribution_metis_subpartition",
+      "supply_area": "TYNY",
+      "feeder_id": "3馈线变压器容量分类/YW  厂线.xls,5联络线数量分类/VH  线.xls",
+      "display_name": "METIS_C002_P03",
+      "feeder_code": "YW,VH",
+      "feeders": [
+        "YW  厂线",
+        "VH  线"
+      ],
+      "converged": true,
+      "internal_bus_count": 27,
+      "boundary_bus_count": 1,
+      "matched_rows": 345,
+      "unmatched_rows": 0,
+      "empty_rows": 0,
+      "boundary_bus_names": [
+        "YW152"
+      ],
+      "boundary_main_bus_count": 0,
+      "boundary_main_bus_names": [],
+      "boundary_transformer_count": 0,
+      "inter_partition_cut_edge_count": 1,
+      "graph_algorithm": "METIS_KWAY",
+      "metis_component_id": 2,
+      "metis_component_edge_cuts": 2744,
+      "metis_connectivity_repairs": 4,
+      "metis_tiny_group_merges": 1,
+      "max_vm_delta_vs_full_pu": 1.1566025914788725e-10,
+      "max_va_delta_vs_full_deg": 1.0885514711844735e-11,
+      "unmatched_samples": [],
+      "error": ""
+    },
+    {
+      "id": 10,
+      "partition_type": "distribution_metis_subpartition",
+      "supply_area": "TYNY",
+      "feeder_id": "3馈线变压器容量分类/YW  厂线.xls,5联络线数量分类/VH  线.xls",
+      "display_name": "METIS_C002_P04",
+      "feeder_code": "YW,VH",
+      "feeders": [
+        "YW  厂线",
+        "VH  线"
+      ],
+      "converged": true,
+      "internal_bus_count": 14,
+      "boundary_bus_count": 2,
+      "matched_rows": 345,
+      "unmatched_rows": 0,
+      "empty_rows": 0,
+      "boundary_bus_names": [
+        "YW140",
+        "YW152"
+      ],
+      "boundary_main_bus_count": 0,
+      "boundary_main_bus_names": [],
+      "boundary_transformer_count": 0,
+      "inter_partition_cut_edge_count": 2,
+      "graph_algorithm": "METIS_KWAY",
+      "metis_component_id": 2,
+      "metis_component_edge_cuts": 2744,
+      "metis_connectivity_repairs": 4,
+      "metis_tiny_group_merges": 1,
+      "max_vm_delta_vs_full_pu": 1.0289835650212353e-10,
+      "max_va_delta_vs_full_deg": 4.6497916628140956e-11,
+      "unmatched_samples": [],
+      "error": ""
+    },
+    {
+      "id": 11,
+      "partition_type": "distribution_metis_subpartition",
+      "supply_area": "TYNY",
+      "feeder_id": "3馈线变压器容量分类/YW  厂线.xls,5联络线数量分类/VH  线.xls",
+      "display_name": "METIS_C002_P05",
+      "feeder_code": "YW,VH",
+      "feeders": [
+        "YW  厂线",
+        "VH  线"
+      ],
+      "converged": true,
+      "internal_bus_count": 12,
+      "boundary_bus_count": 2,
+      "matched_rows": 345,
+      "unmatched_rows": 0,
+      "empty_rows": 0,
+      "boundary_bus_names": [
+        "YW150",
+        "YW153"
+      ],
+      "boundary_main_bus_count": 0,
+      "boundary_main_bus_names": [],
+      "boundary_transformer_count": 0,
+      "inter_partition_cut_edge_count": 2,
+      "graph_algorithm": "METIS_KWAY",
+      "metis_component_id": 2,
+      "metis_component_edge_cuts": 2744,
+      "metis_connectivity_repairs": 4,
+      "metis_tiny_group_merges": 1,
+      "max_vm_delta_vs_full_pu": 1.141234884372011e-10,
+      "max_va_delta_vs_full_deg": 4.831690603168681e-12,
+      "unmatched_samples": [],
+      "error": ""
+    },
+    {
+      "id": 12,
+      "partition_type": "distribution_metis_subpartition",
+      "supply_area": "TYNY",
+      "feeder_id": "3馈线变压器容量分类/YW  厂线.xls,5联络线数量分类/VH  线.xls",
+      "display_name": "METIS_C002_P06",
+      "feeder_code": "YW,VH",
+      "feeders": [
+        "YW  厂线",
+        "VH  线"
+      ],
+      "converged": true,
+      "internal_bus_count": 11,
+      "boundary_bus_count": 4,
+      "matched_rows": 345,
+      "unmatched_rows": 0,
+      "empty_rows": 0,
+      "boundary_bus_names": [
+        "TYN11",
+        "TYNS1",
+        "VH1",
+        "YW7"
       ],
       "boundary_main_bus_count": 2,
       "boundary_main_bus_names": [
         "TYN11",
         "TYNS1"
       ],
-      "boundary_transformer_count": 2,
-      "inter_partition_cut_edge_count": 0,
-      "max_vm_delta_vs_full_pu": 6.034881483429899e-10,
-      "max_va_delta_vs_full_deg": 1.7862180357042234e-07,
+      "boundary_transformer_count": 3,
+      "inter_partition_cut_edge_count": 2,
+      "graph_algorithm": "METIS_KWAY",
+      "metis_component_id": 2,
+      "metis_component_edge_cuts": 2744,
+      "metis_connectivity_repairs": 4,
+      "metis_tiny_group_merges": 1,
+      "max_vm_delta_vs_full_pu": 3.714312746261328e-09,
+      "max_va_delta_vs_full_deg": 2.1546179596043658e-07,
       "unmatched_samples": [],
       "error": ""
     },
     {
-      "id": 3,
-      "partition_type": "distribution_physical_component",
+      "id": 13,
+      "partition_type": "distribution_metis_subpartition",
       "supply_area": "VOEY",
       "feeder_id": "5联络线数量分类/EA  线.xls",
-      "display_name": "D_COMPONENT_003",
+      "display_name": "METIS_C003_P01",
       "feeder_code": "EA",
       "feeders": [
         "EA  线"
       ],
       "converged": true,
-      "internal_bus_count": 249,
+      "internal_bus_count": 113,
       "boundary_bus_count": 1,
       "matched_rows": 115,
       "unmatched_rows": 0,
       "empty_rows": 0,
       "boundary_bus_names": [
-        "VOEB1"
+        "EA2"
+      ],
+      "boundary_main_bus_count": 0,
+      "boundary_main_bus_names": [],
+      "boundary_transformer_count": 0,
+      "inter_partition_cut_edge_count": 1,
+      "graph_algorithm": "METIS_KWAY",
+      "metis_component_id": 3,
+      "metis_component_edge_cuts": 2024,
+      "metis_connectivity_repairs": 1,
+      "metis_tiny_group_merges": 0,
+      "max_vm_delta_vs_full_pu": 5.756506382681437e-13,
+      "max_va_delta_vs_full_deg": 5.4853899200679734e-12,
+      "unmatched_samples": [],
+      "error": ""
+    },
+    {
+      "id": 14,
+      "partition_type": "distribution_metis_subpartition",
+      "supply_area": "VOEY",
+      "feeder_id": "5联络线数量分类/EA  线.xls",
+      "display_name": "METIS_C003_P02",
+      "feeder_code": "EA",
+      "feeders": [
+        "EA  线"
+      ],
+      "converged": true,
+      "internal_bus_count": 89,
+      "boundary_bus_count": 4,
+      "matched_rows": 115,
+      "unmatched_rows": 0,
+      "empty_rows": 0,
+      "boundary_bus_names": [
+        "VOE21",
+        "VOE11",
+        "EA3",
+        "UF39"
       ],
       "boundary_main_bus_count": 2,
       "boundary_main_bus_names": [
         "VOE21",
         "VOE11"
       ],
-      "boundary_transformer_count": 2,
-      "inter_partition_cut_edge_count": 0,
-      "max_vm_delta_vs_full_pu": 6.41597885930878e-13,
-      "max_va_delta_vs_full_deg": 7.812860758349416e-08,
+      "boundary_transformer_count": 4,
+      "inter_partition_cut_edge_count": 2,
+      "graph_algorithm": "METIS_KWAY",
+      "metis_component_id": 3,
+      "metis_component_edge_cuts": 2024,
+      "metis_connectivity_repairs": 1,
+      "metis_tiny_group_merges": 0,
+      "max_vm_delta_vs_full_pu": 7.737140594876735e-09,
+      "max_va_delta_vs_full_deg": 1.5732882729935227e-07,
       "unmatched_samples": [],
       "error": ""
     },
     {
-      "id": 4,
-      "partition_type": "distribution_physical_component",
+      "id": 15,
+      "partition_type": "distribution_metis_subpartition",
+      "supply_area": "VOEY",
+      "feeder_id": "5联络线数量分类/EA  线.xls",
+      "display_name": "METIS_C003_P03",
+      "feeder_code": "EA",
+      "feeders": [
+        "EA  线"
+      ],
+      "converged": true,
+      "internal_bus_count": 47,
+      "boundary_bus_count": 1,
+      "matched_rows": 115,
+      "unmatched_rows": 0,
+      "empty_rows": 0,
+      "boundary_bus_names": [
+        "UF38"
+      ],
+      "boundary_main_bus_count": 0,
+      "boundary_main_bus_names": [],
+      "boundary_transformer_count": 0,
+      "inter_partition_cut_edge_count": 1,
+      "graph_algorithm": "METIS_KWAY",
+      "metis_component_id": 3,
+      "metis_component_edge_cuts": 2024,
+      "metis_connectivity_repairs": 1,
+      "metis_tiny_group_merges": 0,
+      "max_vm_delta_vs_full_pu": 1.2174496966110837e-09,
+      "max_va_delta_vs_full_deg": 2.4564485556766158e-08,
+      "unmatched_samples": [],
+      "error": ""
+    },
+    {
+      "id": 16,
+      "partition_type": "distribution_metis_subpartition",
       "supply_area": "FUNY",
       "feeder_id": "6线路类型分类/IB  路南线.xls,7线路长度分类/ZF  线.xls",
-      "display_name": "D_COMPONENT_004",
+      "display_name": "METIS_C004_P01",
       "feeder_code": "IB,ZFA",
       "feeders": [
         "IB  路南线",
         "ZF  线"
       ],
       "converged": true,
-      "internal_bus_count": 235,
+      "internal_bus_count": 114,
       "boundary_bus_count": 1,
       "matched_rows": 224,
       "unmatched_rows": 1,
       "empty_rows": 0,
       "boundary_bus_names": [
-        "FUNY2"
+        "ZFA11"
       ],
-      "boundary_main_bus_count": 1,
-      "boundary_main_bus_names": [
-        "FUN12"
-      ],
-      "boundary_transformer_count": 1,
-      "inter_partition_cut_edge_count": 0,
-      "max_vm_delta_vs_full_pu": 1.0533596217499053e-09,
-      "max_va_delta_vs_full_deg": 3.50770221757557e-08,
+      "boundary_main_bus_count": 0,
+      "boundary_main_bus_names": [],
+      "boundary_transformer_count": 0,
+      "inter_partition_cut_edge_count": 1,
+      "graph_algorithm": "METIS_KWAY",
+      "metis_component_id": 4,
+      "metis_component_edge_cuts": 534,
+      "metis_connectivity_repairs": 1,
+      "metis_tiny_group_merges": 0,
+      "max_vm_delta_vs_full_pu": 5.526690216584029e-12,
+      "max_va_delta_vs_full_deg": 2.2802737476013135e-10,
       "unmatched_samples": [
         "ZFA128"
       ],
       "error": ""
     },
     {
-      "id": 5,
-      "partition_type": "distribution_physical_component",
+      "id": 17,
+      "partition_type": "distribution_metis_subpartition",
+      "supply_area": "FUNY",
+      "feeder_id": "6线路类型分类/IB  路南线.xls,7线路长度分类/ZF  线.xls",
+      "display_name": "METIS_C004_P02",
+      "feeder_code": "IB,ZFA",
+      "feeders": [
+        "IB  路南线",
+        "ZF  线"
+      ],
+      "converged": true,
+      "internal_bus_count": 70,
+      "boundary_bus_count": 1,
+      "matched_rows": 224,
+      "unmatched_rows": 1,
+      "empty_rows": 0,
+      "boundary_bus_names": [
+        "IB22"
+      ],
+      "boundary_main_bus_count": 0,
+      "boundary_main_bus_names": [],
+      "boundary_transformer_count": 0,
+      "inter_partition_cut_edge_count": 1,
+      "graph_algorithm": "METIS_KWAY",
+      "metis_component_id": 4,
+      "metis_component_edge_cuts": 534,
+      "metis_connectivity_repairs": 1,
+      "metis_tiny_group_merges": 0,
+      "max_vm_delta_vs_full_pu": 4.0282843727368345e-10,
+      "max_va_delta_vs_full_deg": 1.4646900581283262e-08,
+      "unmatched_samples": [
+        "ZFA128"
+      ],
+      "error": ""
+    },
+    {
+      "id": 18,
+      "partition_type": "distribution_metis_subpartition",
+      "supply_area": "FUNY",
+      "feeder_id": "6线路类型分类/IB  路南线.xls,7线路长度分类/ZF  线.xls",
+      "display_name": "METIS_C004_P03",
+      "feeder_code": "IB,ZFA",
+      "feeders": [
+        "IB  路南线",
+        "ZF  线"
+      ],
+      "converged": true,
+      "internal_bus_count": 51,
+      "boundary_bus_count": 3,
+      "matched_rows": 224,
+      "unmatched_rows": 1,
+      "empty_rows": 0,
+      "boundary_bus_names": [
+        "FUN12",
+        "IB23",
+        "ZFA13"
+      ],
+      "boundary_main_bus_count": 1,
+      "boundary_main_bus_names": [
+        "FUN12"
+      ],
+      "boundary_transformer_count": 2,
+      "inter_partition_cut_edge_count": 2,
+      "graph_algorithm": "METIS_KWAY",
+      "metis_component_id": 4,
+      "metis_component_edge_cuts": 534,
+      "metis_connectivity_repairs": 1,
+      "metis_tiny_group_merges": 0,
+      "max_vm_delta_vs_full_pu": 3.812750004605903e-09,
+      "max_va_delta_vs_full_deg": 1.9725738127363e-06,
+      "unmatched_samples": [
+        "ZFA128"
+      ],
+      "error": ""
+    },
+    {
+      "id": 19,
+      "partition_type": "distribution_metis_subpartition",
       "supply_area": "CBEY",
       "feeder_id": "5联络线数量分类/VG  线.xls",
-      "display_name": "D_COMPONENT_005",
+      "display_name": "METIS_C005_P01",
       "feeder_code": "VG",
       "feeders": [
         "VG  线"
       ],
       "converged": true,
-      "internal_bus_count": 191,
+      "internal_bus_count": 118,
       "boundary_bus_count": 1,
       "matched_rows": 188,
       "unmatched_rows": 100,
       "empty_rows": 0,
       "boundary_bus_names": [
-        "CBEB2"
+        "VG66"
       ],
-      "boundary_main_bus_count": 2,
-      "boundary_main_bus_names": [
-        "CBE22",
-        "CBE11"
-      ],
-      "boundary_transformer_count": 2,
-      "inter_partition_cut_edge_count": 0,
-      "max_vm_delta_vs_full_pu": 3.2604067223829247e-09,
-      "max_va_delta_vs_full_deg": 3.0550521046279755e-07,
+      "boundary_main_bus_count": 0,
+      "boundary_main_bus_names": [],
+      "boundary_transformer_count": 0,
+      "inter_partition_cut_edge_count": 1,
+      "graph_algorithm": "METIS_KWAY",
+      "metis_component_id": 5,
+      "metis_component_edge_cuts": 201,
+      "metis_connectivity_repairs": 0,
+      "metis_tiny_group_merges": 0,
+      "max_vm_delta_vs_full_pu": 4.173533518780914e-09,
+      "max_va_delta_vs_full_deg": 1.0947726991616946e-07,
       "unmatched_samples": [
         "VG288",
         "VG286",
@@ -183,11 +706,55 @@
       "error": ""
     },
     {
-      "id": 6,
-      "partition_type": "distribution_physical_component",
+      "id": 20,
+      "partition_type": "distribution_metis_subpartition",
+      "supply_area": "CBEY",
+      "feeder_id": "5联络线数量分类/VG  线.xls",
+      "display_name": "METIS_C005_P02",
+      "feeder_code": "VG",
+      "feeders": [
+        "VG  线"
+      ],
+      "converged": true,
+      "internal_bus_count": 73,
+      "boundary_bus_count": 3,
+      "matched_rows": 188,
+      "unmatched_rows": 100,
+      "empty_rows": 0,
+      "boundary_bus_names": [
+        "CBE22",
+        "CBE11",
+        "VG67"
+      ],
+      "boundary_main_bus_count": 2,
+      "boundary_main_bus_names": [
+        "CBE22",
+        "CBE11"
+      ],
+      "boundary_transformer_count": 3,
+      "inter_partition_cut_edge_count": 1,
+      "graph_algorithm": "METIS_KWAY",
+      "metis_component_id": 5,
+      "metis_component_edge_cuts": 201,
+      "metis_connectivity_repairs": 0,
+      "metis_tiny_group_merges": 0,
+      "max_vm_delta_vs_full_pu": 1.6418575388144063e-09,
+      "max_va_delta_vs_full_deg": 1.9935660588998871e-07,
+      "unmatched_samples": [
+        "VG288",
+        "VG286",
+        "VG287",
+        "VG285",
+        "VG189"
+      ],
+      "error": ""
+    },
+    {
+      "id": 21,
+      "partition_type": "distribution_metis_subpartition",
       "supply_area": "OBFY",
       "feeder_id": "1反送程度分类/DD线.xls,3馈线变压器容量分类/XR  线.xls",
-      "display_name": "D_COMPONENT_006",
+      "display_name": "METIS_C006_P01",
       "feeder_code": "DD,XR",
       "feeders": [
         "DD线",
@@ -200,7 +767,7 @@
       "unmatched_rows": 0,
       "empty_rows": 0,
       "boundary_bus_names": [
-        "OBFY1"
+        "OBF11"
       ],
       "boundary_main_bus_count": 1,
       "boundary_main_bus_names": [
@@ -208,17 +775,22 @@
       ],
       "boundary_transformer_count": 1,
       "inter_partition_cut_edge_count": 0,
-      "max_vm_delta_vs_full_pu": 5.044853423896711e-13,
-      "max_va_delta_vs_full_deg": 4.800426722795237e-11,
+      "graph_algorithm": "METIS_KWAY",
+      "metis_component_id": 6,
+      "metis_component_edge_cuts": 0,
+      "metis_connectivity_repairs": 0,
+      "metis_tiny_group_merges": 0,
+      "max_vm_delta_vs_full_pu": 7.038813976123492e-13,
+      "max_va_delta_vs_full_deg": 4.972188776264375e-07,
       "unmatched_samples": [],
       "error": ""
     },
     {
-      "id": 7,
-      "partition_type": "distribution_physical_component",
+      "id": 22,
+      "partition_type": "distribution_metis_subpartition",
       "supply_area": "IGSY",
       "feeder_id": "3馈线变压器容量分类/GK  线.xls",
-      "display_name": "D_COMPONENT_007",
+      "display_name": "METIS_C007_P01",
       "feeder_code": "GK",
       "feeders": [
         "GK  线"
@@ -230,7 +802,7 @@
       "unmatched_rows": 0,
       "empty_rows": 0,
       "boundary_bus_names": [
-        "IGSY1"
+        "IGSS1"
       ],
       "boundary_main_bus_count": 1,
       "boundary_main_bus_names": [
@@ -238,17 +810,22 @@
       ],
       "boundary_transformer_count": 1,
       "inter_partition_cut_edge_count": 0,
-      "max_vm_delta_vs_full_pu": 3.1030733538273125e-13,
-      "max_va_delta_vs_full_deg": 4.027356226288248e-11,
+      "graph_algorithm": "METIS_KWAY",
+      "metis_component_id": 7,
+      "metis_component_edge_cuts": 0,
+      "metis_connectivity_repairs": 0,
+      "metis_tiny_group_merges": 0,
+      "max_vm_delta_vs_full_pu": 2.7344793096517606e-13,
+      "max_va_delta_vs_full_deg": 5.1523613819881575e-08,
       "unmatched_samples": [],
       "error": ""
     },
     {
-      "id": 8,
-      "partition_type": "distribution_physical_component",
+      "id": 23,
+      "partition_type": "distribution_metis_subpartition",
       "supply_area": "IGSY",
       "feeder_id": "7线路长度分类/NR  线.xls",
-      "display_name": "D_COMPONENT_008",
+      "display_name": "METIS_C008_P01",
       "feeder_code": "NR",
       "feeders": [
         "NR  线"
@@ -260,7 +837,7 @@
       "unmatched_rows": 0,
       "empty_rows": 0,
       "boundary_bus_names": [
-        "IGSY2"
+        "IGSS2"
       ],
       "boundary_main_bus_count": 1,
       "boundary_main_bus_names": [
@@ -268,17 +845,22 @@
       ],
       "boundary_transformer_count": 1,
       "inter_partition_cut_edge_count": 0,
-      "max_vm_delta_vs_full_pu": 7.893685705084863e-14,
-      "max_va_delta_vs_full_deg": 1.3642420526593924e-12,
+      "graph_algorithm": "METIS_KWAY",
+      "metis_component_id": 8,
+      "metis_component_edge_cuts": 0,
+      "metis_connectivity_repairs": 0,
+      "metis_tiny_group_merges": 0,
+      "max_vm_delta_vs_full_pu": 5.850875339774575e-14,
+      "max_va_delta_vs_full_deg": 1.3778219454252394e-08,
       "unmatched_samples": [],
       "error": ""
     },
     {
-      "id": 9,
-      "partition_type": "distribution_physical_component",
+      "id": 24,
+      "partition_type": "distribution_metis_subpartition",
       "supply_area": "QRTY",
       "feeder_id": "2负载率分类/CW  线.xls",
-      "display_name": "D_COMPONENT_009",
+      "display_name": "METIS_C009_P01",
       "feeder_code": "CW",
       "feeders": [
         "CW  线"
@@ -290,7 +872,7 @@
       "unmatched_rows": 1,
       "empty_rows": 0,
       "boundary_bus_names": [
-        "QRTY2"
+        "QRT12"
       ],
       "boundary_main_bus_count": 1,
       "boundary_main_bus_names": [
@@ -298,93 +880,111 @@
       ],
       "boundary_transformer_count": 1,
       "inter_partition_cut_edge_count": 0,
-      "max_vm_delta_vs_full_pu": 1.480426892186415e-11,
-      "max_va_delta_vs_full_deg": 4.434355105331633e-10,
+      "graph_algorithm": "METIS_KWAY",
+      "metis_component_id": 9,
+      "metis_component_edge_cuts": 0,
+      "metis_connectivity_repairs": 0,
+      "metis_tiny_group_merges": 0,
+      "max_vm_delta_vs_full_pu": 3.9635628112932864e-11,
+      "max_va_delta_vs_full_deg": 1.0153735274798237e-07,
       "unmatched_samples": [
         "CW36"
       ],
       "error": ""
     },
     {
-      "id": 10,
-      "partition_type": "distribution_physical_component",
+      "id": 25,
+      "partition_type": "distribution_metis_subpartition",
       "supply_area": "QUAY",
       "feeder_id": "2负载率分类/ZF  东线.xls",
-      "display_name": "D_COMPONENT_010",
+      "display_name": "METIS_C010_P01",
       "feeder_code": "ZF",
       "feeders": [
         "ZF  东线"
       ],
       "converged": true,
       "internal_bus_count": 42,
-      "boundary_bus_count": 1,
+      "boundary_bus_count": 2,
       "matched_rows": 35,
       "unmatched_rows": 0,
       "empty_rows": 0,
       "boundary_bus_names": [
-        "QUAB2"
+        "QUA21",
+        "QUA11"
       ],
       "boundary_main_bus_count": 2,
       "boundary_main_bus_names": [
         "QUA21",
         "QUA11"
       ],
-      "boundary_transformer_count": 2,
+      "boundary_transformer_count": 4,
       "inter_partition_cut_edge_count": 0,
-      "max_vm_delta_vs_full_pu": 5.304645611658998e-13,
-      "max_va_delta_vs_full_deg": 2.3139097606872383e-06,
+      "graph_algorithm": "METIS_KWAY",
+      "metis_component_id": 10,
+      "metis_component_edge_cuts": 0,
+      "metis_connectivity_repairs": 0,
+      "metis_tiny_group_merges": 0,
+      "max_vm_delta_vs_full_pu": 8.254455130529692e-08,
+      "max_va_delta_vs_full_deg": 5.309287956833941e-06,
       "unmatched_samples": [],
       "error": ""
     },
     {
-      "id": 11,
-      "partition_type": "distribution_physical_component",
+      "id": 26,
+      "partition_type": "distribution_metis_subpartition",
       "supply_area": "FUNY",
       "feeder_id": "6线路类型分类/GA  熙湖线.xls",
-      "display_name": "D_COMPONENT_011",
+      "display_name": "METIS_C011_P01",
       "feeder_code": "GAA",
       "feeders": [
         "GA  熙湖线"
       ],
       "converged": true,
       "internal_bus_count": 27,
-      "boundary_bus_count": 1,
+      "boundary_bus_count": 2,
       "matched_rows": 21,
       "unmatched_rows": 0,
       "empty_rows": 0,
       "boundary_bus_names": [
-        "FUNB3"
+        "FUN12",
+        "FUNS2"
       ],
       "boundary_main_bus_count": 2,
       "boundary_main_bus_names": [
         "FUN12",
         "FUNS2"
       ],
-      "boundary_transformer_count": 2,
+      "boundary_transformer_count": 3,
       "inter_partition_cut_edge_count": 0,
-      "max_vm_delta_vs_full_pu": 5.447740036856885e-10,
-      "max_va_delta_vs_full_deg": 3.434137738622667e-07,
+      "graph_algorithm": "METIS_KWAY",
+      "metis_component_id": 11,
+      "metis_component_edge_cuts": 0,
+      "metis_connectivity_repairs": 0,
+      "metis_tiny_group_merges": 0,
+      "max_vm_delta_vs_full_pu": 1.437995045261431e-08,
+      "max_va_delta_vs_full_deg": 8.156928856806189e-07,
       "unmatched_samples": [],
       "error": ""
     },
     {
-      "id": 12,
-      "partition_type": "distribution_physical_component",
+      "id": 27,
+      "partition_type": "distribution_metis_subpartition",
       "supply_area": "FUNY",
       "feeder_id": "4馈线所带用户性质分类/KQ线.xls",
-      "display_name": "D_COMPONENT_012",
+      "display_name": "METIS_C012_P01",
       "feeder_code": "KQ",
       "feeders": [
         "KQ线"
       ],
       "converged": true,
       "internal_bus_count": 21,
-      "boundary_bus_count": 1,
+      "boundary_bus_count": 2,
       "matched_rows": 16,
       "unmatched_rows": 0,
       "empty_rows": 0,
       "boundary_bus_names": [
-        "FUNB1"
+        "FUN11",
+        "FUNS1"
       ],
       "boundary_main_bus_count": 2,
       "boundary_main_bus_names": [
@@ -393,17 +993,22 @@
       ],
       "boundary_transformer_count": 2,
       "inter_partition_cut_edge_count": 0,
-      "max_vm_delta_vs_full_pu": 3.4424874062466415e-10,
-      "max_va_delta_vs_full_deg": 8.293434916595288e-08,
+      "graph_algorithm": "METIS_KWAY",
+      "metis_component_id": 12,
+      "metis_component_edge_cuts": 0,
+      "metis_connectivity_repairs": 0,
+      "metis_tiny_group_merges": 0,
+      "max_vm_delta_vs_full_pu": 6.882691749865444e-09,
+      "max_va_delta_vs_full_deg": 1.7904014271152846e-07,
       "unmatched_samples": [],
       "error": ""
     },
     {
-      "id": 13,
-      "partition_type": "distribution_physical_component",
+      "id": 28,
+      "partition_type": "distribution_metis_subpartition",
       "supply_area": "LAJY",
       "feeder_id": "4馈线所带用户性质分类/NV  院1线.xls",
-      "display_name": "D_COMPONENT_013",
+      "display_name": "METIS_C013_P01",
       "feeder_code": "NVA",
       "feeders": [
         "NV  院1线"
@@ -415,25 +1020,30 @@
       "unmatched_rows": 0,
       "empty_rows": 0,
       "boundary_bus_names": [
-        "LAJY2"
+        "LAJ11"
       ],
       "boundary_main_bus_count": 1,
       "boundary_main_bus_names": [
         "LAJ11"
       ],
-      "boundary_transformer_count": 1,
+      "boundary_transformer_count": 2,
       "inter_partition_cut_edge_count": 0,
-      "max_vm_delta_vs_full_pu": 9.482414853323462e-13,
-      "max_va_delta_vs_full_deg": 2.361844053666573e-11,
+      "graph_algorithm": "METIS_KWAY",
+      "metis_component_id": 13,
+      "metis_component_edge_cuts": 0,
+      "metis_connectivity_repairs": 0,
+      "metis_tiny_group_merges": 0,
+      "max_vm_delta_vs_full_pu": 1.7085222125956534e-12,
+      "max_va_delta_vs_full_deg": 5.516759529200499e-07,
       "unmatched_samples": [],
       "error": ""
     },
     {
-      "id": 14,
-      "partition_type": "distribution_physical_component",
+      "id": 29,
+      "partition_type": "distribution_metis_subpartition",
       "supply_area": "LAJY",
       "feeder_id": "4馈线所带用户性质分类/QL  大学线.xls",
-      "display_name": "D_COMPONENT_014",
+      "display_name": "METIS_C014_P01",
       "feeder_code": "QL",
       "feeders": [
         "QL  大学线"
@@ -445,25 +1055,30 @@
       "unmatched_rows": 0,
       "empty_rows": 2,
       "boundary_bus_names": [
-        "LAJY1"
+        "LAJ11"
       ],
       "boundary_main_bus_count": 1,
       "boundary_main_bus_names": [
         "LAJ11"
       ],
-      "boundary_transformer_count": 1,
+      "boundary_transformer_count": 2,
       "inter_partition_cut_edge_count": 0,
-      "max_vm_delta_vs_full_pu": 1.298363194734975e-09,
-      "max_va_delta_vs_full_deg": 5.93529705383844e-08,
+      "graph_algorithm": "METIS_KWAY",
+      "metis_component_id": 14,
+      "metis_component_edge_cuts": 0,
+      "metis_connectivity_repairs": 0,
+      "metis_tiny_group_merges": 0,
+      "max_vm_delta_vs_full_pu": 2.549776501048484e-09,
+      "max_va_delta_vs_full_deg": 2.244209582613621e-06,
       "unmatched_samples": [],
       "error": ""
     },
     {
-      "id": 15,
-      "partition_type": "distribution_physical_component",
+      "id": 30,
+      "partition_type": "distribution_metis_subpartition",
       "supply_area": "",
       "feeder_id": "",
-      "display_name": "D_COMPONENT_015",
+      "display_name": "METIS_C015_P01",
       "feeder_code": "",
       "feeders": [],
       "converged": true,
@@ -473,7 +1088,7 @@
       "unmatched_rows": 0,
       "empty_rows": 0,
       "boundary_bus_names": [
-        "NHAY1"
+        "NHA11"
       ],
       "boundary_main_bus_count": 1,
       "boundary_main_bus_names": [
@@ -481,17 +1096,22 @@
       ],
       "boundary_transformer_count": 1,
       "inter_partition_cut_edge_count": 0,
+      "graph_algorithm": "METIS_KWAY",
+      "metis_component_id": 15,
+      "metis_component_edge_cuts": 0,
+      "metis_connectivity_repairs": 0,
+      "metis_tiny_group_merges": 0,
       "max_vm_delta_vs_full_pu": 3.3306690738754696e-16,
-      "max_va_delta_vs_full_deg": 0.0,
+      "max_va_delta_vs_full_deg": 2.6362433516169403e-06,
       "unmatched_samples": [],
       "error": ""
     },
     {
-      "id": 16,
-      "partition_type": "distribution_physical_component",
+      "id": 31,
+      "partition_type": "distribution_metis_subpartition",
       "supply_area": "",
       "feeder_id": "",
-      "display_name": "D_COMPONENT_016",
+      "display_name": "METIS_C016_P01",
       "feeder_code": "",
       "feeders": [],
       "converged": true,
@@ -501,7 +1121,7 @@
       "unmatched_rows": 0,
       "empty_rows": 0,
       "boundary_bus_names": [
-        "NHAY2"
+        "NHA12"
       ],
       "boundary_main_bus_count": 1,
       "boundary_main_bus_names": [
@@ -509,17 +1129,22 @@
       ],
       "boundary_transformer_count": 1,
       "inter_partition_cut_edge_count": 0,
-      "max_vm_delta_vs_full_pu": 1.0927925231385416e-12,
-      "max_va_delta_vs_full_deg": 7.105427357601002e-13,
+      "graph_algorithm": "METIS_KWAY",
+      "metis_component_id": 16,
+      "metis_component_edge_cuts": 0,
+      "metis_connectivity_repairs": 0,
+      "metis_tiny_group_merges": 0,
+      "max_vm_delta_vs_full_pu": 1.0931255900459291e-12,
+      "max_va_delta_vs_full_deg": 4.2274990335045e-06,
       "unmatched_samples": [],
       "error": ""
     },
     {
-      "id": 17,
-      "partition_type": "distribution_physical_component",
+      "id": 32,
+      "partition_type": "distribution_metis_subpartition",
       "supply_area": "",
       "feeder_id": "",
-      "display_name": "D_COMPONENT_017",
+      "display_name": "METIS_C017_P01",
       "feeder_code": "",
       "feeders": [],
       "converged": true,
@@ -529,7 +1154,7 @@
       "unmatched_rows": 0,
       "empty_rows": 0,
       "boundary_bus_names": [
-        "OBFY2"
+        "OBF12"
       ],
       "boundary_main_bus_count": 1,
       "boundary_main_bus_names": [
@@ -537,17 +1162,22 @@
       ],
       "boundary_transformer_count": 1,
       "inter_partition_cut_edge_count": 0,
-      "max_vm_delta_vs_full_pu": 9.138245715689663e-13,
-      "max_va_delta_vs_full_deg": 5.5990767577895895e-12,
+      "graph_algorithm": "METIS_KWAY",
+      "metis_component_id": 17,
+      "metis_component_edge_cuts": 0,
+      "metis_connectivity_repairs": 0,
+      "metis_tiny_group_merges": 0,
+      "max_vm_delta_vs_full_pu": 9.140466161738914e-13,
+      "max_va_delta_vs_full_deg": 7.67181234095915e-08,
       "unmatched_samples": [],
       "error": ""
     },
     {
-      "id": 18,
-      "partition_type": "distribution_physical_component",
+      "id": 33,
+      "partition_type": "distribution_metis_subpartition",
       "supply_area": "",
       "feeder_id": "",
-      "display_name": "D_COMPONENT_018",
+      "display_name": "METIS_C018_P01",
       "feeder_code": "",
       "feeders": [],
       "converged": true,
@@ -557,7 +1187,7 @@
       "unmatched_rows": 0,
       "empty_rows": 0,
       "boundary_bus_names": [
-        "QRTY1"
+        "QRT11"
       ],
       "boundary_main_bus_count": 1,
       "boundary_main_bus_names": [
@@ -565,17 +1195,22 @@
       ],
       "boundary_transformer_count": 1,
       "inter_partition_cut_edge_count": 0,
-      "max_vm_delta_vs_full_pu": 5.362377208939506e-14,
-      "max_va_delta_vs_full_deg": 0.0,
+      "graph_algorithm": "METIS_KWAY",
+      "metis_component_id": 18,
+      "metis_component_edge_cuts": 0,
+      "metis_connectivity_repairs": 0,
+      "metis_tiny_group_merges": 0,
+      "max_vm_delta_vs_full_pu": 5.384581669432009e-14,
+      "max_va_delta_vs_full_deg": 1.0658894211701408e-07,
       "unmatched_samples": [],
       "error": ""
     },
     {
-      "id": 19,
-      "partition_type": "distribution_physical_component",
+      "id": 34,
+      "partition_type": "distribution_metis_subpartition",
       "supply_area": "",
       "feeder_id": "",
-      "display_name": "D_COMPONENT_019",
+      "display_name": "METIS_C019_P01",
       "feeder_code": "",
       "feeders": [],
       "converged": true,
@@ -585,7 +1220,7 @@
       "unmatched_rows": 0,
       "empty_rows": 0,
       "boundary_bus_names": [
-        "JIPY1"
+        "JIP11"
       ],
       "boundary_main_bus_count": 1,
       "boundary_main_bus_names": [
@@ -593,56 +1228,68 @@
       ],
       "boundary_transformer_count": 1,
       "inter_partition_cut_edge_count": 0,
-      "max_vm_delta_vs_full_pu": 1.7319479184152442e-14,
-      "max_va_delta_vs_full_deg": 2.842170943040401e-14,
+      "graph_algorithm": "METIS_KWAY",
+      "metis_component_id": 19,
+      "metis_component_edge_cuts": 0,
+      "metis_connectivity_repairs": 0,
+      "metis_tiny_group_merges": 0,
+      "max_vm_delta_vs_full_pu": 1.7430501486614958e-14,
+      "max_va_delta_vs_full_deg": 1.729022756080667e-07,
       "unmatched_samples": [],
       "error": ""
     },
     {
-      "id": 20,
-      "partition_type": "distribution_physical_component",
+      "id": 35,
+      "partition_type": "distribution_metis_subpartition",
       "supply_area": "",
       "feeder_id": "",
-      "display_name": "D_COMPONENT_020",
+      "display_name": "METIS_C020_P01",
       "feeder_code": "",
       "feeders": [],
       "converged": true,
       "internal_bus_count": 8,
-      "boundary_bus_count": 1,
+      "boundary_bus_count": 2,
       "matched_rows": 0,
       "unmatched_rows": 0,
       "empty_rows": 0,
       "boundary_bus_names": [
-        "TYNB2"
+        "TYN11",
+        "TYNS2"
       ],
       "boundary_main_bus_count": 2,
       "boundary_main_bus_names": [
         "TYN11",
         "TYNS2"
       ],
-      "boundary_transformer_count": 2,
+      "boundary_transformer_count": 3,
       "inter_partition_cut_edge_count": 0,
-      "max_vm_delta_vs_full_pu": 6.938893903907228e-14,
-      "max_va_delta_vs_full_deg": 1.286897202135151e-07,
+      "graph_algorithm": "METIS_KWAY",
+      "metis_component_id": 20,
+      "metis_component_edge_cuts": 0,
+      "metis_connectivity_repairs": 0,
+      "metis_tiny_group_merges": 0,
+      "max_vm_delta_vs_full_pu": 6.880981784362916e-09,
+      "max_va_delta_vs_full_deg": 1.9883549384758226e-07,
       "unmatched_samples": [],
       "error": ""
     },
     {
-      "id": 21,
-      "partition_type": "distribution_physical_component",
+      "id": 36,
+      "partition_type": "distribution_metis_subpartition",
       "supply_area": "",
       "feeder_id": "",
-      "display_name": "D_COMPONENT_021",
+      "display_name": "METIS_C021_P01",
       "feeder_code": "",
       "feeders": [],
       "converged": true,
       "internal_bus_count": 7,
-      "boundary_bus_count": 1,
+      "boundary_bus_count": 2,
       "matched_rows": 0,
       "unmatched_rows": 0,
       "empty_rows": 0,
       "boundary_bus_names": [
-        "ATTB2"
+        "ATT11",
+        "ATTS1"
       ],
       "boundary_main_bus_count": 2,
       "boundary_main_bus_names": [
@@ -651,27 +1298,33 @@
       ],
       "boundary_transformer_count": 2,
       "inter_partition_cut_edge_count": 0,
-      "max_vm_delta_vs_full_pu": 1.4865886299730846e-13,
-      "max_va_delta_vs_full_deg": 1.5553570165138808e-07,
+      "graph_algorithm": "METIS_KWAY",
+      "metis_component_id": 21,
+      "metis_component_edge_cuts": 0,
+      "metis_connectivity_repairs": 0,
+      "metis_tiny_group_merges": 0,
+      "max_vm_delta_vs_full_pu": 1.7471826208037555e-09,
+      "max_va_delta_vs_full_deg": 2.2185045622791222e-07,
       "unmatched_samples": [],
       "error": ""
     },
     {
-      "id": 22,
-      "partition_type": "distribution_physical_component",
+      "id": 37,
+      "partition_type": "distribution_metis_subpartition",
       "supply_area": "",
       "feeder_id": "",
-      "display_name": "D_COMPONENT_022",
+      "display_name": "METIS_C022_P01",
       "feeder_code": "",
       "feeders": [],
       "converged": true,
       "internal_bus_count": 7,
-      "boundary_bus_count": 1,
+      "boundary_bus_count": 2,
       "matched_rows": 0,
       "unmatched_rows": 0,
       "empty_rows": 0,
       "boundary_bus_names": [
-        "ATTB3"
+        "ATT12",
+        "ATTS2"
       ],
       "boundary_main_bus_count": 2,
       "boundary_main_bus_names": [
@@ -680,27 +1333,33 @@
       ],
       "boundary_transformer_count": 2,
       "inter_partition_cut_edge_count": 0,
-      "max_vm_delta_vs_full_pu": 1.4854784069484595e-13,
-      "max_va_delta_vs_full_deg": 9.744448564674713e-05,
+      "graph_algorithm": "METIS_KWAY",
+      "metis_component_id": 22,
+      "metis_component_edge_cuts": 0,
+      "metis_connectivity_repairs": 0,
+      "metis_tiny_group_merges": 0,
+      "max_vm_delta_vs_full_pu": 3.5994210367817914e-07,
+      "max_va_delta_vs_full_deg": 7.309649654985151e-05,
       "unmatched_samples": [],
       "error": ""
     },
     {
-      "id": 23,
-      "partition_type": "distribution_physical_component",
+      "id": 38,
+      "partition_type": "distribution_metis_subpartition",
       "supply_area": "",
       "feeder_id": "",
-      "display_name": "D_COMPONENT_023",
+      "display_name": "METIS_C023_P01",
       "feeder_code": "",
       "feeders": [],
       "converged": true,
       "internal_bus_count": 7,
-      "boundary_bus_count": 1,
+      "boundary_bus_count": 2,
       "matched_rows": 0,
       "unmatched_rows": 0,
       "empty_rows": 0,
       "boundary_bus_names": [
-        "JIPB2"
+        "JIP12",
+        "JIPS1"
       ],
       "boundary_main_bus_count": 2,
       "boundary_main_bus_names": [
@@ -709,27 +1368,33 @@
       ],
       "boundary_transformer_count": 2,
       "inter_partition_cut_edge_count": 0,
-      "max_vm_delta_vs_full_pu": 2.1106671965753776e-10,
-      "max_va_delta_vs_full_deg": 1.5108124671314727e-06,
+      "graph_algorithm": "METIS_KWAY",
+      "metis_component_id": 23,
+      "metis_component_edge_cuts": 0,
+      "metis_connectivity_repairs": 0,
+      "metis_tiny_group_merges": 0,
+      "max_vm_delta_vs_full_pu": 5.711214057235736e-09,
+      "max_va_delta_vs_full_deg": 1.6664008342104353e-06,
       "unmatched_samples": [],
       "error": ""
     },
     {
-      "id": 24,
-      "partition_type": "distribution_physical_component",
+      "id": 39,
+      "partition_type": "distribution_metis_subpartition",
       "supply_area": "",
       "feeder_id": "",
-      "display_name": "D_COMPONENT_024",
+      "display_name": "METIS_C024_P01",
       "feeder_code": "",
       "feeders": [],
       "converged": true,
       "internal_bus_count": 7,
-      "boundary_bus_count": 1,
+      "boundary_bus_count": 2,
       "matched_rows": 0,
       "unmatched_rows": 0,
       "empty_rows": 0,
       "boundary_bus_names": [
-        "CDWB1"
+        "CDW11",
+        "CDWS1"
       ],
       "boundary_main_bus_count": 2,
       "boundary_main_bus_names": [
@@ -738,27 +1403,33 @@
       ],
       "boundary_transformer_count": 2,
       "inter_partition_cut_edge_count": 0,
-      "max_vm_delta_vs_full_pu": 7.216449660063518e-15,
-      "max_va_delta_vs_full_deg": 5.1388582278377726e-08,
+      "graph_algorithm": "METIS_KWAY",
+      "metis_component_id": 24,
+      "metis_component_edge_cuts": 0,
+      "metis_connectivity_repairs": 0,
+      "metis_tiny_group_merges": 0,
+      "max_vm_delta_vs_full_pu": 1.946460659318916e-09,
+      "max_va_delta_vs_full_deg": 1.1604757332861482e-07,
       "unmatched_samples": [],
       "error": ""
     },
     {
-      "id": 25,
-      "partition_type": "distribution_physical_component",
+      "id": 40,
+      "partition_type": "distribution_metis_subpartition",
       "supply_area": "",
       "feeder_id": "",
-      "display_name": "D_COMPONENT_025",
+      "display_name": "METIS_C025_P01",
       "feeder_code": "",
       "feeders": [],
       "converged": true,
       "internal_bus_count": 6,
-      "boundary_bus_count": 1,
+      "boundary_bus_count": 2,
       "matched_rows": 0,
       "unmatched_rows": 0,
       "empty_rows": 0,
       "boundary_bus_names": [
-        "FPVB1"
+        "FPV11",
+        "FPVS1"
       ],
       "boundary_main_bus_count": 2,
       "boundary_main_bus_names": [
@@ -767,27 +1438,33 @@
       ],
       "boundary_transformer_count": 2,
       "inter_partition_cut_edge_count": 0,
-      "max_vm_delta_vs_full_pu": 5.551115123125783e-16,
-      "max_va_delta_vs_full_deg": 2.608321580055417e-06,
+      "graph_algorithm": "METIS_KWAY",
+      "metis_component_id": 25,
+      "metis_component_edge_cuts": 0,
+      "metis_connectivity_repairs": 0,
+      "metis_tiny_group_merges": 0,
+      "max_vm_delta_vs_full_pu": 1.606844668433638e-07,
+      "max_va_delta_vs_full_deg": 1.4605178080273618e-06,
       "unmatched_samples": [],
       "error": ""
     },
     {
-      "id": 26,
-      "partition_type": "distribution_physical_component",
+      "id": 41,
+      "partition_type": "distribution_metis_subpartition",
       "supply_area": "",
       "feeder_id": "",
-      "display_name": "D_COMPONENT_026",
+      "display_name": "METIS_C026_P01",
       "feeder_code": "",
       "feeders": [],
       "converged": true,
       "internal_bus_count": 6,
-      "boundary_bus_count": 1,
+      "boundary_bus_count": 2,
       "matched_rows": 0,
       "unmatched_rows": 0,
       "empty_rows": 0,
       "boundary_bus_names": [
-        "CDWB2"
+        "CDW12",
+        "CDWS2"
       ],
       "boundary_main_bus_count": 2,
       "boundary_main_bus_names": [
@@ -796,56 +1473,68 @@
       ],
       "boundary_transformer_count": 2,
       "inter_partition_cut_edge_count": 0,
-      "max_vm_delta_vs_full_pu": 2.76667577736589e-13,
-      "max_va_delta_vs_full_deg": 5.294424454405089e-09,
+      "graph_algorithm": "METIS_KWAY",
+      "metis_component_id": 26,
+      "metis_component_edge_cuts": 0,
+      "metis_connectivity_repairs": 0,
+      "metis_tiny_group_merges": 0,
+      "max_vm_delta_vs_full_pu": 3.8096524823671984e-09,
+      "max_va_delta_vs_full_deg": 7.474076824109943e-08,
       "unmatched_samples": [],
       "error": ""
     },
     {
-      "id": 27,
-      "partition_type": "distribution_physical_component",
+      "id": 42,
+      "partition_type": "distribution_metis_subpartition",
       "supply_area": "",
       "feeder_id": "",
-      "display_name": "D_COMPONENT_027",
+      "display_name": "METIS_C027_P01",
       "feeder_code": "",
       "feeders": [],
       "converged": true,
       "internal_bus_count": 6,
-      "boundary_bus_count": 1,
+      "boundary_bus_count": 2,
       "matched_rows": 0,
       "unmatched_rows": 0,
       "empty_rows": 0,
       "boundary_bus_names": [
-        "QUAB3"
+        "QUA21",
+        "QUA11"
       ],
       "boundary_main_bus_count": 2,
       "boundary_main_bus_names": [
         "QUA21",
         "QUA11"
       ],
-      "boundary_transformer_count": 2,
+      "boundary_transformer_count": 4,
       "inter_partition_cut_edge_count": 0,
-      "max_vm_delta_vs_full_pu": 2.6478819137309983e-13,
-      "max_va_delta_vs_full_deg": 2.4109150729145767e-06,
+      "graph_algorithm": "METIS_KWAY",
+      "metis_component_id": 27,
+      "metis_component_edge_cuts": 0,
+      "metis_connectivity_repairs": 0,
+      "metis_tiny_group_merges": 0,
+      "max_vm_delta_vs_full_pu": 1.080477510795319e-07,
+      "max_va_delta_vs_full_deg": 8.30454709443984e-06,
       "unmatched_samples": [],
       "error": ""
     },
     {
-      "id": 28,
-      "partition_type": "distribution_physical_component",
+      "id": 43,
+      "partition_type": "distribution_metis_subpartition",
       "supply_area": "",
       "feeder_id": "",
-      "display_name": "D_COMPONENT_028",
+      "display_name": "METIS_C028_P01",
       "feeder_code": "",
       "feeders": [],
       "converged": true,
       "internal_bus_count": 6,
-      "boundary_bus_count": 1,
+      "boundary_bus_count": 2,
       "matched_rows": 0,
       "unmatched_rows": 0,
       "empty_rows": 0,
       "boundary_bus_names": [
-        "FPVB2"
+        "FPV12",
+        "FPVS2"
       ],
       "boundary_main_bus_count": 2,
       "boundary_main_bus_names": [
@@ -854,17 +1543,22 @@
       ],
       "boundary_transformer_count": 2,
       "inter_partition_cut_edge_count": 0,
-      "max_vm_delta_vs_full_pu": 1.0311751452718454e-12,
-      "max_va_delta_vs_full_deg": 6.711917421853286e-08,
+      "graph_algorithm": "METIS_KWAY",
+      "metis_component_id": 28,
+      "metis_component_edge_cuts": 0,
+      "metis_connectivity_repairs": 0,
+      "metis_tiny_group_merges": 0,
+      "max_vm_delta_vs_full_pu": 9.174357495922436e-09,
+      "max_va_delta_vs_full_deg": 5.4517670378118055e-08,
       "unmatched_samples": [],
       "error": ""
     },
     {
-      "id": 29,
-      "partition_type": "distribution_physical_component",
+      "id": 44,
+      "partition_type": "distribution_metis_subpartition",
       "supply_area": "",
       "feeder_id": "",
-      "display_name": "D_COMPONENT_029",
+      "display_name": "METIS_C029_P01",
       "feeder_code": "",
       "feeders": [],
       "converged": true,
@@ -874,25 +1568,30 @@
       "unmatched_rows": 0,
       "empty_rows": 0,
       "boundary_bus_names": [
-        "JIEY1"
+        "JIES1"
       ],
       "boundary_main_bus_count": 1,
       "boundary_main_bus_names": [
         "JIES1"
       ],
-      "boundary_transformer_count": 1,
+      "boundary_transformer_count": 2,
       "inter_partition_cut_edge_count": 0,
-      "max_vm_delta_vs_full_pu": 4.4209080840573733e-13,
-      "max_va_delta_vs_full_deg": 2.842170943040401e-14,
+      "graph_algorithm": "METIS_KWAY",
+      "metis_component_id": 29,
+      "metis_component_edge_cuts": 0,
+      "metis_connectivity_repairs": 0,
+      "metis_tiny_group_merges": 0,
+      "max_vm_delta_vs_full_pu": 4.4164671919588727e-13,
+      "max_va_delta_vs_full_deg": 9.696108804746473e-08,
       "unmatched_samples": [],
       "error": ""
     },
     {
-      "id": 30,
-      "partition_type": "distribution_physical_component",
+      "id": 45,
+      "partition_type": "distribution_metis_subpartition",
       "supply_area": "",
       "feeder_id": "",
-      "display_name": "D_COMPONENT_030",
+      "display_name": "METIS_C030_P01",
       "feeder_code": "",
       "feeders": [],
       "converged": true,
@@ -902,25 +1601,30 @@
       "unmatched_rows": 0,
       "empty_rows": 0,
       "boundary_bus_names": [
-        "AYWY1"
+        "AYWS1"
       ],
       "boundary_main_bus_count": 1,
       "boundary_main_bus_names": [
         "AYWS1"
       ],
-      "boundary_transformer_count": 1,
+      "boundary_transformer_count": 2,
       "inter_partition_cut_edge_count": 0,
-      "max_vm_delta_vs_full_pu": 4.440892098500626e-15,
-      "max_va_delta_vs_full_deg": 0.0,
+      "graph_algorithm": "METIS_KWAY",
+      "metis_component_id": 30,
+      "metis_component_edge_cuts": 0,
+      "metis_connectivity_repairs": 0,
+      "metis_tiny_group_merges": 0,
+      "max_vm_delta_vs_full_pu": 4.3298697960381105e-15,
+      "max_va_delta_vs_full_deg": 5.207483866342955e-07,
       "unmatched_samples": [],
       "error": ""
     },
     {
-      "id": 31,
-      "partition_type": "distribution_physical_component",
+      "id": 46,
+      "partition_type": "distribution_metis_subpartition",
       "supply_area": "",
       "feeder_id": "",
-      "display_name": "D_COMPONENT_031",
+      "display_name": "METIS_C031_P01",
       "feeder_code": "",
       "feeders": [],
       "converged": true,
@@ -930,54 +1634,65 @@
       "unmatched_rows": 0,
       "empty_rows": 0,
       "boundary_bus_names": [
-        "AYWY2"
+        "AYWS1"
       ],
       "boundary_main_bus_count": 1,
       "boundary_main_bus_names": [
         "AYWS1"
       ],
-      "boundary_transformer_count": 1,
+      "boundary_transformer_count": 2,
       "inter_partition_cut_edge_count": 0,
-      "max_vm_delta_vs_full_pu": 1.078026556911027e-13,
-      "max_va_delta_vs_full_deg": 0.0,
+      "graph_algorithm": "METIS_KWAY",
+      "metis_component_id": 31,
+      "metis_component_edge_cuts": 0,
+      "metis_connectivity_repairs": 0,
+      "metis_tiny_group_merges": 0,
+      "max_vm_delta_vs_full_pu": 1.0691447727140257e-13,
+      "max_va_delta_vs_full_deg": 7.518182769672421e-07,
       "unmatched_samples": [],
       "error": ""
     },
     {
-      "id": 32,
-      "partition_type": "distribution_physical_component",
+      "id": 47,
+      "partition_type": "distribution_metis_subpartition",
       "supply_area": "",
       "feeder_id": "",
-      "display_name": "D_COMPONENT_032",
+      "display_name": "METIS_C032_P01",
       "feeder_code": "",
       "feeders": [],
       "converged": true,
       "internal_bus_count": 4,
-      "boundary_bus_count": 1,
+      "boundary_bus_count": 2,
       "matched_rows": 0,
       "unmatched_rows": 0,
       "empty_rows": 0,
       "boundary_bus_names": [
-        "CBEB1"
+        "CBE21",
+        "CBE11"
       ],
       "boundary_main_bus_count": 2,
       "boundary_main_bus_names": [
         "CBE21",
         "CBE11"
       ],
-      "boundary_transformer_count": 2,
+      "boundary_transformer_count": 3,
       "inter_partition_cut_edge_count": 0,
-      "max_vm_delta_vs_full_pu": 8.881784197001252e-16,
-      "max_va_delta_vs_full_deg": 1.6887892684280814e-07,
+      "graph_algorithm": "METIS_KWAY",
+      "metis_component_id": 32,
+      "metis_component_edge_cuts": 0,
+      "metis_connectivity_repairs": 0,
+      "metis_tiny_group_merges": 0,
+      "max_vm_delta_vs_full_pu": 3.5417204280463466e-08,
+      "max_va_delta_vs_full_deg": 6.014926441366697e-07,
       "unmatched_samples": [],
       "error": ""
     },
     {
-      "id": 33,
-      "partition_type": "distribution_physical_component",
+      "id": 48,
+      "partition_type": "distribution_metis_subpartition",
       "supply_area": "",
       "feeder_id": "",
-      "display_name": "D_COMPONENT_033",
+      "display_name": "METIS_C033_P01",
       "feeder_code": "",
       "feeders": [],
       "converged": true,
@@ -987,7 +1702,7 @@
       "unmatched_rows": 0,
       "empty_rows": 0,
       "boundary_bus_names": [
-        "NLDY2"
+        "NLDS2"
       ],
       "boundary_main_bus_count": 1,
       "boundary_main_bus_names": [
@@ -995,17 +1710,22 @@
       ],
       "boundary_transformer_count": 1,
       "inter_partition_cut_edge_count": 0,
-      "max_vm_delta_vs_full_pu": 1.2023715356690445e-13,
-      "max_va_delta_vs_full_deg": 1.9895196601282805e-13,
+      "graph_algorithm": "METIS_KWAY",
+      "metis_component_id": 33,
+      "metis_component_edge_cuts": 0,
+      "metis_connectivity_repairs": 0,
+      "metis_tiny_group_merges": 0,
+      "max_vm_delta_vs_full_pu": 1.2045919817182948e-13,
+      "max_va_delta_vs_full_deg": 4.8487976300748414e-08,
       "unmatched_samples": [],
       "error": ""
     },
     {
-      "id": 34,
-      "partition_type": "distribution_physical_component",
+      "id": 49,
+      "partition_type": "distribution_metis_subpartition",
       "supply_area": "",
       "feeder_id": "",
-      "display_name": "D_COMPONENT_034",
+      "display_name": "METIS_C034_P01",
       "feeder_code": "",
       "feeders": [],
       "converged": true,
@@ -1015,7 +1735,7 @@
       "unmatched_rows": 0,
       "empty_rows": 0,
       "boundary_bus_names": [
-        "GXVY2"
+        "GXVS2"
       ],
       "boundary_main_bus_count": 1,
       "boundary_main_bus_names": [
@@ -1023,17 +1743,22 @@
       ],
       "boundary_transformer_count": 1,
       "inter_partition_cut_edge_count": 0,
-      "max_vm_delta_vs_full_pu": 3.7969627442180354e-14,
-      "max_va_delta_vs_full_deg": 0.0,
+      "graph_algorithm": "METIS_KWAY",
+      "metis_component_id": 34,
+      "metis_component_edge_cuts": 0,
+      "metis_connectivity_repairs": 0,
+      "metis_tiny_group_merges": 0,
+      "max_vm_delta_vs_full_pu": 3.785860513971784e-14,
+      "max_va_delta_vs_full_deg": 4.045216428494314e-08,
       "unmatched_samples": [],
       "error": ""
     },
     {
-      "id": 35,
-      "partition_type": "distribution_physical_component",
+      "id": 50,
+      "partition_type": "distribution_metis_subpartition",
       "supply_area": "",
       "feeder_id": "",
-      "display_name": "D_COMPONENT_035",
+      "display_name": "METIS_C035_P01",
       "feeder_code": "",
       "feeders": [],
       "converged": true,
@@ -1043,7 +1768,7 @@
       "unmatched_rows": 0,
       "empty_rows": 0,
       "boundary_bus_names": [
-        "NLDY1"
+        "NLDS1"
       ],
       "boundary_main_bus_count": 1,
       "boundary_main_bus_names": [
@@ -1051,17 +1776,22 @@
       ],
       "boundary_transformer_count": 1,
       "inter_partition_cut_edge_count": 0,
-      "max_vm_delta_vs_full_pu": 7.771561172376096e-16,
-      "max_va_delta_vs_full_deg": 2.842170943040401e-14,
+      "graph_algorithm": "METIS_KWAY",
+      "metis_component_id": 35,
+      "metis_component_edge_cuts": 0,
+      "metis_connectivity_repairs": 0,
+      "metis_tiny_group_merges": 0,
+      "max_vm_delta_vs_full_pu": 4.440892098500626e-16,
+      "max_va_delta_vs_full_deg": 2.281726096953207e-08,
       "unmatched_samples": [],
       "error": ""
     },
     {
-      "id": 36,
-      "partition_type": "distribution_physical_component",
+      "id": 51,
+      "partition_type": "distribution_metis_subpartition",
       "supply_area": "",
       "feeder_id": "",
-      "display_name": "D_COMPONENT_036",
+      "display_name": "METIS_C036_P01",
       "feeder_code": "",
       "feeders": [],
       "converged": true,
@@ -1071,7 +1801,7 @@
       "unmatched_rows": 0,
       "empty_rows": 0,
       "boundary_bus_names": [
-        "GXVY1"
+        "GXVS1"
       ],
       "boundary_main_bus_count": 1,
       "boundary_main_bus_names": [
@@ -1079,17 +1809,22 @@
       ],
       "boundary_transformer_count": 1,
       "inter_partition_cut_edge_count": 0,
-      "max_vm_delta_vs_full_pu": 4.3298697960381105e-15,
-      "max_va_delta_vs_full_deg": 0.0,
+      "graph_algorithm": "METIS_KWAY",
+      "metis_component_id": 36,
+      "metis_component_edge_cuts": 0,
+      "metis_connectivity_repairs": 0,
+      "metis_tiny_group_merges": 0,
+      "max_vm_delta_vs_full_pu": 4.6629367034256575e-15,
+      "max_va_delta_vs_full_deg": 1.207886839438288e-07,
       "unmatched_samples": [],
       "error": ""
     },
     {
-      "id": 37,
-      "partition_type": "distribution_physical_component",
+      "id": 52,
+      "partition_type": "distribution_metis_subpartition",
       "supply_area": "",
       "feeder_id": "",
-      "display_name": "D_COMPONENT_037",
+      "display_name": "METIS_C037_P01",
       "feeder_code": "",
       "feeders": [],
       "converged": true,
@@ -1099,7 +1834,7 @@
       "unmatched_rows": 0,
       "empty_rows": 0,
       "boundary_bus_names": [
-        "DPEY1"
+        "DPES1"
       ],
       "boundary_main_bus_count": 1,
       "boundary_main_bus_names": [
@@ -1107,17 +1842,22 @@
       ],
       "boundary_transformer_count": 1,
       "inter_partition_cut_edge_count": 0,
-      "max_vm_delta_vs_full_pu": 4.440892098500626e-16,
-      "max_va_delta_vs_full_deg": 0.0,
+      "graph_algorithm": "METIS_KWAY",
+      "metis_component_id": 37,
+      "metis_component_edge_cuts": 0,
+      "metis_connectivity_repairs": 0,
+      "metis_tiny_group_merges": 0,
+      "max_vm_delta_vs_full_pu": 1.1102230246251565e-16,
+      "max_va_delta_vs_full_deg": 6.066362061574182e-07,
       "unmatched_samples": [],
       "error": ""
     },
     {
-      "id": 38,
-      "partition_type": "distribution_physical_component",
+      "id": 53,
+      "partition_type": "distribution_metis_subpartition",
       "supply_area": "",
       "feeder_id": "",
-      "display_name": "D_COMPONENT_038",
+      "display_name": "METIS_C038_P01",
       "feeder_code": "",
       "feeders": [],
       "converged": true,
@@ -1127,7 +1867,7 @@
       "unmatched_rows": 0,
       "empty_rows": 0,
       "boundary_bus_names": [
-        "DPEY2"
+        "DPES2"
       ],
       "boundary_main_bus_count": 1,
       "boundary_main_bus_names": [
@@ -1135,17 +1875,22 @@
       ],
       "boundary_transformer_count": 1,
       "inter_partition_cut_edge_count": 0,
-      "max_vm_delta_vs_full_pu": 2.0627943797535409e-13,
-      "max_va_delta_vs_full_deg": 0.0,
+      "graph_algorithm": "METIS_KWAY",
+      "metis_component_id": 38,
+      "metis_component_edge_cuts": 0,
+      "metis_connectivity_repairs": 0,
+      "metis_tiny_group_merges": 0,
+      "max_vm_delta_vs_full_pu": 2.0661250488274163e-13,
+      "max_va_delta_vs_full_deg": 1.3141573163011344e-07,
       "unmatched_samples": [],
       "error": ""
     },
     {
-      "id": 39,
-      "partition_type": "distribution_physical_component",
+      "id": 54,
+      "partition_type": "distribution_metis_subpartition",
       "supply_area": "",
       "feeder_id": "",
-      "display_name": "D_COMPONENT_039",
+      "display_name": "METIS_C039_P01",
       "feeder_code": "",
       "feeders": [],
       "converged": true,
@@ -1155,25 +1900,30 @@
       "unmatched_rows": 0,
       "empty_rows": 0,
       "boundary_bus_names": [
-        "JIEY2"
+        "JIES1"
       ],
       "boundary_main_bus_count": 1,
       "boundary_main_bus_names": [
         "JIES1"
       ],
-      "boundary_transformer_count": 1,
+      "boundary_transformer_count": 2,
       "inter_partition_cut_edge_count": 0,
-      "max_vm_delta_vs_full_pu": 1.4662715486224442e-12,
-      "max_va_delta_vs_full_deg": 2.5863755581667647e-12,
+      "graph_algorithm": "METIS_KWAY",
+      "metis_component_id": 39,
+      "metis_component_edge_cuts": 0,
+      "metis_connectivity_repairs": 0,
+      "metis_tiny_group_merges": 0,
+      "max_vm_delta_vs_full_pu": 1.4660495040175192e-12,
+      "max_va_delta_vs_full_deg": 4.8518899120608694e-08,
       "unmatched_samples": [],
       "error": ""
     },
     {
-      "id": 40,
-      "partition_type": "distribution_physical_component",
+      "id": 55,
+      "partition_type": "distribution_metis_subpartition",
       "supply_area": "",
       "feeder_id": "",
-      "display_name": "D_COMPONENT_040",
+      "display_name": "METIS_C040_P01",
       "feeder_code": "",
       "feeders": [],
       "converged": true,
@@ -1183,25 +1933,30 @@
       "unmatched_rows": 0,
       "empty_rows": 0,
       "boundary_bus_names": [
-        "HWFY2"
+        "HWFS1"
       ],
       "boundary_main_bus_count": 1,
       "boundary_main_bus_names": [
         "HWFS1"
       ],
-      "boundary_transformer_count": 1,
+      "boundary_transformer_count": 2,
       "inter_partition_cut_edge_count": 0,
+      "graph_algorithm": "METIS_KWAY",
+      "metis_component_id": 40,
+      "metis_component_edge_cuts": 0,
+      "metis_connectivity_repairs": 0,
+      "metis_tiny_group_merges": 0,
       "max_vm_delta_vs_full_pu": 4.440892098500626e-16,
-      "max_va_delta_vs_full_deg": 0.0,
+      "max_va_delta_vs_full_deg": 2.3901104015067176e-05,
       "unmatched_samples": [],
       "error": ""
     },
     {
-      "id": 41,
-      "partition_type": "distribution_physical_component",
+      "id": 56,
+      "partition_type": "distribution_metis_subpartition",
       "supply_area": "",
       "feeder_id": "",
-      "display_name": "D_COMPONENT_041",
+      "display_name": "METIS_C041_P01",
       "feeder_code": "",
       "feeders": [],
       "converged": true,
@@ -1211,7 +1966,7 @@
       "unmatched_rows": 0,
       "empty_rows": 0,
       "boundary_bus_names": [
-        "WMNY2"
+        "WMNS2"
       ],
       "boundary_main_bus_count": 1,
       "boundary_main_bus_names": [
@@ -1219,17 +1974,22 @@
       ],
       "boundary_transformer_count": 1,
       "inter_partition_cut_edge_count": 0,
-      "max_vm_delta_vs_full_pu": 2.5646151868841116e-14,
-      "max_va_delta_vs_full_deg": 0.0,
+      "graph_algorithm": "METIS_KWAY",
+      "metis_component_id": 41,
+      "metis_component_edge_cuts": 0,
+      "metis_connectivity_repairs": 0,
+      "metis_tiny_group_merges": 0,
+      "max_vm_delta_vs_full_pu": 2.5091040356528538e-14,
+      "max_va_delta_vs_full_deg": 6.679130137854372e-08,
       "unmatched_samples": [],
       "error": ""
     },
     {
-      "id": 42,
-      "partition_type": "distribution_physical_component",
+      "id": 57,
+      "partition_type": "distribution_metis_subpartition",
       "supply_area": "",
       "feeder_id": "",
-      "display_name": "D_COMPONENT_042",
+      "display_name": "METIS_C042_P01",
       "feeder_code": "",
       "feeders": [],
       "converged": true,
@@ -1239,7 +1999,7 @@
       "unmatched_rows": 0,
       "empty_rows": 0,
       "boundary_bus_names": [
-        "KCQY2"
+        "KCQS2"
       ],
       "boundary_main_bus_count": 1,
       "boundary_main_bus_names": [
@@ -1247,17 +2007,22 @@
       ],
       "boundary_transformer_count": 1,
       "inter_partition_cut_edge_count": 0,
-      "max_vm_delta_vs_full_pu": 8.284484209752918e-13,
-      "max_va_delta_vs_full_deg": 2.842170943040401e-14,
+      "graph_algorithm": "METIS_KWAY",
+      "metis_component_id": 42,
+      "metis_component_edge_cuts": 0,
+      "metis_connectivity_repairs": 0,
+      "metis_tiny_group_merges": 0,
+      "max_vm_delta_vs_full_pu": 8.281153540679043e-13,
+      "max_va_delta_vs_full_deg": 5.913427116865932e-07,
       "unmatched_samples": [],
       "error": ""
     },
     {
-      "id": 43,
-      "partition_type": "distribution_physical_component",
+      "id": 58,
+      "partition_type": "distribution_metis_subpartition",
       "supply_area": "",
       "feeder_id": "",
-      "display_name": "D_COMPONENT_043",
+      "display_name": "METIS_C043_P01",
       "feeder_code": "",
       "feeders": [],
       "converged": true,
@@ -1267,7 +2032,7 @@
       "unmatched_rows": 0,
       "empty_rows": 0,
       "boundary_bus_names": [
-        "WMNY1"
+        "WMNS1"
       ],
       "boundary_main_bus_count": 1,
       "boundary_main_bus_names": [
@@ -1275,17 +2040,22 @@
       ],
       "boundary_transformer_count": 1,
       "inter_partition_cut_edge_count": 0,
-      "max_vm_delta_vs_full_pu": 0.0,
-      "max_va_delta_vs_full_deg": 0.0,
+      "graph_algorithm": "METIS_KWAY",
+      "metis_component_id": 43,
+      "metis_component_edge_cuts": 0,
+      "metis_connectivity_repairs": 0,
+      "metis_tiny_group_merges": 0,
+      "max_vm_delta_vs_full_pu": 1.1102230246251565e-16,
+      "max_va_delta_vs_full_deg": 3.000172910105903e-08,
       "unmatched_samples": [],
       "error": ""
     },
     {
-      "id": 44,
-      "partition_type": "distribution_physical_component",
+      "id": 59,
+      "partition_type": "distribution_metis_subpartition",
       "supply_area": "",
       "feeder_id": "",
-      "display_name": "D_COMPONENT_044",
+      "display_name": "METIS_C044_P01",
       "feeder_code": "",
       "feeders": [],
       "converged": true,
@@ -1295,25 +2065,30 @@
       "unmatched_rows": 0,
       "empty_rows": 0,
       "boundary_bus_names": [
-        "HWFY1"
+        "HWFS1"
       ],
       "boundary_main_bus_count": 1,
       "boundary_main_bus_names": [
         "HWFS1"
       ],
-      "boundary_transformer_count": 1,
+      "boundary_transformer_count": 2,
       "inter_partition_cut_edge_count": 0,
-      "max_vm_delta_vs_full_pu": 1.5543122344752192e-15,
-      "max_va_delta_vs_full_deg": 0.0,
+      "graph_algorithm": "METIS_KWAY",
+      "metis_component_id": 44,
+      "metis_component_edge_cuts": 0,
+      "metis_connectivity_repairs": 0,
+      "metis_tiny_group_merges": 0,
+      "max_vm_delta_vs_full_pu": 1.7763568394002505e-15,
+      "max_va_delta_vs_full_deg": 1.3701134463417475e-05,
       "unmatched_samples": [],
       "error": ""
     },
     {
-      "id": 45,
-      "partition_type": "distribution_physical_component",
+      "id": 60,
+      "partition_type": "distribution_metis_subpartition",
       "supply_area": "",
       "feeder_id": "",
-      "display_name": "D_COMPONENT_045",
+      "display_name": "METIS_C045_P01",
       "feeder_code": "",
       "feeders": [],
       "converged": true,
@@ -1323,7 +2098,7 @@
       "unmatched_rows": 0,
       "empty_rows": 0,
       "boundary_bus_names": [
-        "KCQY1"
+        "KCQS1"
       ],
       "boundary_main_bus_count": 1,
       "boundary_main_bus_names": [
@@ -1331,124 +2106,153 @@
       ],
       "boundary_transformer_count": 1,
       "inter_partition_cut_edge_count": 0,
+      "graph_algorithm": "METIS_KWAY",
+      "metis_component_id": 45,
+      "metis_component_edge_cuts": 0,
+      "metis_connectivity_repairs": 0,
+      "metis_tiny_group_merges": 0,
       "max_vm_delta_vs_full_pu": 2.4424906541753444e-15,
-      "max_va_delta_vs_full_deg": 0.0,
+      "max_va_delta_vs_full_deg": 4.803865749636316e-08,
       "unmatched_samples": [],
       "error": ""
     },
     {
-      "id": 46,
-      "partition_type": "distribution_physical_component",
+      "id": 61,
+      "partition_type": "distribution_metis_subpartition",
       "supply_area": "",
       "feeder_id": "",
-      "display_name": "D_COMPONENT_046",
+      "display_name": "METIS_C046_P01",
       "feeder_code": "",
       "feeders": [],
       "converged": true,
       "internal_bus_count": 2,
-      "boundary_bus_count": 1,
+      "boundary_bus_count": 2,
       "matched_rows": 0,
       "unmatched_rows": 0,
       "empty_rows": 0,
       "boundary_bus_names": [
-        "LQTB1"
+        "LQT21",
+        "LQT11"
       ],
       "boundary_main_bus_count": 2,
       "boundary_main_bus_names": [
         "LQT21",
         "LQT11"
       ],
-      "boundary_transformer_count": 2,
+      "boundary_transformer_count": 4,
       "inter_partition_cut_edge_count": 0,
-      "max_vm_delta_vs_full_pu": 2.220446049250313e-16,
-      "max_va_delta_vs_full_deg": 1.3453984593070345e-06,
+      "graph_algorithm": "METIS_KWAY",
+      "metis_component_id": 46,
+      "metis_component_edge_cuts": 0,
+      "metis_connectivity_repairs": 0,
+      "metis_tiny_group_merges": 0,
+      "max_vm_delta_vs_full_pu": 5.049208851026776e-08,
+      "max_va_delta_vs_full_deg": 1.6698533613634936e-06,
       "unmatched_samples": [],
       "error": ""
     },
     {
-      "id": 47,
-      "partition_type": "distribution_physical_component",
+      "id": 62,
+      "partition_type": "distribution_metis_subpartition",
       "supply_area": "",
       "feeder_id": "",
-      "display_name": "D_COMPONENT_047",
+      "display_name": "METIS_C047_P01",
       "feeder_code": "",
       "feeders": [],
       "converged": true,
       "internal_bus_count": 2,
-      "boundary_bus_count": 1,
+      "boundary_bus_count": 2,
       "matched_rows": 0,
       "unmatched_rows": 0,
       "empty_rows": 0,
       "boundary_bus_names": [
-        "LQTB2"
+        "LQT21",
+        "LQT11"
       ],
       "boundary_main_bus_count": 2,
       "boundary_main_bus_names": [
         "LQT21",
         "LQT11"
       ],
-      "boundary_transformer_count": 2,
+      "boundary_transformer_count": 4,
       "inter_partition_cut_edge_count": 0,
-      "max_vm_delta_vs_full_pu": 1.1102230246251565e-16,
-      "max_va_delta_vs_full_deg": 1.2952033614510583e-06,
+      "graph_algorithm": "METIS_KWAY",
+      "metis_component_id": 47,
+      "metis_component_edge_cuts": 0,
+      "metis_connectivity_repairs": 0,
+      "metis_tiny_group_merges": 0,
+      "max_vm_delta_vs_full_pu": 4.975324707778839e-08,
+      "max_va_delta_vs_full_deg": 1.351759635781491e-06,
       "unmatched_samples": [],
       "error": ""
     },
     {
-      "id": 48,
-      "partition_type": "distribution_physical_component",
+      "id": 63,
+      "partition_type": "distribution_metis_subpartition",
       "supply_area": "",
       "feeder_id": "",
-      "display_name": "D_COMPONENT_048",
+      "display_name": "METIS_C048_P01",
       "feeder_code": "",
       "feeders": [],
       "converged": true,
       "internal_bus_count": 2,
-      "boundary_bus_count": 1,
+      "boundary_bus_count": 2,
       "matched_rows": 0,
       "unmatched_rows": 0,
       "empty_rows": 0,
       "boundary_bus_names": [
-        "YOVB2"
+        "YOV21",
+        "YOV11"
       ],
       "boundary_main_bus_count": 2,
       "boundary_main_bus_names": [
         "YOV21",
         "YOV11"
       ],
-      "boundary_transformer_count": 2,
+      "boundary_transformer_count": 4,
       "inter_partition_cut_edge_count": 0,
-      "max_vm_delta_vs_full_pu": 0.0,
-      "max_va_delta_vs_full_deg": 6.680041622075805e-07,
+      "graph_algorithm": "METIS_KWAY",
+      "metis_component_id": 48,
+      "metis_component_edge_cuts": 0,
+      "metis_connectivity_repairs": 0,
+      "metis_tiny_group_merges": 0,
+      "max_vm_delta_vs_full_pu": 1.276267669325648e-08,
+      "max_va_delta_vs_full_deg": 9.818629962410341e-07,
       "unmatched_samples": [],
       "error": ""
     },
     {
-      "id": 49,
-      "partition_type": "distribution_physical_component",
+      "id": 64,
+      "partition_type": "distribution_metis_subpartition",
       "supply_area": "",
       "feeder_id": "",
-      "display_name": "D_COMPONENT_049",
+      "display_name": "METIS_C049_P01",
       "feeder_code": "",
       "feeders": [],
       "converged": true,
       "internal_bus_count": 2,
-      "boundary_bus_count": 1,
+      "boundary_bus_count": 2,
       "matched_rows": 0,
       "unmatched_rows": 0,
       "empty_rows": 0,
       "boundary_bus_names": [
-        "YOVB3"
+        "YOV21",
+        "YOV11"
       ],
       "boundary_main_bus_count": 2,
       "boundary_main_bus_names": [
         "YOV21",
         "YOV11"
       ],
-      "boundary_transformer_count": 2,
+      "boundary_transformer_count": 4,
       "inter_partition_cut_edge_count": 0,
-      "max_vm_delta_vs_full_pu": 1.1102230246251565e-16,
-      "max_va_delta_vs_full_deg": 6.390243072473822e-07,
+      "graph_algorithm": "METIS_KWAY",
+      "metis_component_id": 49,
+      "metis_component_edge_cuts": 0,
+      "metis_connectivity_repairs": 0,
+      "metis_tiny_group_merges": 0,
+      "max_vm_delta_vs_full_pu": 1.1195367966010394e-08,
+      "max_va_delta_vs_full_deg": 9.490141792412032e-07,
       "unmatched_samples": [],
       "error": ""
     }

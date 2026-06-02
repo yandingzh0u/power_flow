@@ -452,10 +452,32 @@ def _run_local_pf_ladder(netp: pp.pandapowerNet):
             last_err = exc
     raise last_err
 
+
+def _drop_passive_boundary_injections(netp: pp.pandapowerNet, active_buses: set[int]) -> None:
+    active = set(int(b) for b in active_buses)
+    passive = set(int(b) for b in netp.bus.index.astype(int).tolist()) - active
+    if not passive:
+        return
+    for tab in ["load", "sgen", "gen", "shunt", "ward", "xward", "storage"]:
+        if tab not in netp or len(getattr(netp, tab)) == 0:
+            continue
+        df = getattr(netp, tab)
+        if "bus" not in df.columns:
+            continue
+        drop_idx = df.index[df.bus.astype(int).isin(passive)].tolist()
+        if drop_idx:
+            df.drop(index=drop_idx, inplace=True)
+    if "ext_grid" in netp and len(netp.ext_grid):
+        drop_idx = netp.ext_grid.index[netp.ext_grid.bus.astype(int).isin(passive)].tolist()
+        if drop_idx:
+            netp.ext_grid.drop(index=drop_idx, inplace=True)
+
+
 def _local_pf_solver_pp(net_full: pp.pandapowerNet,
                         part: PartitionSpec,
                         boundary_fixed: Dict[int, Tuple[float, float]],
-                        use_soft_boundary: Optional[bool] = None) -> Dict[int, Tuple[float, float]]:
+                        use_soft_boundary: Optional[bool] = None,
+                        active_buses: Optional[set[int]] = None) -> Dict[int, Tuple[float, float]]:
     boundary_fixed = _sanitize_boundary_fixed(boundary_fixed)
     prefer_soft = USE_SOFT_BOUNDARY if use_soft_boundary is None else bool(use_soft_boundary)
 
@@ -469,6 +491,8 @@ def _local_pf_solver_pp(net_full: pp.pandapowerNet,
     last_err = None
     for use_soft, rho_soft in attempt_modes:
         netp = _make_partition_net(net_full, part.buses)
+        if active_buses is not None:
+            _drop_passive_boundary_injections(netp, set(int(b) for b in active_buses))
         _ensure_reference_per_island(netp, boundary_fixed, use_soft_boundary=use_soft, rho_soft=rho_soft)
         try:
             _run_local_pf_ladder(netp)
@@ -506,10 +530,12 @@ def _solve_t_part_worker(t_json: str,
 def _solve_demo_d_part_worker(net_full: pp.pandapowerNet,
                               part_id: int,
                               part_buses: List[int],
-                              boundary_fixed: Dict[int, Tuple[float, float]]):
+                              boundary_fixed: Dict[int, Tuple[float, float]],
+                              internal_buses: Optional[List[int]] = None):
     part = PartitionSpec(id=int(part_id), buses=[int(b) for b in part_buses])
     bf = {int(b): (float(vm), float(va)) for b, (vm, va) in boundary_fixed.items()}
-    res = _local_pf_solver_pp(net_full, part, bf, use_soft_boundary=False)
+    internal = set(int(b) for b in (internal_buses or part_buses))
+    res = _local_pf_solver_pp(net_full, part, bf, use_soft_boundary=False, active_buses=internal)
     return int(part_id), res
 
 
@@ -2060,10 +2086,10 @@ def run_gmss_multi(max_iter=50, tol_dS_MW=1e-3, tol_dV_pu=1e-4,
                    target_buses_per_part: int = 2500,
                    t_local_parallel: bool = True,
                    d_solver: str = "partitioned",
-                   d_partition_mode: str = "physical_component",
+                   d_partition_mode: str = "metis",
                    d_n_parts: int = 0,
                    d_local_parallel: bool = True,
-                   d_target_buses_per_part: int = 400):
+                   d_target_buses_per_part: int = 150):
     idx_path = DATA_DIR / "INDEX_synth_multi.json"
     if not idx_path.exists():
         raise FileNotFoundError(f"未找到合成索引 {idx_path}，请先运行合成。")
@@ -2949,6 +2975,309 @@ def _build_demo_physical_component_partitions(
     return partitions
 
 
+def _demo_bus_vertex_weight(net: pp.pandapowerNet, bus_idx: int) -> int:
+    p_mw = 0.0
+    q_mvar = 0.0
+    if "load" in net and len(net.load):
+        rows = net.load[net.load.bus.astype(int) == int(bus_idx)]
+        if len(rows):
+            p_mw += float(rows.p_mw.sum())
+            q_mvar += float(rows.q_mvar.sum())
+    if "sgen" in net and len(net.sgen):
+        rows = net.sgen[net.sgen.bus.astype(int) == int(bus_idx)]
+        if len(rows):
+            p_mw += abs(float(rows.p_mw.sum()))
+            q_mvar += abs(float(rows.q_mvar.sum()))
+    s_mva = math.sqrt(p_mw * p_mw + q_mvar * q_mvar)
+    return int(max(1, min(10000, round(1.0 + 10.0 * s_mva))))
+
+
+def _demo_edge_weight_lookup(net: pp.pandapowerNet) -> Dict[Tuple[int, int], int]:
+    weights: Dict[Tuple[int, int], int] = {}
+
+    def put(u: int, v: int, weight: float) -> None:
+        key = tuple(sorted((int(u), int(v))))
+        w = int(max(1, min(10000, round(float(weight)))))
+        weights[key] = max(weights.get(key, 1), w)
+
+    if "line" in net and len(net.line):
+        for idx, row in net.line.iterrows():
+            if "in_service" in net.line.columns and not bool(row.get("in_service", True)):
+                continue
+            length = max(float(row.get("length_km", 1.0) or 1.0), 1e-6)
+            r = float(row.get("r_ohm_per_km", 0.0) or 0.0) * length
+            x = float(row.get("x_ohm_per_km", 0.0) or 0.0) * length
+            z_ohm = math.sqrt(r * r + x * x)
+            coupling = 30.0 / max(z_ohm, 0.03)
+            flow = 0.0
+            if "res_line" in net and idx in net.res_line.index:
+                p1 = float(net.res_line.at[idx, "p_from_mw"]) if "p_from_mw" in net.res_line.columns else 0.0
+                q1 = float(net.res_line.at[idx, "q_from_mvar"]) if "q_from_mvar" in net.res_line.columns else 0.0
+                flow = 2.0 * math.sqrt(p1 * p1 + q1 * q1)
+            put(int(row.from_bus), int(row.to_bus), 10.0 + coupling + flow)
+
+    if "trafo" in net and len(net.trafo):
+        for idx, row in net.trafo.iterrows():
+            if "in_service" in net.trafo.columns and not bool(row.get("in_service", True)):
+                continue
+            sn_mva = float(row.get("sn_mva", 1.0) or 1.0)
+            vk = float(row.get("vk_percent", 10.0) or 10.0)
+            coupling = 20.0 * sn_mva / max(vk, 0.1)
+            loading = 0.0
+            if "res_trafo" in net and idx in net.res_trafo.index and "loading_percent" in net.res_trafo.columns:
+                loading = 0.1 * abs(float(net.res_trafo.at[idx, "loading_percent"]))
+            put(int(row.hv_bus), int(row.lv_bus), 25.0 + coupling + loading)
+
+    return weights
+
+
+def _demo_metis_part_count(
+    size: int,
+    target_buses_per_part: int,
+    max_parts_per_component: int = 8,
+) -> int:
+    target = max(50, int(target_buses_per_part or 150))
+    if int(size) <= target:
+        return 1
+    return int(max(1, min(max_parts_per_component, math.ceil(int(size) / target), int(size))))
+
+
+def _demo_repair_partition_connectivity(
+    graph: nx.Graph,
+    groups: List[set[int]],
+) -> Tuple[List[set[int]], int]:
+    repaired: List[set[int]] = []
+    split_count = 0
+    for group in groups:
+        if not group:
+            continue
+        comps = [
+            set(int(bus) for bus in comp)
+            for comp in nx.connected_components(graph.subgraph(group))
+            if comp
+        ]
+        if len(comps) > 1:
+            split_count += len(comps) - 1
+        repaired.extend(comps)
+    repaired.sort(key=lambda comp: (-len(comp), min(comp)))
+    return repaired, split_count
+
+
+def _demo_merge_tiny_metis_groups(
+    graph: nx.Graph,
+    groups: List[set[int]],
+    min_size: int = 5,
+) -> Tuple[List[set[int]], int]:
+    merged = [set(int(bus) for bus in group) for group in groups if group]
+    merge_count = 0
+    min_size_eff = max(2, int(min_size))
+    while len(merged) > 1:
+        tiny_idx = None
+        tiny_size = math.inf
+        for idx, group in enumerate(merged):
+            if len(group) < min_size_eff and len(group) < tiny_size:
+                tiny_idx = idx
+                tiny_size = len(group)
+        if tiny_idx is None:
+            break
+
+        tiny = merged[tiny_idx]
+        best_idx = None
+        best_score = 0
+        for idx, group in enumerate(merged):
+            if idx == tiny_idx:
+                continue
+            score = 0
+            for bus in tiny:
+                if bus not in graph:
+                    continue
+                for nbr in graph.neighbors(bus):
+                    if int(nbr) in group:
+                        score += 1
+            if score > best_score:
+                best_score = score
+                best_idx = idx
+        if best_idx is None:
+            break
+
+        merged[best_idx].update(tiny)
+        del merged[tiny_idx]
+        merge_count += 1
+
+    merged.sort(key=lambda comp: (-len(comp), min(comp)))
+    return merged, merge_count
+
+
+def _demo_run_metis_on_component(
+    net: pp.pandapowerNet,
+    graph: nx.Graph,
+    component_buses: set[int],
+    n_parts: int,
+) -> Tuple[List[set[int]], Dict[str, Any]]:
+    nodes = sorted(int(bus) for bus in component_buses)
+    if int(n_parts) <= 1 or len(nodes) <= 1:
+        return [set(nodes)], {
+            "metis_used": False,
+            "metis_edge_cuts": 0,
+            "metis_requested_parts": 1,
+            "metis_raw_parts": 1,
+            "metis_connectivity_repairs": 0,
+            "metis_tiny_group_merges": 0,
+        }
+
+    try:
+        import pymetis
+    except ImportError as exc:
+        raise RuntimeError(
+            "d_partition_mode='metis' 需要安装 pymetis。请在当前环境执行: "
+            "python -m pip install pymetis"
+        ) from exc
+
+    pos = {bus: i for i, bus in enumerate(nodes)}
+    edge_weights = _demo_edge_weight_lookup(net)
+    xadj: List[int] = [0]
+    adjncy: List[int] = []
+    eweights: List[int] = []
+    for bus in nodes:
+        for nbr in sorted(int(x) for x in graph.neighbors(bus) if int(x) in pos):
+            adjncy.append(pos[nbr])
+            eweights.append(edge_weights.get(tuple(sorted((int(bus), int(nbr)))), 10))
+        xadj.append(len(adjncy))
+
+    if not adjncy:
+        return [set(nodes)], {
+            "metis_used": False,
+            "metis_edge_cuts": 0,
+            "metis_requested_parts": 1,
+            "metis_raw_parts": 1,
+            "metis_connectivity_repairs": 0,
+            "metis_tiny_group_merges": 0,
+        }
+
+    vweights = [_demo_bus_vertex_weight(net, bus) for bus in nodes]
+    options = pymetis.Options(contig=1, seed=42, ncuts=8, niter=20, minconn=1)
+    adjacency = pymetis.CSRAdjacency(xadj, adjncy)
+    result = pymetis.part_graph(
+        int(n_parts),
+        adjacency=adjacency,
+        vweights=vweights,
+        eweights=eweights,
+        options=options,
+    )
+    raw_groups: List[set[int]] = [set() for _ in range(int(n_parts))]
+    for bus, label in zip(nodes, list(result.vertex_part)):
+        raw_groups[int(label)].add(int(bus))
+    groups, repair_count = _demo_repair_partition_connectivity(graph, raw_groups)
+    groups, tiny_merge_count = _demo_merge_tiny_metis_groups(graph, groups)
+    return groups, {
+        "metis_used": True,
+        "metis_edge_cuts": int(result.edge_cuts),
+        "metis_requested_parts": int(n_parts),
+        "metis_raw_parts": int(len([g for g in raw_groups if g])),
+        "metis_connectivity_repairs": int(repair_count),
+        "metis_tiny_group_merges": int(tiny_merge_count),
+        "metis_vertex_weight_sum": int(sum(vweights)),
+    }
+
+
+def _build_demo_metis_partitions(
+    net: pp.pandapowerNet,
+    feeder_parts: List[Dict[str, Any]],
+    n_parts: int = 0,
+    target_buses_per_part: int = 150,
+) -> List[Dict[str, Any]]:
+    full_graph = _build_pp_graph(net)
+    physical_parts = _build_demo_physical_component_partitions(net, feeder_parts)
+    all_distribution_buses = set(
+        int(bus)
+        for part in physical_parts
+        for bus in part.get("internal_buses", [])
+    )
+    td_pairs = _demo_td_transformer_pairs(
+        net,
+        *_demo_main_distribution_sets(net),
+    )
+    component_sizes = [len(part.get("internal_buses", [])) for part in physical_parts]
+    requested_total = int(n_parts or 0)
+    if requested_total > len(physical_parts):
+        target = max(50, math.ceil(sum(component_sizes) / requested_total))
+    else:
+        target = max(50, int(target_buses_per_part or 150))
+
+    partitions: List[Dict[str, Any]] = []
+    metis_split_component_count = 0
+    metis_total_edge_cuts = 0
+    connectivity_repairs = 0
+    tiny_group_merges = 0
+
+    for component_id, base in enumerate(physical_parts, start=1):
+        component_buses = set(int(x) for x in base.get("internal_buses", []))
+        if not component_buses:
+            continue
+        sub_count = _demo_metis_part_count(len(component_buses), target)
+        subgraph = full_graph.subgraph(component_buses).copy()
+        groups, metrics = _demo_run_metis_on_component(net, subgraph, component_buses, sub_count)
+        if bool(metrics.get("metis_used")):
+            metis_split_component_count += 1
+        metis_total_edge_cuts += int(metrics.get("metis_edge_cuts", 0))
+        connectivity_repairs += int(metrics.get("metis_connectivity_repairs", 0))
+        tiny_group_merges += int(metrics.get("metis_tiny_group_merges", 0))
+
+        for local_id, internal_buses in enumerate(groups, start=1):
+            boundary_buses, boundary_fixed = _compute_demo_partition_boundary(net, internal_buses)
+            boundary_trafo_indices: List[int] = []
+            boundary_main_buses: set[int] = set()
+            for trafo_idx, pair in td_pairs.items():
+                d_bus = int(pair["distribution_bus"])
+                main_bus = int(pair["main_bus"])
+                if d_bus in internal_buses or main_bus in boundary_buses:
+                    boundary_trafo_indices.append(int(trafo_idx))
+                    boundary_main_buses.add(main_bus)
+            part_buses = set(internal_buses) | set(boundary_buses)
+            cut_metrics = _demo_graph_cut_metrics(full_graph, internal_buses, all_distribution_buses)
+            pid = len(partitions) + 1
+            partitions.append(
+                {
+                    "id": int(pid),
+                    "partition_type": "distribution_metis_subpartition",
+                    "supply_area": base.get("supply_area", ""),
+                    "feeder_id": base.get("feeder_id", ""),
+                    "display_name": f"METIS_C{component_id:03d}_P{local_id:02d}",
+                    "feeder_code": base.get("feeder_code", ""),
+                    "feeders": list(base.get("feeders", [])),
+                    "internal_buses": sorted(int(x) for x in internal_buses),
+                    "boundary_buses": sorted(int(x) for x in boundary_buses),
+                    "boundary_main_buses": sorted(int(x) for x in boundary_main_buses),
+                    "boundary_trafo_indices": sorted(int(x) for x in boundary_trafo_indices),
+                    "part_buses": sorted(int(x) for x in part_buses),
+                    "boundary_fixed": boundary_fixed,
+                    "matched_rows": int(base.get("matched_rows", 0)),
+                    "unmatched_rows": int(base.get("unmatched_rows", 0)),
+                    "empty_rows": int(base.get("empty_rows", 0)),
+                    "unmatched_samples": list(base.get("unmatched_samples", [])),
+                    "graph_algorithm": "METIS_KWAY",
+                    "metis_component_id": int(component_id),
+                    "metis_component_bus_count": int(len(component_buses)),
+                    "metis_component_requested_parts": int(metrics.get("metis_requested_parts", sub_count)),
+                    "metis_component_raw_parts": int(metrics.get("metis_raw_parts", len(groups))),
+                    "metis_component_edge_cuts": int(metrics.get("metis_edge_cuts", 0)),
+                    "metis_connectivity_repairs": int(metrics.get("metis_connectivity_repairs", 0)),
+                    "metis_tiny_group_merges": int(metrics.get("metis_tiny_group_merges", 0)),
+                    "boundary_transformer_count": int(len(boundary_trafo_indices)),
+                    "boundary_main_bus_count": int(len(boundary_main_buses)),
+                    "physical_component_count": int(len(physical_parts)),
+                    **cut_metrics,
+                }
+            )
+
+    for part in partitions:
+        part["metis_split_component_count"] = int(metis_split_component_count)
+        part["metis_total_edge_cuts"] = int(metis_total_edge_cuts)
+        part["metis_total_connectivity_repairs"] = int(connectivity_repairs)
+        part["metis_total_tiny_group_merges"] = int(tiny_group_merges)
+    return partitions
+
+
 def _demo_boundary_distance_weight(full_graph: nx.Graph, left_bounds: List[int], right_bounds: List[int]) -> float:
     best = math.inf
     for left in left_bounds:
@@ -3140,7 +3469,7 @@ def _build_demo_distribution_partitions(
     feeder_json: Path,
     partition_mode: str,
     n_parts: int = 0,
-    target_buses_per_part: int = 400,
+    target_buses_per_part: int = 150,
 ) -> List[Dict[str, Any]]:
     feeder_parts = _build_demo_feeder_partitions(net, feeder_json)
     mode = str(partition_mode or "supply_area").strip().lower()
@@ -3150,6 +3479,13 @@ def _build_demo_distribution_partitions(
         return _merge_demo_partitions_by_supply_area(net, feeder_parts)
     if mode in {"physical_component", "component", "td_component", "physical"}:
         return _build_demo_physical_component_partitions(net, feeder_parts)
+    if mode in {"metis", "pymetis", "metis_kway", "intelligent"}:
+        return _build_demo_metis_partitions(
+            net,
+            feeder_parts,
+            n_parts=int(n_parts or 0),
+            target_buses_per_part=int(target_buses_per_part or 150),
+        )
     if mode in {"graph", "topology", "graph_partition"}:
         return _build_demo_graph_partitions(
             net,
@@ -3202,6 +3538,11 @@ def _summarize_demo_distribution_partition_result(
         "boundary_main_bus_names": [_demo_bus_label(net, int(b)) for b in part_meta.get("boundary_main_buses", [])[:10]],
         "boundary_transformer_count": int(part_meta.get("boundary_transformer_count", 0)),
         "inter_partition_cut_edge_count": int(part_meta.get("inter_partition_cut_edge_count", 0)),
+        "graph_algorithm": part_meta.get("graph_algorithm", ""),
+        "metis_component_id": part_meta.get("metis_component_id"),
+        "metis_component_edge_cuts": part_meta.get("metis_component_edge_cuts"),
+        "metis_connectivity_repairs": part_meta.get("metis_connectivity_repairs"),
+        "metis_tiny_group_merges": part_meta.get("metis_tiny_group_merges"),
         "max_vm_delta_vs_full_pu": max_vm_delta,
         "max_va_delta_vs_full_deg": max_va_delta,
         "unmatched_samples": list(part_meta.get("unmatched_samples", [])),
@@ -3212,12 +3553,12 @@ def _summarize_demo_distribution_partition_result(
 def _run_demo_distribution_partitions(
     net: pp.pandapowerNet,
     feeder_json: Path,
-    partition_mode: str = "physical_component",
+    partition_mode: str = "metis",
     n_parts: int = 0,
-    target_buses_per_part: int = 400,
+    target_buses_per_part: int = 150,
     local_parallel: bool = True,
 ) -> Dict[str, Any]:
-    mode = str(partition_mode or "physical_component").strip().lower()
+    mode = str(partition_mode or "metis").strip().lower()
     partitions_meta = _build_demo_distribution_partitions(
         net,
         feeder_json,
@@ -3250,6 +3591,7 @@ def _run_demo_distribution_partitions(
                     int(part["id"]),
                     [int(x) for x in part["part_buses"]],
                     {int(b): tuple(v) for b, v in part["boundary_fixed"].items()},
+                    [int(x) for x in part["internal_buses"]],
                 ): int(part["id"])
                 for part in partitions_meta
             }
@@ -3274,6 +3616,7 @@ def _run_demo_distribution_partitions(
                     pid,
                     [int(x) for x in part["part_buses"]],
                     {int(b): tuple(v) for b, v in part["boundary_fixed"].items()},
+                    [int(x) for x in part["internal_buses"]],
                 )
                 raw_results[pid] = res
             except Exception as exc:
@@ -3309,9 +3652,16 @@ def _run_demo_distribution_partitions(
         for part in partitions_meta
         for bus in part.get("boundary_main_buses", [])
     )
-    total_boundary_transformers = int(
-        sum(int(part.get("boundary_transformer_count", 0)) for part in partitions_meta)
+    unique_boundary_transformers = set(
+        int(idx)
+        for part in partitions_meta
+        for idx in part.get("boundary_trafo_indices", [])
     )
+    metis_partitions = [part for part in partitions_meta if str(part.get("graph_algorithm", "")).startswith("METIS")]
+    metis_total_edge_cuts = int(max([int(part.get("metis_total_edge_cuts", 0)) for part in partitions_meta] or [0]))
+    metis_split_component_count = int(max([int(part.get("metis_split_component_count", 0)) for part in partitions_meta] or [0]))
+    metis_connectivity_repairs = int(max([int(part.get("metis_total_connectivity_repairs", 0)) for part in partitions_meta] or [0]))
+    metis_tiny_group_merges = int(max([int(part.get("metis_total_tiny_group_merges", 0)) for part in partitions_meta] or [0]))
     max_vm_delta = _safe_max(
         np.array(
             [
@@ -3344,8 +3694,14 @@ def _run_demo_distribution_partitions(
         "unique_internal_bus_count": int(len(unique_internal_buses)),
         "unique_boundary_bus_count": int(len(unique_boundary_buses)),
         "unique_boundary_main_bus_count": int(len(unique_boundary_main_buses)),
-        "total_boundary_transformer_count": total_boundary_transformers,
+        "total_boundary_transformer_count": int(len(unique_boundary_transformers)),
         "total_inter_partition_cut_edge_count": total_cut_edges,
+        "graph_algorithm": "METIS_KWAY" if metis_partitions else "",
+        "metis_partition_count": int(len(metis_partitions)),
+        "metis_split_component_count": metis_split_component_count,
+        "metis_total_edge_cuts": metis_total_edge_cuts,
+        "metis_connectivity_repairs": metis_connectivity_repairs,
+        "metis_tiny_group_merges": metis_tiny_group_merges,
         "min_partition_bus_count": min_part_size,
         "max_partition_bus_count": max_part_size,
         "balance_ratio_max_to_min": balance_ratio,
@@ -3388,20 +3744,21 @@ def run_demo_area_service(dataset_cfg: MultiConfig, solver_cfg: Dict[str, Any]) 
     )
 
     d_solver = str(solver_cfg.get("d_solver", "partitioned")).strip().lower()
-    d_partition_mode = str(solver_cfg.get("d_partition_mode", "physical_component")).strip().lower()
+    d_partition_mode = str(solver_cfg.get("d_partition_mode", "metis")).strip().lower()
     d_n_parts = int(solver_cfg.get("d_n_parts", 0))
     d_target_buses_per_part = int(solver_cfg.get("d_target_buses_per_part", 400))
     d_local_parallel = _coerce_bool(solver_cfg.get("d_local_parallel", True))
     distribution_partition = {"enabled": False, "status": "disabled", "mode": "none", "n_parts": 0}
     if d_solver in {"partitioned", "feeder", "feeder_partitioned", "distribution_partitioned"}:
         if d_partition_mode not in {
+            "metis", "pymetis", "metis_kway", "intelligent",
             "physical_component", "component", "td_component", "physical",
             "graph", "topology", "graph_partition",
             "supply_area", "area", "region", "station",
             "feeder",
         }:
             raise ValueError(
-                "示范区配网分区目前支持 d_partition_mode='physical_component'、'graph'、'supply_area' 或 'feeder'，"
+                "示范区配网分区目前支持 d_partition_mode='metis'、'physical_component'、'graph'、'supply_area' 或 'feeder'，"
                 f"当前为: {d_partition_mode!r}"
             )
         distribution_partition = _run_demo_distribution_partitions(
@@ -3453,6 +3810,12 @@ def run_demo_area_service(dataset_cfg: MultiConfig, solver_cfg: Dict[str, Any]) 
         "d_n_parts": int(distribution_partition.get("n_parts", 0)),
         "d_partition_converged": int(distribution_partition.get("converged_partitions", 0)),
         "d_partition_failed": int(distribution_partition.get("failed_partitions", 0)),
+        "d_graph_algorithm": distribution_partition.get("graph_algorithm", ""),
+        "d_metis_partition_count": int(distribution_partition.get("metis_partition_count", 0)),
+        "d_metis_split_component_count": int(distribution_partition.get("metis_split_component_count", 0)),
+        "d_metis_total_edge_cuts": int(distribution_partition.get("metis_total_edge_cuts", 0)),
+        "d_metis_connectivity_repairs": int(distribution_partition.get("metis_connectivity_repairs", 0)),
+        "d_metis_tiny_group_merges": int(distribution_partition.get("metis_tiny_group_merges", 0)),
     }
     last_state = {
         "converged": bool(net.converged),
@@ -3591,10 +3954,10 @@ def default_run_gmss_solver_config() -> Dict[str, Any]:
         "target_buses_per_part": 2500,
         "t_local_parallel": True,
         "d_solver": "partitioned",
-        "d_partition_mode": "physical_component",
+        "d_partition_mode": "metis",
         "d_n_parts": 0,
         "d_local_parallel": True,
-        "d_target_buses_per_part": 400,
+        "d_target_buses_per_part": 150,
     }
 
 def normalize_run_gmss_solver_config(payload: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
