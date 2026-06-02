@@ -13,6 +13,8 @@ from .core import (
 )
 
 DATASET_KEYS = (
+    "dataset_id",
+    "scenario_id",
     "t_case_file",
     "nD",
     "mg_per_D",
@@ -93,6 +95,11 @@ def simplify_response(response: Dict[str, Any], api_request: Optional[Dict[str, 
         "model_id": api_request.get("model_id", request.get("model_id", "")),
         "scenario_id": api_request.get("scenario_id", request.get("scenario_id", "")),
         "summary": {
+            "dataset_id": node_summary.get("dataset_id"),
+            "scenario_id": node_summary.get("scenario_id"),
+            "bus_count": node_summary.get("bus_count"),
+            "line_count": node_summary.get("line_count"),
+            "trafo_count": node_summary.get("trafo_count"),
             "nD": node_summary.get("nD"),
             "total_mg": node_summary.get("total_mg"),
             "total_nodes": node_summary.get("total_nodes"),

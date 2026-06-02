@@ -36,6 +36,8 @@ def preview_value(value):
 def main() -> None:
     parser = argparse.ArgumentParser(description="Call the local GMSS API.")
     parser.add_argument("--base-url", default="http://127.0.0.1:8000")
+    parser.add_argument("--dataset", default="demo_area", help="dataset id: demo_area or synthetic")
+    parser.add_argument("--scenario", default="13点", help="demo_area supports 13点 or 20点")
     parser.add_argument("--normalize-only", action="store_true", help="only normalize request; do not run calculation")
     parser.add_argument("--full", action="store_true", help="print full API response")
     parser.add_argument("--timeout", type=float, default=7200.0)
@@ -44,20 +46,30 @@ def main() -> None:
 
     payload = {
         "task_id": "demo_task_001",
-        "model_id": "case_ACTIVSg25k_plus_500D",
-        "scenario_id": "default_snapshot",
-        "t_case_file": "case_ACTIVSg25k.m",
-        "nD": 500,
-        "mg_per_D": 3,
-        "mg_bus_count": 46,
-        "target_total_nodes": 100000,
-        "n_parts": 4,
+        "dataset_id": args.dataset,
+        "scenario_id": args.scenario,
         "max_iter": args.max_iter,
-        "t_solver": "partitioned",
-        "t_partition_mode": "hard",
         "alpha": 0.6,
         "beta": 0.6,
     }
+    if args.dataset.strip().lower() in {"demo_area", "demo", "示范区"}:
+        payload.update({
+            "model_id": "demo_area_pandapower",
+            "t_solver": "pandapower_direct",
+            "t_partition_mode": "none",
+        })
+    else:
+        payload.update({
+            "model_id": "case_ACTIVSg25k_plus_500D",
+            "t_case_file": "case_ACTIVSg25k.m",
+            "nD": 500,
+            "mg_per_D": 3,
+            "mg_bus_count": 46,
+            "target_total_nodes": 100000,
+            "n_parts": 4,
+            "t_solver": "partitioned",
+            "t_partition_mode": "hard",
+        })
 
     endpoint = "/api/v1/gmss/normalize" if args.normalize_only else "/api/v1/gmss/run"
     result = post_json(args.base_url.rstrip("/") + endpoint, payload, timeout=args.timeout)
@@ -74,6 +86,8 @@ def main() -> None:
             "model_id": req.get("model_id"),
             "scenario_id": req.get("scenario_id"),
             "dataset_config": {
+                "dataset_id": dataset.get("dataset_id"),
+                "scenario_id": dataset.get("scenario_id"),
                 "t_case_file": dataset.get("t_case_file"),
                 "nD": dataset.get("nD"),
                 "mg_per_D": "3 each" if len(set(dataset.get("mg_per_D", []))) == 1 else dataset.get("mg_per_D", [])[:10],

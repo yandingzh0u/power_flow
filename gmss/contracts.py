@@ -9,17 +9,12 @@ from .service import make_api_request
 def example_compact_request() -> Dict[str, Any]:
     return {
         "task_id": "task_001",
-        "model_id": "case_ACTIVSg25k_plus_500D",
-        "scenario_id": "default_snapshot",
-        "t_case_file": "case_ACTIVSg25k.m",
-        "nD": 500,
-        "mg_per_D": 3,
-        "mg_bus_count": 46,
-        "target_total_nodes": 100000,
-        "n_parts": 4,
+        "model_id": "demo_area_pandapower",
+        "dataset_id": "demo_area",
+        "scenario_id": "13点",
         "max_iter": 10,
-        "t_solver": "partitioned",
-        "t_partition_mode": "hard",
+        "t_solver": "pandapower_direct",
+        "t_partition_mode": "none",
         "alpha": 0.6,
         "beta": 0.6,
     }

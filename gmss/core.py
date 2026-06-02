@@ -1159,6 +1159,8 @@ def synthesize_T_plus_multiD(t_net: pp.pandapowerNet, out_json: Path, map_yaml: 
 
 @dataclass
 class MultiConfig:
+    dataset_id: str = "synthetic"
+    scenario_id: str = "default_snapshot"
     nD: int = 3
     mg_per_D: List[int] = field(default_factory=lambda: [2, 1, 3])
     mv_level_kv: float = 4.16
@@ -2269,6 +2271,119 @@ def run_gmss_multi(max_iter=50, tol_dS_MW=1e-3, tol_dV_pu=1e-4,
         if mg_pool:
             mg_pool.shutdown(wait=True)
 
+
+def _normalize_demo_area_scenario(scenario_id: str) -> Tuple[str, str]:
+    raw = str(scenario_id or "").strip()
+    key = raw.lower().replace("：", ":").replace(" ", "")
+    mapping = {
+        "": ("13点", "13"),
+        "default": ("13点", "13"),
+        "default_snapshot": ("13点", "13"),
+        "13": ("13点", "13"),
+        "13点": ("13点", "13"),
+        "13:00": ("13点", "13"),
+        "13时": ("13点", "13"),
+        "20": ("20点", "20"),
+        "20点": ("20点", "20"),
+        "20:00": ("20点", "20"),
+        "20时": ("20点", "20"),
+    }
+    if key not in mapping:
+        raise ValueError("示范区数据集仅支持 scenario_id='13点' 或 '20点'。当前为: " + raw)
+    return mapping[key]
+
+
+def _safe_max(series: Any) -> Optional[float]:
+    try:
+        if series is None or len(series) == 0:
+            return None
+        value = float(series.max())
+        return None if math.isnan(value) else value
+    except Exception:
+        return None
+
+
+def run_demo_area_service(dataset_cfg: MultiConfig, solver_cfg: Dict[str, Any]) -> Tuple[Dict[str, Any], Dict[str, Any], Dict[str, str]]:
+    scenario_label, scenario_key = _normalize_demo_area_scenario(dataset_cfg.scenario_id)
+    converted_dir = DATA_DIR / "demo_area" / "converted"
+    raw_dir = DATA_DIR / "demo_area" / "raw"
+    pp_json = converted_dir / f"demo_area_{scenario_key}_pandapower.json"
+    summary_json = converted_dir / f"demo_area_{scenario_key}_summary.json"
+    raw_dat = raw_dir / f"{scenario_key}点sim2合并anony.dat"
+    if not pp_json.exists():
+        raise FileNotFoundError(f"未找到示范区 pandapower JSON: {pp_json}。请先运行 tools/convert_bpa_to_pandapower.py。")
+
+    net = pp.from_json(str(pp_json))
+    pp.runpp(
+        net,
+        algorithm="nr",
+        init="auto",
+        max_iteration=int(solver_cfg.get("max_iter", 50)),
+        tolerance_mva=float(solver_cfg.get("tol_dS_MW", 1e-6)),
+        enforce_q_lims=False,
+        calculate_voltage_angles=True,
+        trafo_model="t",
+    )
+
+    vm = net.res_bus.vm_pu
+    va = net.res_bus.va_degree
+    line_loading = net.res_line.loading_percent if "res_line" in net and len(net.res_line) else None
+    trafo_loading = net.res_trafo.loading_percent if "res_trafo" in net and len(net.res_trafo) else None
+    ext_p = float(net.res_ext_grid.p_mw.sum()) if len(net.res_ext_grid) else 0.0
+    ext_q = float(net.res_ext_grid.q_mvar.sum()) if len(net.res_ext_grid) else 0.0
+
+    node_summary = {
+        "dataset_id": "demo_area",
+        "scenario_id": scenario_label,
+        "bus_count": int(len(net.bus)),
+        "line_count": int(len(net.line)),
+        "trafo_count": int(len(net.trafo)),
+        "load_count": int(len(net.load)),
+        "sgen_count": int(len(net.sgen)),
+        "gen_count": int(len(net.gen)),
+        "ext_grid_count": int(len(net.ext_grid)),
+        "total_nodes": int(len(net.bus)),
+        "nD": 0,
+        "total_mg": 0,
+    }
+    last_state = {
+        "converged": bool(net.converged),
+        "iterations": int(net._ppc.get("iterations", -1)),
+        "vm_pu_min": float(vm.min()),
+        "vm_pu_max": float(vm.max()),
+        "va_degree_min": float(va.min()),
+        "va_degree_max": float(va.max()),
+        "line_loading_percent_max": _safe_max(line_loading),
+        "trafo_loading_percent_max": _safe_max(trafo_loading),
+        "ext_grid_p_mw": ext_p,
+        "ext_grid_q_mvar": ext_q,
+        "sample_bus_vm_pu": [float(x) for x in vm.head(10).tolist()],
+    }
+
+    dataset_index = {
+        "dataset_id": "demo_area",
+        "scenario_id": scenario_label,
+        "raw_dat": str(raw_dat),
+        "pandapower_json": str(pp_json),
+        "conversion_summary_json": str(summary_json),
+        "node_summary": node_summary,
+    }
+    artifacts = {
+        "pandapower_json": str(pp_json),
+        "conversion_summary_json": str(summary_json),
+    }
+    gmss_result = {
+        "node_summary": node_summary,
+        "last_state": last_state,
+        "solver_config": {
+            **solver_cfg,
+            "t_solver": "pandapower_direct",
+            "t_partition_mode": "none",
+        },
+    }
+    return dataset_index, gmss_result, artifacts
+
+
 SERVICE_SCHEMA_VERSION = "gmss-service-v1"
 
 def _coerce_bool(value: Any) -> bool:
@@ -2300,6 +2415,8 @@ def _normalize_mg_per_d_payload(mg_per_d: Any, nD: int, fallback: List[int]) -> 
 
 def multi_config_to_payload(cfg: MultiConfig) -> Dict[str, Any]:
     payload = _config_to_manifest(cfg)
+    payload["dataset_id"] = str(cfg.dataset_id or "synthetic")
+    payload["scenario_id"] = str(cfg.scenario_id or "default_snapshot")
     payload["mg_per_D"] = [int(x) for x in cfg.mg_per_D]
     payload["reuse_if_match"] = bool(cfg.reuse_if_match)
     payload["force_rebuild"] = bool(cfg.force_rebuild)
@@ -2312,6 +2429,8 @@ def multi_config_from_payload(payload: Optional[Dict[str, Any]] = None) -> Multi
     nD_eff = max(1, int(merged.get("nD", defaults["nD"])))
     mg_per_d_eff = _normalize_mg_per_d_payload(merged.get("mg_per_D"), nD_eff, defaults["mg_per_D"])
     return MultiConfig(
+        dataset_id=str(merged.get("dataset_id", defaults["dataset_id"])),
+        scenario_id=str(merged.get("scenario_id", defaults["scenario_id"])),
         nD=nD_eff,
         mg_per_D=mg_per_d_eff,
         mv_level_kv=float(merged.get("mv_level_kv", defaults["mv_level_kv"])),
@@ -2407,6 +2526,18 @@ def run_gmss_service(request: Dict[str, Any]) -> Dict[str, Any]:
     )
     dataset_cfg = multi_config_from_payload(normalized_request["dataset_config"])
     solver_cfg = dict(normalized_request["solver_config"])
+
+    if str(dataset_cfg.dataset_id).strip().lower() in {"demo_area", "示范区", "demo"}:
+        dataset_index, gmss_result, artifacts = run_demo_area_service(dataset_cfg, solver_cfg)
+        return {
+            "schema_version": SERVICE_SCHEMA_VERSION,
+            "status": "ok",
+            "request": normalized_request,
+            "artifacts": artifacts,
+            "dataset_index": dataset_index,
+            "gmss_result": gmss_result,
+        }
+
     dataset_index = synthesize_dataset_multi(dataset_cfg)
     gmss_result = run_gmss_multi(**solver_cfg)
     return {
