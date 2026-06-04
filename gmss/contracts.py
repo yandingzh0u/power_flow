@@ -14,6 +14,9 @@ def example_compact_request() -> Dict[str, Any]:
         "scenario_id": "13点",
         "time_point": "13:00",
         "use_feeder_profiles": True,
+        "enable_microgrid": True,
+        "demo_mg_count": 6,
+        "mg_bus_count": 33,
         "max_iter": 10,
         "t_solver": "pandapower_direct",
         "t_partition_mode": "none",
@@ -22,6 +25,8 @@ def example_compact_request() -> Dict[str, Any]:
         "d_n_parts": 0,
         "d_local_parallel": True,
         "d_target_buses_per_part": 150,
+        "mg_parallel": True,
+        "mg_coupling_iterations": 2,
         "alpha": 0.6,
         "beta": 0.6,
     }

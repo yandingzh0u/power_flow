@@ -52,6 +52,8 @@ def main() -> None:
     parser.add_argument("--max-iter", type=int, default=10)
     parser.add_argument("--time-point", default="", help="demo_area feeder profile time, e.g. 13:00 or 14:15")
     parser.add_argument("--no-feeder-profiles", action="store_true", help="disable demo_area feeder XLS profiles")
+    parser.add_argument("--no-microgrid", action="store_true", help="disable demo_area equivalent microgrids")
+    parser.add_argument("--demo-mg-count", type=int, default=6, help="number of equivalent demo-area microgrids")
     args = parser.parse_args()
 
     payload = {
@@ -74,6 +76,10 @@ def main() -> None:
             "d_target_buses_per_part": 150,
             "time_point": args.time_point,
             "use_feeder_profiles": not args.no_feeder_profiles,
+            "enable_microgrid": not args.no_microgrid,
+            "demo_mg_count": args.demo_mg_count,
+            "mg_bus_count": 33,
+            "mg_coupling_iterations": 2,
         })
     else:
         payload.update({
@@ -112,6 +118,8 @@ def main() -> None:
                 "target_total_nodes": dataset.get("target_total_nodes"),
                 "time_point": dataset.get("time_point"),
                 "use_feeder_profiles": dataset.get("use_feeder_profiles"),
+                "enable_microgrid": dataset.get("enable_microgrid"),
+                "demo_mg_count": dataset.get("demo_mg_count"),
             },
             "solver_config": {
                 "t_solver": solver.get("t_solver"),
@@ -122,6 +130,8 @@ def main() -> None:
                 "d_n_parts": solver.get("d_n_parts"),
                 "d_local_parallel": solver.get("d_local_parallel"),
                 "d_target_buses_per_part": solver.get("d_target_buses_per_part"),
+                "mg_parallel": solver.get("mg_parallel"),
+                "mg_coupling_iterations": solver.get("mg_coupling_iterations"),
                 "max_iter": solver.get("max_iter"),
                 "alpha": solver.get("alpha"),
                 "beta": solver.get("beta"),

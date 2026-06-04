@@ -1200,6 +1200,8 @@ class MultiConfig:
     scenario_id: str = "default_snapshot"
     time_point: str = ""
     use_feeder_profiles: bool = True
+    enable_microgrid: bool = True
+    demo_mg_count: int = 6
     nD: int = 3
     mg_per_D: List[int] = field(default_factory=lambda: [2, 1, 3])
     mv_level_kv: float = 4.16
@@ -1252,6 +1254,8 @@ def _config_to_manifest(cfg: MultiConfig) -> Dict[str, Any]:
         "mg_cache_version": int(MG_CACHE_VERSION),
         "time_point": str(cfg.time_point or ""),
         "use_feeder_profiles": bool(cfg.use_feeder_profiles),
+        "enable_microgrid": bool(cfg.enable_microgrid),
+        "demo_mg_count": int(cfg.demo_mg_count),
         "nD": int(cfg.nD),
         "mg_per_D": [int(x) for x in cfg.mg_per_D],
         "mv_level_kv": float(cfg.mv_level_kv),
@@ -3711,6 +3715,216 @@ def _run_demo_distribution_partitions(
     }
 
 
+def _demo_part_load_mw(net: pp.pandapowerNet, buses: List[int]) -> float:
+    if "load" not in net or len(net.load) == 0:
+        return 0.0
+    bus_set = set(int(b) for b in buses)
+    rows = net.load[net.load.bus.astype(int).isin(bus_set)]
+    return float(rows.p_mw.sum()) if len(rows) else 0.0
+
+
+def _demo_bus_load_score(net: pp.pandapowerNet, bus_idx: int) -> float:
+    if "load" not in net or len(net.load) == 0:
+        return 0.0
+    rows = net.load[net.load.bus.astype(int) == int(bus_idx)]
+    if not len(rows):
+        return 0.0
+    p = float(rows.p_mw.sum())
+    q = float(rows.q_mvar.sum())
+    return math.sqrt(p * p + q * q)
+
+
+def _select_demo_microgrid_specs(
+    net: pp.pandapowerNet,
+    partitions_meta: List[Dict[str, Any]],
+    dataset_cfg: MultiConfig,
+) -> List[Dict[str, Any]]:
+    mg_count = max(0, int(dataset_cfg.demo_mg_count))
+    if mg_count <= 0 or not partitions_meta:
+        return []
+
+    ranked = sorted(
+        partitions_meta,
+        key=lambda part: (
+            _demo_part_load_mw(net, [int(x) for x in part.get("internal_buses", [])]),
+            len(part.get("internal_buses", [])),
+        ),
+        reverse=True,
+    )
+    specs: List[Dict[str, Any]] = []
+    used_pcc_buses: set[int] = set()
+    for seq, part in enumerate(ranked, start=1):
+        if len(specs) >= mg_count:
+            break
+        internal_buses = [int(x) for x in part.get("internal_buses", [])]
+        if not internal_buses:
+            continue
+        pcc_bus = max(internal_buses, key=lambda bus: (_demo_bus_load_score(net, bus), -bus))
+        if pcc_bus in used_pcc_buses:
+            continue
+        used_pcc_buses.add(pcc_bus)
+        mg_json_list, mg_aggs = build_tr66_list_for_D(
+            int(seq),
+            1,
+            bool(dataset_cfg.randomize_mg),
+            mg_bus_count=int(dataset_cfg.mg_bus_count),
+            random_seed=int(dataset_cfg.random_seed),
+        )
+        specs.append(
+            {
+                "id": int(len(specs) + 1),
+                "partition_id": int(part.get("id", seq)),
+                "partition_name": str(part.get("display_name", "")),
+                "pcc_bus": int(pcc_bus),
+                "pcc_bus_name": _demo_bus_label(net, int(pcc_bus)),
+                "mg_json_list": mg_json_list,
+                "mg_init_agg": mg_aggs[0] if mg_aggs else {},
+                "mg_bus_count": int(dataset_cfg.mg_bus_count),
+            }
+        )
+    return specs
+
+
+def _drop_demo_microgrid_equivalents(net: pp.pandapowerNet) -> None:
+    for tab in ("sgen", "load"):
+        if tab not in net or len(getattr(net, tab)) == 0:
+            continue
+        df = getattr(net, tab)
+        if "name" not in df.columns:
+            continue
+        names = df.name.astype(str)
+        drop_idx = df.index[names.str.startswith("DEMO_MG_EQUIV_")].tolist()
+        if drop_idx:
+            df.drop(index=drop_idx, inplace=True)
+
+
+def _apply_demo_microgrid_equivalents(
+    net: pp.pandapowerNet,
+    specs: List[Dict[str, Any]],
+    injections: List[Tuple[float, float]],
+) -> None:
+    _drop_demo_microgrid_equivalents(net)
+    for spec, (p_mw, q_mvar) in zip(specs, injections):
+        pp.create_sgen(
+            net,
+            bus=int(spec["pcc_bus"]),
+            p_mw=float(p_mw),
+            q_mvar=float(q_mvar),
+            name=f"DEMO_MG_EQUIV_{int(spec['id']):03d}_{spec['pcc_bus_name']}",
+            type="demo_microgrid_equivalent",
+        )
+
+
+def _solve_demo_microgrid_specs(
+    specs: List[Dict[str, Any]],
+    pcc_voltages: List[float],
+    solver_cfg: Dict[str, Any],
+) -> List[Tuple[float, float]]:
+    if not specs:
+        return []
+    q_v_slope = float(solver_cfg.get("q_v_slope_mvar_per_pu", 0.10))
+    q_cap = float(solver_cfg.get("q_cap_mvar", 0.10))
+    use_parallel = _coerce_bool(solver_cfg.get("mg_parallel", True))
+    max_workers = min(len(specs), max(1, os.cpu_count() or 1))
+    if use_parallel and max_workers > 1 and _can_pickle_callable(_solve_one_mg_worker):
+        pool = make_process_pool(max_workers)
+        try:
+            futures = [
+                pool.submit(
+                    _solve_one_mg_worker,
+                    list(spec["mg_json_list"]),
+                    float(v_pu),
+                    q_v_slope,
+                    q_cap,
+                )
+                for spec, v_pu in zip(specs, pcc_voltages)
+            ]
+            return [tuple(map(float, fut.result())) for fut in futures]
+        finally:
+            pool.shutdown(wait=True)
+
+    return [
+        solve_MG_cluster_at_voltage_and_get_sum(
+            list(spec["mg_json_list"]),
+            float(v_pu),
+            q_v_slope_mvar_per_pu=q_v_slope,
+            q_cap_mvar=q_cap,
+        )
+        for spec, v_pu in zip(specs, pcc_voltages)
+    ]
+
+
+def _run_demo_microgrid_equivalents(
+    net: pp.pandapowerNet,
+    partitions_meta: List[Dict[str, Any]],
+    dataset_cfg: MultiConfig,
+    solver_cfg: Dict[str, Any],
+) -> Dict[str, Any]:
+    if not bool(dataset_cfg.enable_microgrid):
+        _drop_demo_microgrid_equivalents(net)
+        return {"enabled": False, "status": "disabled", "total_mg": 0}
+
+    specs = _select_demo_microgrid_specs(net, partitions_meta, dataset_cfg)
+    if not specs:
+        _drop_demo_microgrid_equivalents(net)
+        return {"enabled": True, "status": "empty", "total_mg": 0, "mg_specs": []}
+
+    iterations = max(1, int(solver_cfg.get("mg_coupling_iterations", 2)))
+    injections: List[Tuple[float, float]] = [(0.0, 0.0) for _ in specs]
+    for _ in range(iterations):
+        pcc_voltages = [
+            float(net.res_bus.at[int(spec["pcc_bus"]), "vm_pu"]) if int(spec["pcc_bus"]) in net.res_bus.index else 1.0
+            for spec in specs
+        ]
+        injections = _solve_demo_microgrid_specs(specs, pcc_voltages, solver_cfg)
+        _apply_demo_microgrid_equivalents(net, specs, injections)
+        pp.runpp(
+            net,
+            algorithm="nr",
+            init="auto",
+            max_iteration=int(solver_cfg.get("max_iter", 50)),
+            tolerance_mva=float(solver_cfg.get("tol_dS_MW", 1e-6)),
+            enforce_q_lims=False,
+            calculate_voltage_angles=True,
+            trafo_model="t",
+        )
+
+    p_values = [float(p) for p, _ in injections]
+    q_values = [float(q) for _, q in injections]
+    pcc_voltages = [
+        float(net.res_bus.at[int(spec["pcc_bus"]), "vm_pu"]) if int(spec["pcc_bus"]) in net.res_bus.index else 1.0
+        for spec in specs
+    ]
+    return {
+        "enabled": True,
+        "status": "ok",
+        "model_type": "equivalent_microgrid_overlay",
+        "data_note": "河北示范区算例未提供微网明细，微网采用等值模型用于主配微接口和并行计算验证。",
+        "total_mg": int(len(specs)),
+        "mg_bus_count": int(dataset_cfg.mg_bus_count),
+        "mg_nodes_total": int(len(specs) * int(dataset_cfg.mg_bus_count)),
+        "coupling_iterations": int(iterations),
+        "parallel": bool(_coerce_bool(solver_cfg.get("mg_parallel", True)) and len(specs) > 1),
+        "p_mw_total": float(sum(p_values)),
+        "q_mvar_total": float(sum(q_values)),
+        "pcc_vm_pu_min": float(min(pcc_voltages)) if pcc_voltages else None,
+        "pcc_vm_pu_max": float(max(pcc_voltages)) if pcc_voltages else None,
+        "mg_specs": [
+            {
+                "id": int(spec["id"]),
+                "partition_id": int(spec["partition_id"]),
+                "pcc_bus": int(spec["pcc_bus"]),
+                "pcc_bus_name": str(spec["pcc_bus_name"]),
+                "mg_bus_count": int(spec["mg_bus_count"]),
+                "p_mw": float(p_values[idx]),
+                "q_mvar": float(q_values[idx]),
+                "pcc_vm_pu": float(pcc_voltages[idx]),
+            }
+            for idx, spec in enumerate(specs)
+        ],
+    }
+
+
 def run_demo_area_service(dataset_cfg: MultiConfig, solver_cfg: Dict[str, Any]) -> Tuple[Dict[str, Any], Dict[str, Any], Dict[str, str]]:
     scenario_label, scenario_key = _normalize_demo_area_scenario(dataset_cfg.scenario_id)
     converted_dir = DATA_DIR / "demo_area" / "converted"
@@ -3746,8 +3960,24 @@ def run_demo_area_service(dataset_cfg: MultiConfig, solver_cfg: Dict[str, Any]) 
     d_solver = str(solver_cfg.get("d_solver", "partitioned")).strip().lower()
     d_partition_mode = str(solver_cfg.get("d_partition_mode", "metis")).strip().lower()
     d_n_parts = int(solver_cfg.get("d_n_parts", 0))
-    d_target_buses_per_part = int(solver_cfg.get("d_target_buses_per_part", 400))
+    d_target_buses_per_part = int(solver_cfg.get("d_target_buses_per_part", 150))
     d_local_parallel = _coerce_bool(solver_cfg.get("d_local_parallel", True))
+    microgrid = {"enabled": False, "status": "disabled", "total_mg": 0}
+    if bool(dataset_cfg.enable_microgrid):
+        mg_partition_candidates = _build_demo_distribution_partitions(
+            net,
+            feeder_json=feeder_json,
+            partition_mode=d_partition_mode,
+            n_parts=d_n_parts,
+            target_buses_per_part=d_target_buses_per_part,
+        )
+        microgrid = _run_demo_microgrid_equivalents(
+            net,
+            mg_partition_candidates,
+            dataset_cfg=dataset_cfg,
+            solver_cfg=solver_cfg,
+        )
+
     distribution_partition = {"enabled": False, "status": "disabled", "mode": "none", "n_parts": 0}
     if d_solver in {"partitioned", "feeder", "feeder_partitioned", "distribution_partitioned"}:
         if d_partition_mode not in {
@@ -3798,9 +4028,17 @@ def run_demo_area_service(dataset_cfg: MultiConfig, solver_cfg: Dict[str, Any]) 
         "td_boundary_bus_count": md_summary["td_boundary_bus_count"],
         "td_main_boundary_bus_count": md_summary["td_main_boundary_bus_count"],
         "distribution_component_count": md_summary["distribution_component_count"],
-        "total_nodes": int(len(net.bus)),
-        "nD": 0,
-        "total_mg": 0,
+        "total_nodes": int(len(net.bus) + int(microgrid.get("mg_nodes_total", 0))),
+        "nD": int(distribution_partition.get("n_parts", 0)),
+        "total_mg": int(microgrid.get("total_mg", 0)),
+        "microgrid_enabled": bool(microgrid.get("enabled", False)),
+        "microgrid_model_type": microgrid.get("model_type", ""),
+        "microgrid_bus_count": int(microgrid.get("mg_bus_count", 0) or 0),
+        "microgrid_nodes_total": int(microgrid.get("mg_nodes_total", 0) or 0),
+        "microgrid_p_mw_total": float(microgrid.get("p_mw_total", 0.0) or 0.0),
+        "microgrid_q_mvar_total": float(microgrid.get("q_mvar_total", 0.0) or 0.0),
+        "microgrid_coupling_iterations": int(microgrid.get("coupling_iterations", 0) or 0),
+        "microgrid_parallel": bool(microgrid.get("parallel", False)),
         "time_point": feeder_profile.get("time_point"),
         "feeder_profile_enabled": bool(feeder_profile.get("enabled", False)),
         "feeder_profile_matched_rows": int(feeder_profile.get("matched_rows", 0)),
@@ -3830,6 +4068,7 @@ def run_demo_area_service(dataset_cfg: MultiConfig, solver_cfg: Dict[str, Any]) 
         "ext_grid_q_mvar": ext_q,
         "sample_bus_vm_pu": [float(x) for x in vm.head(10).tolist()],
         "feeder_profile": feeder_profile,
+        "microgrid": microgrid,
         "distribution_partition": distribution_partition,
     }
 
@@ -3840,6 +4079,7 @@ def run_demo_area_service(dataset_cfg: MultiConfig, solver_cfg: Dict[str, Any]) 
         "pandapower_json": str(pp_json),
         "conversion_summary_json": str(summary_json),
         "feeder_profile_json": str(feeder_json) if feeder_profile.get("enabled", False) else "",
+        "microgrid_cache_dir": str(MG_DIR) if microgrid.get("enabled", False) else "",
         "distribution_partition_json": str(d_partition_json) if distribution_partition.get("enabled", False) else "",
         "node_summary": node_summary,
     }
@@ -3849,6 +4089,8 @@ def run_demo_area_service(dataset_cfg: MultiConfig, solver_cfg: Dict[str, Any]) 
     }
     if feeder_profile.get("enabled", False):
         artifacts["feeder_profile_json"] = str(feeder_json)
+    if microgrid.get("enabled", False):
+        artifacts["microgrid_cache_dir"] = str(MG_DIR)
     if distribution_partition.get("enabled", False):
         artifacts["distribution_partition_json"] = str(d_partition_json)
     gmss_result = {
@@ -3918,6 +4160,8 @@ def multi_config_from_payload(payload: Optional[Dict[str, Any]] = None) -> Multi
         scenario_id=str(merged.get("scenario_id", defaults["scenario_id"])),
         time_point=str(merged.get("time_point", defaults["time_point"])),
         use_feeder_profiles=_coerce_bool(merged.get("use_feeder_profiles", defaults["use_feeder_profiles"])),
+        enable_microgrid=_coerce_bool(merged.get("enable_microgrid", defaults["enable_microgrid"])),
+        demo_mg_count=int(merged.get("demo_mg_count", defaults["demo_mg_count"])),
         nD=nD_eff,
         mg_per_D=mg_per_d_eff,
         mv_level_kv=float(merged.get("mv_level_kv", defaults["mv_level_kv"])),
@@ -3942,6 +4186,7 @@ def default_run_gmss_solver_config() -> Dict[str, Any]:
         "beta": 1.0,
         "parallel": True,
         "mg_parallel": True,
+        "mg_coupling_iterations": 2,
         "t_n_parts":  4 ,
         "t_solver": "admm_pp",
         "t_partition_mode": "soft",
@@ -3972,6 +4217,7 @@ def normalize_run_gmss_solver_config(payload: Optional[Dict[str, Any]] = None) -
         "beta": float(merged.get("beta", defaults["beta"])),
         "parallel": _coerce_bool(merged.get("parallel", defaults["parallel"])),
         "mg_parallel": _coerce_bool(merged.get("mg_parallel", defaults["mg_parallel"])),
+        "mg_coupling_iterations": int(merged.get("mg_coupling_iterations", defaults["mg_coupling_iterations"])),
         "t_n_parts": int(merged.get("t_n_parts", defaults["t_n_parts"])),
         "t_solver": str(merged.get("t_solver", defaults["t_solver"])).strip().lower(),
         "t_partition_mode": str(merged.get("t_partition_mode", defaults["t_partition_mode"])).strip().lower(),
