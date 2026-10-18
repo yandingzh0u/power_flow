@@ -1,0 +1,693 @@
+{
+  "created_at": "2026-10-18T22:52:39.922606",
+  "policy": "move to Freedesktop Trash; preserve original Shijiazhuang DAT/XLS bytes",
+  "documents": [
+    {
+      "source": "2025ZD0804600/3-论文/1-SeqFedEDT/SeqFedEDT.pdf",
+      "destination": "doc/2025ZD0804600/3-论文/1-SeqFedEDT/SeqFedEDT.pdf",
+      "sha256": "7046dbce43afb5644bddc87b649cb89ed7c50e998c7c2ffec7f3f61aa23f2221"
+    },
+    {
+      "source": "2025ZD0804600/3-论文/2-SeqFedRPC/SeqFedRPC.pdf",
+      "destination": "doc/2025ZD0804600/3-论文/2-SeqFedRPC/SeqFedRPC.pdf",
+      "sha256": "48e5edcba98528a659de83ed53bdca682e18bbf322f3ab806391bf2e7f68f85d"
+    },
+    {
+      "source": "2025ZD0804600/4-专利/1-一种面向数据异构的元素级顺序解耦联邦学习方法/一种面向数据异构的元素级顺序解耦联邦学习方法-申请文件.docx",
+      "destination": "doc/2025ZD0804600/4-专利/1-一种面向数据异构的元素级顺序解耦联邦学习方法/一种面向数据异构的元素级顺序解耦联邦学习方法-申请文件.docx",
+      "sha256": "5514cdcf4c80c2b2c399a9d30bb92e2b771fc9a020b12eedd8d6606bbec05a68"
+    },
+    {
+      "source": "2025ZD0804600/8-系统平台/1-主配微电网分区解耦与并行潮流计算/主配微分区解耦潮流计算技术报告.docx",
+      "destination": "doc/2025ZD0804600/8-系统平台/1-主配微电网分区解耦与并行潮流计算/主配微分区解耦潮流计算技术报告.docx",
+      "sha256": "4dfb13767e2c18b910a409719470898c370cff07e83f84008f87ad479ea6329b"
+    },
+    {
+      "source": "AJ251010004修订稿1124-一种面向数据异构的元素级顺序解耦联邦学习方法.docx",
+      "destination": "doc/AJ251010004修订稿1124-一种面向数据异构的元素级顺序解耦联邦学习方法.docx",
+      "sha256": "5514cdcf4c80c2b2c399a9d30bb92e2b771fc9a020b12eedd8d6606bbec05a68"
+    },
+    {
+      "source": "SeqFedEDT_Accelerating_Sequential_Federated_Learning_on_non-IID_Data_via_Element-Wise_Decoupled_Training.pdf",
+      "destination": "doc/SeqFedEDT_Accelerating_Sequential_Federated_Learning_on_non-IID_Data_via_Element-Wise_Decoupled_Training.pdf",
+      "sha256": "7046dbce43afb5644bddc87b649cb89ed7c50e998c7c2ffec7f3f61aa23f2221"
+    },
+    {
+      "source": "Transactions on Emerging Telecommunications Technologies - 2026 - Mao - SeqFedRPC Sequential Federated Learning With.pdf",
+      "destination": "doc/Transactions on Emerging Telecommunications Technologies - 2026 - Mao - SeqFedRPC Sequential Federated Learning With.pdf",
+      "sha256": "48e5edcba98528a659de83ed53bdca682e18bbf322f3ab806391bf2e7f68f85d"
+    },
+    {
+      "source": "data/demo_area/raw/潮流手册.pdf",
+      "destination": "doc/data/demo_area/raw/潮流手册.pdf",
+      "sha256": "dff0a2bd1f45e4bb07ac4096ea89294e00c07b40bf480615fe97ae27803da023"
+    },
+    {
+      "source": "data/reference/周报/周报(1).docx",
+      "destination": "doc/data/reference/周报/周报(1).docx",
+      "sha256": "94f0849034710ce0bb25bf193e6f83c87ac5f80e53ae667f6635d7069e2836f7"
+    },
+    {
+      "source": "data/reference/周报/周报(2).docx",
+      "destination": "doc/data/reference/周报/周报(2).docx",
+      "sha256": "0c81161fdaf63e381fe9ab6e8b097716213620aed0eefdcf80b86ff31a12ac7b"
+    },
+    {
+      "source": "data/reference/周报/周报(3).docx",
+      "destination": "doc/data/reference/周报/周报(3).docx",
+      "sha256": "0dc5f2302f61175d36fdf101ccf711bcddc0b528cb1b9a8fcd2175e692664502"
+    },
+    {
+      "source": "data/reference/周报/周报-20260213.docx",
+      "destination": "doc/data/reference/周报/周报-20260213.docx",
+      "sha256": "d9f7e60f5e0f405a0d9c9a522ade6a5ed8335f0af62700621ea7ecb1fe807c49"
+    },
+    {
+      "source": "data/reference/周报/周报-20260327(1).docx",
+      "destination": "doc/data/reference/周报/周报-20260327(1).docx",
+      "sha256": "b55ac8161d4e9c0a73c47ead8465f4afac0b0f2f7f7e8f06e53d551811cc18ee"
+    },
+    {
+      "source": "data/reference/周报/周报-20260327(2).docx",
+      "destination": "doc/data/reference/周报/周报-20260327(2).docx",
+      "sha256": "cb9b2f6d2dda66e6734ea8c732100092a53393b7803e5526d062531d7be65192"
+    },
+    {
+      "source": "data/reference/周报/周报-20260327.docx",
+      "destination": "doc/data/reference/周报/周报-20260327.docx",
+      "sha256": "cb625d92a152cf10f9b4caa90c75e6d926e6ae0c80e3cc4e951a16acd664a169"
+    },
+    {
+      "source": "data/reference/周报/周报-20260410 (2).docx",
+      "destination": "doc/data/reference/周报/周报-20260410 (2).docx",
+      "sha256": "c8bb549e6fe65924ffea561863a1ca726a8de8edf57626cb715be2abbff283dd"
+    },
+    {
+      "source": "data/reference/周报/周报-20260410(1).docx",
+      "destination": "doc/data/reference/周报/周报-20260410(1).docx",
+      "sha256": "f2e160b952e6881bd9fe8bf372b0c2f628ddc92ef1a73929001d03f5b8f738b1"
+    },
+    {
+      "source": "data/reference/周报/周报-20260410-课题1.docx",
+      "destination": "doc/data/reference/周报/周报-20260410-课题1.docx",
+      "sha256": "7f5b6c170078a9903e343ee7dbd09604738633334f460b701cd7377f96b09f4d"
+    },
+    {
+      "source": "data/reference/周报/周报-20260410.docx",
+      "destination": "doc/data/reference/周报/周报-20260410.docx",
+      "sha256": "67e2a780e95057326134ba04447befc7acdce2c5e03e267dbfb534996e7a45a1"
+    },
+    {
+      "source": "data/reference/周报/周报-20260416-课题1.docx",
+      "destination": "doc/data/reference/周报/周报-20260416-课题1.docx",
+      "sha256": "017fdb28a939833b6dec65664d60df36716b1df7b0e5f64375892e5b6d80cbb8"
+    },
+    {
+      "source": "data/reference/周报/周报-20260509-课题1(1).docx",
+      "destination": "doc/data/reference/周报/周报-20260509-课题1(1).docx",
+      "sha256": "68f05fd1e75a8a04945fab1978740a4aeaa570b1bcc5fd36c9a50e9915eb8fe5"
+    },
+    {
+      "source": "data/reference/周报/周报-20260509-课题1.docx",
+      "destination": "doc/data/reference/周报/周报-20260509-课题1.docx",
+      "sha256": "2d439f05a55241f38c471af2fcd044f56e73cc947a5db9cc7bb91a8a9a78c88b"
+    },
+    {
+      "source": "data/reference/周报/周报.docx",
+      "destination": "doc/data/reference/周报/周报.docx",
+      "sha256": "4bb66d0e193f61d0449133fbf0cf868d9ab4bd28161c3e9bc2bb95e826bd426a"
+    },
+    {
+      "source": "raw_dataset/PSD-BPA潮流说明书-4.6.13.pdf",
+      "destination": "doc/raw_dataset/PSD-BPA潮流说明书-4.6.13.pdf",
+      "sha256": "8a273b125fc2709ac5e6332c0b433a98c7e5bb01f37d11a1f95a3d6c6d2c6852"
+    },
+    {
+      "source": "raw_dataset/extracted/潮流手册.pdf",
+      "destination": "doc/raw_dataset/extracted/潮流手册.pdf",
+      "sha256": "dff0a2bd1f45e4bb07ac4096ea89294e00c07b40bf480615fe97ae27803da023"
+    },
+    {
+      "source": "raw_dataset/覃海 等 - 2018 - 基于MATLAB平台的BPA数据快速准.pdf",
+      "destination": "doc/raw_dataset/覃海 等 - 2018 - 基于MATLAB平台的BPA数据快速准.pdf",
+      "sha256": "42e6dcd7a167b23243b729618e2bf1b9bbd98312b85fdb87707188db404a76f3"
+    },
+    {
+      "source": "reports/原始数据集复算核查/原始数据集与转换模型复算核查报告.docx",
+      "destination": "doc/reports/原始数据集复算核查/原始数据集与转换模型复算核查报告.docx",
+      "sha256": "3b674d665584854782591ba155d3cef3410ad9cf119784007af2d1972c158695"
+    },
+    {
+      "source": "reports/原始数据集复算核查/原始数据集与转换模型复算核查报告.pdf",
+      "destination": "doc/reports/原始数据集复算核查/原始数据集与转换模型复算核查报告.pdf",
+      "sha256": "d2633f13e87ab8cf5c9d278e082e421bbf67fbb11a61e6f5b616dfe6725bb274"
+    },
+    {
+      "source": "reports/石家庄数据与模型质量核查/石家庄示范区电网潮流数据与模型质量核查报告.docx",
+      "destination": "doc/reports/石家庄数据与模型质量核查/石家庄示范区电网潮流数据与模型质量核查报告.docx",
+      "sha256": "d83b1c93a1841f9a2d332bea6f843f7325026b4a94cc1b8db795f5863a1c7d2a"
+    },
+    {
+      "source": "reports/石家庄数据与模型质量核查/石家庄示范区电网潮流数据与模型质量核查报告.pdf",
+      "destination": "doc/reports/石家庄数据与模型质量核查/石家庄示范区电网潮流数据与模型质量核查报告.pdf",
+      "sha256": "023c4a96756b0b3b76cd9450f56872fc5dc76a5910618a2e177d2ddd9136f900"
+    },
+    {
+      "source": "主配微分区解耦潮流计算技术报告.docx",
+      "destination": "doc/主配微分区解耦潮流计算技术报告.docx",
+      "sha256": "4dfb13767e2c18b910a409719470898c370cff07e83f84008f87ad479ea6329b"
+    },
+    {
+      "source": "任务书-发布版-多点分散源荷不确定性下主配微多时间尺度潮流优化与安全分析技术.pdf",
+      "destination": "doc/任务书-发布版-多点分散源荷不确定性下主配微多时间尺度潮流优化与安全分析技术.pdf",
+      "sha256": "15b926626eceab5f7755235adaa4d70ce29570ac292752e6c46f231e35a94469"
+    },
+    {
+      "source": "附件1-智能电网国家科技重大专项项目季度简.wps",
+      "destination": "doc/附件1-智能电网国家科技重大专项项目季度简.wps",
+      "sha256": "1251281ada72cfa010e728fb2c2a4f17146b31701bc3df7c4509d561b4e348ea"
+    },
+    {
+      "source": "附件3-智能电网国家科技重大专项项目半年度.wps",
+      "destination": "doc/附件3-智能电网国家科技重大专项项目半年度.wps",
+      "sha256": "906781db41e9e090e7508087bed9e76e90d1f8f594420aa67f651fd7cf376162"
+    },
+    {
+      "source": "reports/原始数据集复算核查/archive_comparison_with_cells.json",
+      "destination": "doc/reports/原始数据集复算核查/archive_comparison_with_cells.json",
+      "sha256": "ab7d5dcc0317aaa6e5ff432365809436eac83665b63b85286625f6f5c05eee05"
+    },
+    {
+      "source": "reports/原始数据集复算核查/base_100_sensitivity_NOT_VALIDATED.json",
+      "destination": "doc/reports/原始数据集复算核查/base_100_sensitivity_NOT_VALIDATED.json",
+      "sha256": "36884664d57987d59c332650389450e842e537eed5d959e6aeaafbab564c968d"
+    },
+    {
+      "source": "reports/原始数据集复算核查/fresh_vs_existing_parameters.json",
+      "destination": "doc/reports/原始数据集复算核查/fresh_vs_existing_parameters.json",
+      "sha256": "b4acdbf98363a4669352da4539526eefc7f74456778a525a105f6d904f3f83e1"
+    },
+    {
+      "source": "reports/原始数据集复算核查/independent_newton.json",
+      "destination": "doc/reports/原始数据集复算核查/independent_newton.json",
+      "sha256": "d7031869e3706f8ac76db2bc6516f77b6fb906962e5e91d55cfcd445d22278e2"
+    },
+    {
+      "source": "reports/原始数据集复算核查/raw_13_branch_flows.csv",
+      "destination": "doc/reports/原始数据集复算核查/raw_13_branch_flows.csv",
+      "sha256": "2d0a705bff14ae191a9bad6a2076403fc449b14cc46e8c93ad71f0ac556cd488"
+    },
+    {
+      "source": "reports/原始数据集复算核查/raw_20_branch_flows.csv",
+      "destination": "doc/reports/原始数据集复算核查/raw_20_branch_flows.csv",
+      "sha256": "9e72a6108a53257f0f0e6d19b7290c3fbeb6e019769bd8ea923a90dd0469e3a1"
+    },
+    {
+      "source": "reports/原始数据集复算核查/原始数据集与转换模型复算核查报告.md",
+      "destination": "doc/reports/原始数据集复算核查/原始数据集与转换模型复算核查报告.md",
+      "sha256": "0a6c5f4f415dbf691816294b2c7be4605f4626903d5d8de0f021dba147468b19"
+    },
+    {
+      "source": "reports/石家庄数据与模型质量核查/回归测试记录.txt",
+      "destination": "doc/reports/石家庄数据与模型质量核查/回归测试记录.txt",
+      "sha256": "8f000e72d8b31de07e0ea0c8a3ab5833643a30059e02a2ad91e57766839424bb"
+    },
+    {
+      "source": "reports/石家庄数据与模型质量核查/异常设备明细.csv",
+      "destination": "doc/reports/石家庄数据与模型质量核查/异常设备明细.csv",
+      "sha256": "703780b9cd5161047049900da2dc02ef8d96c078cf7486ea4b377c53b7bdb14d"
+    },
+    {
+      "source": "reports/石家庄数据与模型质量核查/核查证据.json",
+      "destination": "doc/reports/石家庄数据与模型质量核查/核查证据.json",
+      "sha256": "085d95a1bb546d64bc0b25f5faccf5bf7218353b55ce3d06a9130f875f200b74"
+    },
+    {
+      "source": "reports/石家庄数据与模型质量核查/石家庄示范区电网潮流数据与模型质量核查报告.md",
+      "destination": "doc/reports/石家庄数据与模型质量核查/石家庄示范区电网潮流数据与模型质量核查报告.md",
+      "sha256": "1ff83850c04b32a74f33996290b4cd9a7585be2dd1afe63775036d5e4b7b35bd"
+    },
+    {
+      "source": "reports/石家庄数据与模型质量核查/馈线未匹配记录.csv",
+      "destination": "doc/reports/石家庄数据与模型质量核查/馈线未匹配记录.csv",
+      "sha256": "0eb57a56a4ee329a5b4f54dcc9edd4dbc3cda9274b6a0be4f459684df3213186"
+    },
+    {
+      "source": "tools/bpa_style_solver.md",
+      "destination": "doc/tools/bpa_style_solver.md",
+      "sha256": "4696016a494fd4a617005fb47fd81f462350cdc9accbdee92706957742de2bed"
+    }
+  ],
+  "trashed": [
+    {
+      "source": "modify_demo_ppt.py",
+      "trash_path": "/home/y/.local/share/Trash/files/modify_demo_ppt.py__sjz_184c2e839a",
+      "trash_info": "/home/y/.local/share/Trash/info/modify_demo_ppt.py__sjz_184c2e839a.trashinfo",
+      "file_count": 1,
+      "bytes": 66873
+    },
+    {
+      "source": "主配微项目 甘特图-课题1 模板.xlsx",
+      "trash_path": "/home/y/.local/share/Trash/files/主配微项目 甘特图-课题1 模板.xlsx__sjz_9c5b995ca5",
+      "trash_info": "/home/y/.local/share/Trash/info/主配微项目 甘特图-课题1 模板.xlsx__sjz_9c5b995ca5.trashinfo",
+      "file_count": 1,
+      "bytes": 17431
+    },
+    {
+      "source": "modify_topic1_ppt.py",
+      "trash_path": "/home/y/.local/share/Trash/files/modify_topic1_ppt.py__sjz_b24112ce7d",
+      "trash_info": "/home/y/.local/share/Trash/info/modify_topic1_ppt.py__sjz_b24112ce7d.trashinfo",
+      "file_count": 1,
+      "bytes": 19021
+    },
+    {
+      "source": "课题1-推进会-任务2-0302(1)_算例重构版.pptx",
+      "trash_path": "/home/y/.local/share/Trash/files/课题1-推进会-任务2-0302(1)_算例重构版.pptx__sjz_8a0cc09663",
+      "trash_info": "/home/y/.local/share/Trash/info/课题1-推进会-任务2-0302(1)_算例重构版.pptx__sjz_8a0cc09663.trashinfo",
+      "file_count": 1,
+      "bytes": 4190588
+    },
+    {
+      "source": "rebuild_case_study_slides_v2.py",
+      "trash_path": "/home/y/.local/share/Trash/files/rebuild_case_study_slides_v2.py__sjz_e2359f1d4c",
+      "trash_info": "/home/y/.local/share/Trash/info/rebuild_case_study_slides_v2.py__sjz_e2359f1d4c.trashinfo",
+      "file_count": 1,
+      "bytes": 36395
+    },
+    {
+      "source": "call_api.py",
+      "trash_path": "/home/y/.local/share/Trash/files/call_api.py__sjz_7c5350a864",
+      "trash_info": "/home/y/.local/share/Trash/info/call_api.py__sjz_7c5350a864.trashinfo",
+      "file_count": 1,
+      "bytes": 6654
+    },
+    {
+      "source": "update_slide9_percentages.py",
+      "trash_path": "/home/y/.local/share/Trash/files/update_slide9_percentages.py__sjz_36562d9df9",
+      "trash_info": "/home/y/.local/share/Trash/info/update_slide9_percentages.py__sjz_36562d9df9.trashinfo",
+      "file_count": 1,
+      "bytes": 2571
+    },
+    {
+      "source": "附件2-智能电网国家科技重大专项项目半年度.et",
+      "trash_path": "/home/y/.local/share/Trash/files/附件2-智能电网国家科技重大专项项目半年度.et__sjz_c3ffb637fa",
+      "trash_info": "/home/y/.local/share/Trash/info/附件2-智能电网国家科技重大专项项目半年度.et__sjz_c3ffb637fa.trashinfo",
+      "file_count": 1,
+      "bytes": 22528
+    },
+    {
+      "source": "_case_study_assets",
+      "trash_path": "/home/y/.local/share/Trash/files/_case_study_assets__sjz_ba390ee89d",
+      "trash_info": "/home/y/.local/share/Trash/info/_case_study_assets__sjz_ba390ee89d.trashinfo",
+      "file_count": 2,
+      "bytes": 153572
+    },
+    {
+      "source": "revise_slides_7_8_15.py",
+      "trash_path": "/home/y/.local/share/Trash/files/revise_slides_7_8_15.py__sjz_ce37823403",
+      "trash_info": "/home/y/.local/share/Trash/info/revise_slides_7_8_15.py__sjz_ce37823403.trashinfo",
+      "file_count": 1,
+      "bytes": 20300
+    },
+    {
+      "source": "附件2-智能电网国家科技重大专项项目半年度-兼容版.xlsx",
+      "trash_path": "/home/y/.local/share/Trash/files/附件2-智能电网国家科技重大专项项目半年度-兼容版.xlsx__sjz_6ce74cea4a",
+      "trash_info": "/home/y/.local/share/Trash/info/附件2-智能电网国家科技重大专项项目半年度-兼容版.xlsx__sjz_6ce74cea4a.trashinfo",
+      "file_count": 1,
+      "bytes": 9177
+    },
+    {
+      "source": "scripts",
+      "trash_path": "/home/y/.local/share/Trash/files/scripts__sjz_15f20cf866",
+      "trash_info": "/home/y/.local/share/Trash/info/scripts__sjz_15f20cf866.trashinfo",
+      "file_count": 2,
+      "bytes": 2943
+    },
+    {
+      "source": "__pycache__",
+      "trash_path": "/home/y/.local/share/Trash/files/__pycache____sjz_6c6f27601f",
+      "trash_info": "/home/y/.local/share/Trash/info/__pycache____sjz_6c6f27601f.trashinfo",
+      "file_count": 3,
+      "bytes": 107690
+    },
+    {
+      "source": "add_case_study_slides.py",
+      "trash_path": "/home/y/.local/share/Trash/files/add_case_study_slides.py__sjz_9f859acfec",
+      "trash_info": "/home/y/.local/share/Trash/info/add_case_study_slides.py__sjz_9f859acfec.trashinfo",
+      "file_count": 1,
+      "bytes": 27508
+    },
+    {
+      "source": "2025ZD0804600",
+      "trash_path": "/home/y/.local/share/Trash/files/2025ZD0804600__sjz_2f828cdcb1",
+      "trash_info": "/home/y/.local/share/Trash/info/2025ZD0804600__sjz_2f828cdcb1.trashinfo",
+      "file_count": 0,
+      "bytes": 0
+    },
+    {
+      "source": "img_ppt",
+      "trash_path": "/home/y/.local/share/Trash/files/img_ppt__sjz_1de17e6618",
+      "trash_info": "/home/y/.local/share/Trash/info/img_ppt__sjz_1de17e6618.trashinfo",
+      "file_count": 6,
+      "bytes": 202595
+    },
+    {
+      "source": "reports",
+      "trash_path": "/home/y/.local/share/Trash/files/reports__sjz_f529a88b22",
+      "trash_info": "/home/y/.local/share/Trash/info/reports__sjz_f529a88b22.trashinfo",
+      "file_count": 2,
+      "bytes": 1138322
+    },
+    {
+      "source": "_report_formula_images",
+      "trash_path": "/home/y/.local/share/Trash/files/_report_formula_images__sjz_7e6f859726",
+      "trash_info": "/home/y/.local/share/Trash/info/_report_formula_images__sjz_7e6f859726.trashinfo",
+      "file_count": 18,
+      "bytes": 798218
+    },
+    {
+      "source": "build_research_progress_ppt.py",
+      "trash_path": "/home/y/.local/share/Trash/files/build_research_progress_ppt.py__sjz_2e49785bdf",
+      "trash_info": "/home/y/.local/share/Trash/info/build_research_progress_ppt.py__sjz_2e49785bdf.trashinfo",
+      "file_count": 1,
+      "bytes": 7383
+    },
+    {
+      "source": "bf.lnk",
+      "trash_path": "/home/y/.local/share/Trash/files/bf.lnk__sjz_aad54d0909",
+      "trash_info": "/home/y/.local/share/Trash/info/bf.lnk__sjz_aad54d0909.trashinfo",
+      "file_count": 1,
+      "bytes": 652
+    },
+    {
+      "source": "2025ZD0804600.zip",
+      "trash_path": "/home/y/.local/share/Trash/files/2025ZD0804600.zip__sjz_0f5888dff6",
+      "trash_info": "/home/y/.local/share/Trash/info/2025ZD0804600.zip__sjz_0f5888dff6.trashinfo",
+      "file_count": 1,
+      "bytes": 11537219
+    },
+    {
+      "source": "generate_technical_report.py",
+      "trash_path": "/home/y/.local/share/Trash/files/generate_technical_report.py__sjz_e3404dabbb",
+      "trash_info": "/home/y/.local/share/Trash/info/generate_technical_report.py__sjz_e3404dabbb.trashinfo",
+      "file_count": 1,
+      "bytes": 36540
+    },
+    {
+      "source": "_case_study_assets_v2",
+      "trash_path": "/home/y/.local/share/Trash/files/_case_study_assets_v2__sjz_cec2a51dc8",
+      "trash_info": "/home/y/.local/share/Trash/info/_case_study_assets_v2__sjz_cec2a51dc8.trashinfo",
+      "file_count": 4,
+      "bytes": 1188493
+    },
+    {
+      "source": "data/case_ACTIVSg25k.m",
+      "trash_path": "/home/y/.local/share/Trash/files/case_ACTIVSg25k.m__sjz_f76a7b5b9a",
+      "trash_info": "/home/y/.local/share/Trash/info/case_ACTIVSg25k.m__sjz_f76a7b5b9a.trashinfo",
+      "file_count": 1,
+      "bytes": 7075993
+    },
+    {
+      "source": "data/_tmp_dss_repo",
+      "trash_path": "/home/y/.local/share/Trash/files/_tmp_dss_repo__sjz_b0835a030d",
+      "trash_info": "/home/y/.local/share/Trash/info/_tmp_dss_repo__sjz_b0835a030d.trashinfo",
+      "file_count": 1544,
+      "bytes": 127690098
+    },
+    {
+      "source": "data/reference",
+      "trash_path": "/home/y/.local/share/Trash/files/reference__sjz_c89a2810ee",
+      "trash_info": "/home/y/.local/share/Trash/info/reference__sjz_c89a2810ee.trashinfo",
+      "file_count": 6,
+      "bytes": 556769
+    },
+    {
+      "source": "data/INDEX_synth_multi.json",
+      "trash_path": "/home/y/.local/share/Trash/files/INDEX_synth_multi.json__sjz_79c39888cc",
+      "trash_info": "/home/y/.local/share/Trash/info/INDEX_synth_multi.json__sjz_79c39888cc.trashinfo",
+      "file_count": 1,
+      "bytes": 428712
+    },
+    {
+      "source": "data/_mg_cache",
+      "trash_path": "/home/y/.local/share/Trash/files/_mg_cache__sjz_eaac9e44d2",
+      "trash_info": "/home/y/.local/share/Trash/info/_mg_cache__sjz_eaac9e44d2.trashinfo",
+      "file_count": 1506,
+      "bytes": 192340962
+    },
+    {
+      "source": "data/_transmission_cache",
+      "trash_path": "/home/y/.local/share/Trash/files/_transmission_cache__sjz_8ca7076002",
+      "trash_info": "/home/y/.local/share/Trash/info/_transmission_cache__sjz_8ca7076002.trashinfo",
+      "file_count": 1,
+      "bytes": 7157767
+    },
+    {
+      "source": "data/INDEX_iter_multi.json",
+      "trash_path": "/home/y/.local/share/Trash/files/INDEX_iter_multi.json__sjz_5f0c3aece2",
+      "trash_info": "/home/y/.local/share/Trash/info/INDEX_iter_multi.json__sjz_5f0c3aece2.trashinfo",
+      "file_count": 1,
+      "bytes": 448665
+    },
+    {
+      "source": "data/_ieee13_cache",
+      "trash_path": "/home/y/.local/share/Trash/files/_ieee13_cache__sjz_e0b8503f78",
+      "trash_info": "/home/y/.local/share/Trash/info/_ieee13_cache__sjz_e0b8503f78.trashinfo",
+      "file_count": 3,
+      "bytes": 20629
+    },
+    {
+      "source": "data/diagnostics",
+      "trash_path": "/home/y/.local/share/Trash/files/diagnostics__sjz_7dba63b298",
+      "trash_info": "/home/y/.local/share/Trash/info/diagnostics__sjz_7dba63b298.trashinfo",
+      "file_count": 46,
+      "bytes": 7393630
+    },
+    {
+      "source": "data/_synth",
+      "trash_path": "/home/y/.local/share/Trash/files/_synth__sjz_7baffcea65",
+      "trash_info": "/home/y/.local/share/Trash/info/_synth__sjz_7baffcea65.trashinfo",
+      "file_count": 7,
+      "bytes": 7815732
+    },
+    {
+      "source": "data/power_flow_fixed.ipynb",
+      "trash_path": "/home/y/.local/share/Trash/files/power_flow_fixed.ipynb__sjz_318450ae80",
+      "trash_info": "/home/y/.local/share/Trash/info/power_flow_fixed.ipynb__sjz_318450ae80.trashinfo",
+      "file_count": 1,
+      "bytes": 206889
+    },
+    {
+      "source": "data/case_ACTIVSg2000.m",
+      "trash_path": "/home/y/.local/share/Trash/files/case_ACTIVSg2000.m__sjz_1595b522cc",
+      "trash_info": "/home/y/.local/share/Trash/info/case_ACTIVSg2000.m__sjz_1595b522cc.trashinfo",
+      "file_count": 1,
+      "bytes": 659545
+    },
+    {
+      "source": "data/demo_area/raw",
+      "trash_path": "/home/y/.local/share/Trash/files/raw__sjz_94f4ed27f2",
+      "trash_info": "/home/y/.local/share/Trash/info/raw__sjz_94f4ed27f2.trashinfo",
+      "file_count": 21,
+      "bytes": 4914339
+    },
+    {
+      "source": "data/demo_area/reconstructed",
+      "trash_path": "/home/y/.local/share/Trash/files/reconstructed__sjz_342eef5c9c",
+      "trash_info": "/home/y/.local/share/Trash/info/reconstructed__sjz_342eef5c9c.trashinfo",
+      "file_count": 38,
+      "bytes": 15410222
+    },
+    {
+      "source": "data/demo_area/converted",
+      "trash_path": "/home/y/.local/share/Trash/files/converted__sjz_e5136a71b9",
+      "trash_info": "/home/y/.local/share/Trash/info/converted__sjz_e5136a71b9.trashinfo",
+      "file_count": 7,
+      "bytes": 9090397
+    },
+    {
+      "source": "data/demo_area/corrected",
+      "trash_path": "/home/y/.local/share/Trash/files/corrected__sjz_583f72c6db",
+      "trash_info": "/home/y/.local/share/Trash/info/corrected__sjz_583f72c6db.trashinfo",
+      "file_count": 5,
+      "bytes": 2453792
+    },
+    {
+      "source": "raw_dataset/示范区算例.zip",
+      "trash_path": "/home/y/.local/share/Trash/files/示范区算例.zip__sjz_858fab5d5b",
+      "trash_info": "/home/y/.local/share/Trash/info/示范区算例.zip__sjz_858fab5d5b.trashinfo",
+      "file_count": 1,
+      "bytes": 1952764
+    },
+    {
+      "source": "tools/build_raw_dataset_verification_report.py",
+      "trash_path": "/home/y/.local/share/Trash/files/build_raw_dataset_verification_report.py__sjz_91ede1f33f",
+      "trash_info": "/home/y/.local/share/Trash/info/build_raw_dataset_verification_report.py__sjz_91ede1f33f.trashinfo",
+      "file_count": 1,
+      "bytes": 10860
+    },
+    {
+      "source": "tools/diagnose_raw_loading_cause.py",
+      "trash_path": "/home/y/.local/share/Trash/files/diagnose_raw_loading_cause.py__sjz_eacdb4f88c",
+      "trash_info": "/home/y/.local/share/Trash/info/diagnose_raw_loading_cause.py__sjz_eacdb4f88c.trashinfo",
+      "file_count": 1,
+      "bytes": 8455
+    },
+    {
+      "source": "tools/convert_bpa_to_pandapower.py",
+      "trash_path": "/home/y/.local/share/Trash/files/convert_bpa_to_pandapower.py__sjz_757418ac12",
+      "trash_info": "/home/y/.local/share/Trash/info/convert_bpa_to_pandapower.py__sjz_757418ac12.trashinfo",
+      "file_count": 1,
+      "bytes": 12575
+    },
+    {
+      "source": "tools/__pycache__",
+      "trash_path": "/home/y/.local/share/Trash/files/__pycache____sjz_4bcaebe74e",
+      "trash_info": "/home/y/.local/share/Trash/info/__pycache____sjz_4bcaebe74e.trashinfo",
+      "file_count": 13,
+      "bytes": 309119
+    },
+    {
+      "source": "tools/build_dataset_quality_report.py",
+      "trash_path": "/home/y/.local/share/Trash/files/build_dataset_quality_report.py__sjz_908c94a319",
+      "trash_info": "/home/y/.local/share/Trash/info/build_dataset_quality_report.py__sjz_908c94a319.trashinfo",
+      "file_count": 1,
+      "bytes": 38038
+    },
+    {
+      "source": "tools/bpa_style_solver.py",
+      "trash_path": "/home/y/.local/share/Trash/files/bpa_style_solver.py__sjz_3b4e28a56e",
+      "trash_info": "/home/y/.local/share/Trash/info/bpa_style_solver.py__sjz_3b4e28a56e.trashinfo",
+      "file_count": 1,
+      "bytes": 11193
+    },
+    {
+      "source": "tools/convert_demo_feeders.py",
+      "trash_path": "/home/y/.local/share/Trash/files/convert_demo_feeders.py__sjz_b92032c7c0",
+      "trash_info": "/home/y/.local/share/Trash/info/convert_demo_feeders.py__sjz_b92032c7c0.trashinfo",
+      "file_count": 1,
+      "bytes": 7580
+    },
+    {
+      "source": "tools/diagnose_demo_transformer.py",
+      "trash_path": "/home/y/.local/share/Trash/files/diagnose_demo_transformer.py__sjz_1dfa12a0a4",
+      "trash_info": "/home/y/.local/share/Trash/info/diagnose_demo_transformer.py__sjz_1dfa12a0a4.trashinfo",
+      "file_count": 1,
+      "bytes": 11533
+    },
+    {
+      "source": "tools/repair_demo_model.py",
+      "trash_path": "/home/y/.local/share/Trash/files/repair_demo_model.py__sjz_2ea3c03ae1",
+      "trash_info": "/home/y/.local/share/Trash/info/repair_demo_model.py__sjz_2ea3c03ae1.trashinfo",
+      "file_count": 1,
+      "bytes": 16039
+    },
+    {
+      "source": "tools/verify_bpa_newton_comparison.py",
+      "trash_path": "/home/y/.local/share/Trash/files/verify_bpa_newton_comparison.py__sjz_238ed0e324",
+      "trash_info": "/home/y/.local/share/Trash/info/verify_bpa_newton_comparison.py__sjz_238ed0e324.trashinfo",
+      "file_count": 1,
+      "bytes": 18233
+    },
+    {
+      "source": "tools/audit_demo_dataset.py",
+      "trash_path": "/home/y/.local/share/Trash/files/audit_demo_dataset.py__sjz_b3b54820bf",
+      "trash_info": "/home/y/.local/share/Trash/info/audit_demo_dataset.py__sjz_b3b54820bf.trashinfo",
+      "file_count": 1,
+      "bytes": 9604
+    },
+    {
+      "source": "tools/reconstruct_demo_model.py",
+      "trash_path": "/home/y/.local/share/Trash/files/reconstruct_demo_model.py__sjz_8e11ada2d0",
+      "trash_info": "/home/y/.local/share/Trash/info/reconstruct_demo_model.py__sjz_8e11ada2d0.trashinfo",
+      "file_count": 1,
+      "bytes": 15151
+    },
+    {
+      "source": "tests/test_powerflow_model_consistency.py",
+      "trash_path": "/home/y/.local/share/Trash/files/test_powerflow_model_consistency.py__sjz_a28a901eeb",
+      "trash_info": "/home/y/.local/share/Trash/info/test_powerflow_model_consistency.py__sjz_a28a901eeb.trashinfo",
+      "file_count": 1,
+      "bytes": 5052
+    },
+    {
+      "source": "tests/test_demo_model_repair.py",
+      "trash_path": "/home/y/.local/share/Trash/files/test_demo_model_repair.py__sjz_dabf4c72ea",
+      "trash_info": "/home/y/.local/share/Trash/info/test_demo_model_repair.py__sjz_dabf4c72ea.trashinfo",
+      "file_count": 1,
+      "bytes": 3620
+    },
+    {
+      "source": "tests/test_demo_reconstruction.py",
+      "trash_path": "/home/y/.local/share/Trash/files/test_demo_reconstruction.py__sjz_e4de86f188",
+      "trash_info": "/home/y/.local/share/Trash/info/test_demo_reconstruction.py__sjz_e4de86f188.trashinfo",
+      "file_count": 1,
+      "bytes": 6300
+    },
+    {
+      "source": "tests/__pycache__",
+      "trash_path": "/home/y/.local/share/Trash/files/__pycache____sjz_f9dc506c1f",
+      "trash_info": "/home/y/.local/share/Trash/info/__pycache____sjz_f9dc506c1f.trashinfo",
+      "file_count": 4,
+      "bytes": 48233
+    },
+    {
+      "source": "gmss/memory.py",
+      "trash_path": "/home/y/.local/share/Trash/files/memory.py__sjz_3d0656c978",
+      "trash_info": "/home/y/.local/share/Trash/info/memory.py__sjz_3d0656c978.trashinfo",
+      "file_count": 1,
+      "bytes": 1341
+    },
+    {
+      "source": "gmss/__pycache__",
+      "trash_path": "/home/y/.local/share/Trash/files/__pycache____sjz_e7debce047",
+      "trash_info": "/home/y/.local/share/Trash/info/__pycache____sjz_e7debce047.trashinfo",
+      "file_count": 11,
+      "bytes": 119822
+    },
+    {
+      "source": "gmss/contracts.py",
+      "trash_path": "/home/y/.local/share/Trash/files/contracts.py__sjz_cc8099a02b",
+      "trash_info": "/home/y/.local/share/Trash/info/contracts.py__sjz_cc8099a02b.trashinfo",
+      "file_count": 1,
+      "bytes": 1844
+    },
+    {
+      "source": "web_sjz/__pycache__",
+      "trash_path": "/home/y/.local/share/Trash/files/__pycache____sjz_fc1aed5f6e",
+      "trash_info": "/home/y/.local/share/Trash/info/__pycache____sjz_fc1aed5f6e.trashinfo",
+      "file_count": 2,
+      "bytes": 52519
+    },
+    {
+      "source": "web_sjz/diagnostics",
+      "trash_path": "/home/y/.local/share/Trash/files/diagnostics__sjz_3b5aaccfbe",
+      "trash_info": "/home/y/.local/share/Trash/info/diagnostics__sjz_3b5aaccfbe.trashinfo",
+      "file_count": 2,
+      "bytes": 8600
+    }
+  ],
+  "preserved_raw_sha256": {
+    "raw_dataset/extracted/13点sim2合并anony.dat": "ae840c888ccac947ac76cd4a43d3fa4352495685690ee3467998c09ba0918e9c",
+    "raw_dataset/extracted/20点sim2合并anony.dat": "f9712bf7c5e03185b77d8648f3ffc4c550ee383dca6df07003e17eff0c890dc5",
+    "raw_dataset/extracted/示范区典型10kV馈线目录 - 脱密.xls": "3e8328e4a24d1451a368584a8eda145cb25cdc76b28aa4ccdf0afd45436b37c5",
+    "raw_dataset/extracted/各10kV馈线/1反送程度分类/DD线.xls": "708185716ca959ef6cdeee318fdb7dff0228443e183226ceb7e51acb7a0f3f8a",
+    "raw_dataset/extracted/各10kV馈线/7线路长度分类/NR  线.xls": "1d38d63b08e898757f0b26fb551b132094bb3cb6561c9bbdfe5d1d3bbf3ee700",
+    "raw_dataset/extracted/各10kV馈线/7线路长度分类/JK  2线.xls": "76a98d80953acc8002c4744ffbf9125cf4feb248ba91210c356905a3147bd21c",
+    "raw_dataset/extracted/各10kV馈线/7线路长度分类/ZF  线.xls": "315de2a90f1a08d6649b40d505ff837b4d22559d4240b0c8fe57a39fb3761f1a",
+    "raw_dataset/extracted/各10kV馈线/2负载率分类/ZF  东线.xls": "44163ce2c71010a8bb9163874730cf3e1d4ce3677496ec3c0e76d86b68d814dd",
+    "raw_dataset/extracted/各10kV馈线/2负载率分类/CW  线.xls": "da88b61c3aab4a8d609948be40608b5bd3bb893d062e5f71ace37aff5d7e6b75",
+    "raw_dataset/extracted/各10kV馈线/5联络线数量分类/VG  线.xls": "75a9ec008cc41fab05e7cfb3b92cccb87eb6cfea3c3c7556f90e868702f3a2e5",
+    "raw_dataset/extracted/各10kV馈线/5联络线数量分类/YE  村线.xls": "e49d0e41fad0cf543931eca53d15d77f1d172c64507cba58d7a669ea64a0863b",
+    "raw_dataset/extracted/各10kV馈线/5联络线数量分类/VH  线.xls": "a51572e8f295a917f0bcc58ec65d7106d3ae32e0698d76b2cdea6b5b8a534c6f",
+    "raw_dataset/extracted/各10kV馈线/5联络线数量分类/EA  线.xls": "cff239bde5c5d14db2245487f6c78b7d03d91a0e906092885c0b69f639e54abf",
+    "raw_dataset/extracted/各10kV馈线/4馈线所带用户性质分类/KQ线.xls": "33830e046af3af2fe00a961db63513c095910fa644c9dd898fe53c922d8baacb",
+    "raw_dataset/extracted/各10kV馈线/4馈线所带用户性质分类/QL  大学线.xls": "0e181f69b835368276bce32385a89275b08a89a7e9b3bb1fe0e6dea22904be47",
+    "raw_dataset/extracted/各10kV馈线/4馈线所带用户性质分类/NV  院1线.xls": "790f10edacbd0a087f6dbaad56f2a573fc0ce0cf0a8f9e933690768945e20e27",
+    "raw_dataset/extracted/各10kV馈线/6线路类型分类/IB  路南线.xls": "ab19571ae3221d392d528dee8a1cd0e0cf08d651ecab2e7074b8861954131d10",
+    "raw_dataset/extracted/各10kV馈线/6线路类型分类/GA  熙湖线.xls": "6d3428b73166eb2c9d1d6b1ec89caa1c5549a4d0c280235f25e29c01290c6755",
+    "raw_dataset/extracted/各10kV馈线/3馈线变压器容量分类/XR  线.xls": "4209a134e1c9bc08f5f166a355bbfaad9b18b83a2ae9b39c0e09e68aaa6281e2",
+    "raw_dataset/extracted/各10kV馈线/3馈线变压器容量分类/GK  线.xls": "2a1405b727611b8ffff10a620b74be4b82691b1ffba117383555ae94bef0d9bf",
+    "raw_dataset/extracted/各10kV馈线/3馈线变压器容量分类/YW  厂线.xls": "749828cb2534f852d109ea453f00bb4f74993ab6ff622f4fd8b76c1652a59b2d"
+  }
+}

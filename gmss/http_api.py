@@ -1,94 +1,152 @@
-"""Minimal HTTP API for GMSS using the Python standard library."""
-
-from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+"""One local HTTP server for the UI, folder uploads, jobs, and SSE logs."""
+from __future__ import annotations
 import argparse
+from functools import partial
+import hashlib
+from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
+from io import BytesIO
 import json
-import traceback
-from typing import Any, Dict
+from pathlib import Path
+from urllib.parse import urlparse
 
-from .contracts import describe_public_contract
-from .service import make_api_request, run_api_request
-
-
-def _json_bytes(payload: Dict[str, Any]) -> bytes:
-    return json.dumps(payload, ensure_ascii=False, indent=2).encode("utf-8")
+from .core import ALGORITHMS, ROOT
+from .service import JobService
 
 
-class GMSSRequestHandler(BaseHTTPRequestHandler):
-    server_version = "GMSSHTTP/1.0"
+class Handler(SimpleHTTPRequestHandler):
+    protocol_version = 'HTTP/1.1'
 
-    def _send_json(self, status: int, payload: Dict[str, Any]) -> None:
-        data = _json_bytes(payload)
-        self.send_response(status)
-        self.send_header("Content-Type", "application/json; charset=utf-8")
-        # The static analysis page is normally served on a separate local port.
-        # Keep the API usable from that page without requiring a proxy.
-        self.send_header("Access-Control-Allow-Origin", "*")
-        self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-        self.send_header("Access-Control-Allow-Headers", "Content-Type")
-        self.send_header("Content-Length", str(len(data)))
+    def end_headers(self):
+        if not urlparse(self.path).path.startswith(('/api/', '/health')):
+            self.send_header('Cache-Control', 'no-store')
+        super().end_headers()
+
+    def send_head(self):
+        if urlparse(self.path).path in ('/', '/index.html'):
+            root = Path(self.directory)
+            html = (root / 'index.html').read_text(encoding='utf-8')
+            for name in ('styles.css', 'data.js', 'app.js'):
+                version = hashlib.sha256((root / name).read_bytes()).hexdigest()[:16]
+                html = html.replace(f'{name}?v=__ASSET_VERSION__', f'{name}?v={version}')
+            data = html.encode('utf-8')
+            # Always send current HTML, including when the browser has an old page.
+            self.send_response(200)
+            self.send_header('Content-Type', 'text/html; charset=utf-8')
+            self.send_header('Content-Length', str(len(data)))
+            self.end_headers()
+            return BytesIO(data)
+        return super().send_head()
+
+    @property
+    def service(self):
+        return self.server.service
+
+    def send_json(self, code, payload):
+        data = json.dumps(payload, ensure_ascii=False, allow_nan=False).encode()
+        self.send_response(code)
+        self.send_header('Content-Type', 'application/json; charset=utf-8')
+        self.send_header('Cache-Control', 'no-store')
+        self.send_header('Content-Length', str(len(data)))
         self.end_headers()
         self.wfile.write(data)
 
-    def do_OPTIONS(self) -> None:
-        self.send_response(204)
-        self.send_header("Access-Control-Allow-Origin", "*")
-        self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-        self.send_header("Access-Control-Allow-Headers", "Content-Type")
+    def payload(self):
+        length = int(self.headers.get('Content-Length', '0'))
+        if not 0 < length <= 48 * 1024**2:
+            raise ValueError('请求为空或超过上传大小限制')
+        return json.loads(self.rfile.read(length))
+
+    def do_GET(self):
+        path = urlparse(self.path).path
+        try:
+            if path in ('/health', '/api/v1/health'):
+                return self.send_json(200, {'status':'ok'})
+            if path == '/api/datasets':
+                return self.send_json(200, {'datasets':self.service.datasets(), 'algorithms':ALGORITHMS})
+            parts = path.strip('/').split('/')
+            if len(parts) == 4 and parts[:2] == ['api','runs']:
+                task = self.service.get(parts[2])
+                if parts[3] == 'events':
+                    return self.stream(task)
+                if parts[3] == 'result':
+                    if task['status'] != 'completed':
+                        return self.send_json(409, {'status':task['status']})
+                    return self.send_json(200, task['result'])
+            if path.startswith('/api/'):
+                return self.send_json(404, {'error':'接口不存在'})
+            return super().do_GET()
+        except KeyError as error:
+            self.send_json(404, {'error':str(error)})
+        except (ValueError, TypeError) as error:
+            self.send_json(400, {'error':str(error)})
+        except (BrokenPipeError, ConnectionResetError):
+            pass
+
+    def do_POST(self):
+        try:
+            path = urlparse(self.path).path
+            payload = self.payload()
+            if path == '/api/datasets/import':
+                return self.send_json(201, {'datasets':self.service.import_folder(payload.get('files'))})
+            if path == '/api/runs':
+                task = self.service.create(str(payload.get('dataset_id','13')), str(payload.get('algorithm','nr')))
+                return self.send_json(202, {'task_id':task['id'], 'status':task['status']})
+            return self.send_json(404, {'error':'接口不存在'})
+        except (ValueError, KeyError, TypeError, UnicodeError) as error:
+            self.send_json(400, {'error':str(error)})
+        except Exception as error:
+            self.send_json(500, {'error':str(error)})
+
+    def stream(self, task):
+        last = self.headers.get('Last-Event-ID','0')
+        index = max(0, int(last))
+        self.send_response(200)
+        self.send_header('Content-Type','text/event-stream; charset=utf-8')
+        self.send_header('Cache-Control','no-cache')
+        self.send_header('Connection','close')
+        self.send_header('X-Accel-Buffering','no')
         self.end_headers()
-
-    def _read_payload(self) -> Dict[str, Any]:
-        raw_len = self.headers.get("Content-Length", "0")
+        self.close_connection = True
         try:
-            length = int(raw_len)
-        except ValueError:
-            length = 0
-        if length <= 0:
-            return {}
-        data = self.rfile.read(length)
-        if not data:
-            return {}
-        return json.loads(data.decode("utf-8"))
-
-    def do_GET(self) -> None:
-        if self.path in {"/health", "/api/v1/health"}:
-            self._send_json(200, {"status": "ok"})
-            return
-        if self.path in {"/contract", "/api/v1/contract"}:
-            self._send_json(200, describe_public_contract())
-            return
-        self._send_json(404, {"status": "error", "message": f"unknown path: {self.path}"})
-
-    def do_POST(self) -> None:
-        try:
-            payload = self._read_payload()
-            if self.path in {"/normalize", "/api/v1/gmss/normalize"}:
-                self._send_json(200, {"status": "ok", "request": make_api_request(payload)})
-                return
-            if self.path in {"/run", "/api/v1/gmss/run"}:
-                self._send_json(200, run_api_request(payload))
-                return
-            self._send_json(404, {"status": "error", "message": f"unknown path: {self.path}"})
-        except Exception as exc:
-            traceback.print_exc()
-            self._send_json(500, {"status": "error", "message": str(exc)})
-
-    def log_message(self, fmt: str, *args: Any) -> None:
-        print("%s - %s" % (self.address_string(), fmt % args))
+            while True:
+                with task['condition']:
+                    if index >= len(task['events']) and task['status'] not in ('completed','failed'):
+                        task['condition'].wait(timeout=1)
+                    events = task['events'][index:]
+                for event in events:
+                    data = json.dumps(event, ensure_ascii=False, allow_nan=False)
+                    self.wfile.write(f"id: {event['id']}\ndata: {data}\n\n".encode())
+                    index = event['id']
+                self.wfile.write(b': heartbeat\n\n')
+                self.wfile.flush()
+                if task['status'] in ('completed','failed') and index >= len(task['events']):
+                    break
+        except (BrokenPipeError, ConnectionResetError):
+            pass
 
 
-def main() -> None:
-    parser = argparse.ArgumentParser(description="Run the GMSS HTTP API service.")
-    parser.add_argument("--host", default="127.0.0.1")
-    parser.add_argument("--port", type=int, default=8000)
+def make_server(host='127.0.0.1', port=4173, runtime=None, raw_dir=None):
+    server = ThreadingHTTPServer((host,port), partial(Handler, directory=str(ROOT/'web_sjz')))
+    server.daemon_threads = True
+    server.service = JobService(runtime, raw_dir)
+    return server
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--host',default='127.0.0.1')
+    parser.add_argument('--port',type=int,default=4173)
     args = parser.parse_args()
+    server = make_server(args.host,args.port)
+    print(f'石家庄潮流系统：http://{args.host}:{server.server_port}/',flush=True)
+    try:
+        server.serve_forever()
+    except KeyboardInterrupt:
+        pass
+    finally:
+        server.server_close()
+        server.service.executor.shutdown(wait=True)
 
-    server = ThreadingHTTPServer((args.host, args.port), GMSSRequestHandler)
-    print(f"GMSS API listening on http://{args.host}:{args.port}", flush=True)
-    print("Health check: GET /api/v1/health", flush=True)
-    print("Run endpoint: POST /api/v1/gmss/run", flush=True)
-    server.serve_forever()
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()

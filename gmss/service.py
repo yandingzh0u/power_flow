@@ -1,174 +1,130 @@
-"""External API-style request adapter and compact response helpers."""
+"""Dataset registry and isolated calculation jobs with replayable real events."""
+from __future__ import annotations
+import base64
+from concurrent.futures import ThreadPoolExecutor
+from datetime import datetime, timezone
+import hashlib
+import json
+from pathlib import Path, PurePosixPath
+import threading
+import time
+import uuid
 
-from typing import Any, Dict, Optional
-
-from .core import (
-    SERVICE_SCHEMA_VERSION,
-    default_run_gmss_solver_config,
-    describe_gmss_service_contract,
-    make_gmss_service_request,
-    normalize_run_gmss_solver_config,
-    run_gmss_service,
-    run_gmss_service_from_configs,
-)
-
-DATASET_KEYS = (
-    "dataset_id",
-    "scenario_id",
-    "time_point",
-    "use_feeder_profiles",
-    "enable_microgrid",
-    "demo_mg_count",
-    "t_case_file",
-    "nD",
-    "mg_per_D",
-    "mg_bus_count",
-    "target_total_nodes",
-    "mv_level_kv",
-    "pcc_bus",
-    "randomize_mg",
-    "random_seed",
-    "d_bus_count_hint",
-    "prefer_balanced_mix",
-    "reuse_if_match",
-    "force_rebuild",
-)
-
-SOLVER_KEYS = (
-    "t_solver",
-    "t_partition_mode",
-    "t_admm_max_iter",
-    "t_admm_tol_vm",
-    "t_admm_tol_va_deg",
-    "t_use_monolithic_warm_start",
-    "tol_dS_MW",
-    "tol_dV_pu",
-    "alpha",
-    "beta",
-    "parallel",
-    "mg_parallel",
-    "mg_coupling_iterations",
-    "t_local_parallel",
-    "q_v_slope_mvar_per_pu",
-    "q_cap_mvar",
-    "target_buses_per_part",
-    "d_solver",
-    "d_partition_mode",
-    "d_n_parts",
-    "d_local_parallel",
-    "d_target_buses_per_part",
-)
+from .core import ROOT, run_case
+from .dat import read_dat
+from .raw_solver import validate_bpa_scope
 
 
-def make_api_request(payload: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
-    """Normalize a compact external payload into the internal GMSS request."""
-    payload = dict(payload or {})
-    dataset_config = dict(payload.get("dataset_config") or {})
-    solver_config = dict(payload.get("solver_config") or {})
+class JobService:
+    def __init__(self, runtime=None, raw_dir=None):
+        self.runtime = Path(runtime or ROOT / 'runtime')
+        self.raw_dir = Path(raw_dir or ROOT / 'raw_dataset/extracted')
+        self.runtime.mkdir(parents=True, exist_ok=True)
+        self.jobs = {}
+        self.lock = threading.RLock()
+        self.executor = ThreadPoolExecutor(max_workers=1, thread_name_prefix='powerflow')
+        self.registry_path = self.runtime / 'datasets.json'
+        self.imported = json.loads(self.registry_path.read_text()) if self.registry_path.exists() else []
 
-    for key in DATASET_KEYS:
-        if key in payload:
-            dataset_config[key] = payload[key]
+    def datasets(self):
+        return [{'id': hour, 'label': f'石家庄 {hour}:00', 'filename': f'{hour}点sim2合并anony.dat', 'builtin': True}
+                for hour in ('13','20')] + [{k:v for k,v in d.items() if k != 'path'} for d in self.imported]
 
-    if "n_parts" in payload:
-        solver_config["t_n_parts"] = payload["n_parts"]
-    if "t_n_parts" in payload:
-        solver_config["t_n_parts"] = payload["t_n_parts"]
-    if "max_iter" in payload:
-        solver_config["max_iter"] = payload["max_iter"]
-    for key in SOLVER_KEYS:
-        if key in payload:
-            solver_config[key] = payload[key]
+    def resolve(self, dataset_id):
+        if dataset_id in ('13', '20'):
+            return self.raw_dir / f'{dataset_id}点sim2合并anony.dat', f'石家庄 {dataset_id}:00', True
+        for d in self.imported:
+            if d['id'] == dataset_id:
+                return self.runtime / d['path'], d['label'], False
+        raise ValueError('未找到所选数据集，请重新导入')
 
-    # Stable API defaults. Computational functions remain available for explicit soft mode.
-    solver_config.setdefault("t_solver", "partitioned")
-    solver_config.setdefault("t_partition_mode", "hard")
+    def import_folder(self, files):
+        if not isinstance(files, list) or not 1 <= len(files) <= 500:
+            raise ValueError('文件夹必须包含 1～500 个 DAT/XLS/XLSX 文件')
+        decoded, seen, total = [], set(), 0
+        for item in files:
+            path = PurePosixPath(str(item['path']).replace('\\', '/'))
+            if path.is_absolute() or not path.parts or any(p in ('..', '.') or p.startswith('.') for p in path.parts) or ':' in str(path):
+                raise ValueError('上传文件路径无效')
+            if path.suffix.lower() not in ('.dat', '.xls', '.xlsx'):
+                raise ValueError('仅导入 DAT 和配套 XLS/XLSX；文档不参与计算')
+            if str(path) in seen:
+                raise ValueError('上传路径重复')
+            seen.add(str(path))
+            data = base64.b64decode(item['content'], validate=True)
+            total += len(data)
+            if total > 32 * 1024**2 or len(data) > 16 * 1024**2:
+                raise ValueError('上传总大小限 32 MiB，单文件限 16 MiB')
+            decoded.append((path, data))
+        if not any(p.suffix.lower()=='.dat' for p,_ in decoded):
+            raise ValueError('文件夹中没有 DAT 潮流文件')
+        folder_id = uuid.uuid4().hex
+        root = self.runtime / 'uploads' / folder_id
+        root.mkdir(parents=True)
+        entries = []
+        for relative, data in decoded:
+            target = root / str(relative)
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_bytes(data)
+            if target.suffix.lower() == '.dat':
+                _, buses, branches, _ = read_dat(target)
+                if not buses or not branches:
+                    raise ValueError(f'{relative.name} 没有可计算的节点或支路')
+                validate_bpa_scope(target, buses)
+                entries.append({'id': f'upload-{uuid.uuid4().hex}', 'label': f'导入 · {relative.name}',
+                                'filename': relative.name, 'builtin': False,
+                                'path': str(target.relative_to(self.runtime)),
+                                'sha256': hashlib.sha256(data).hexdigest()})
+        with self.lock:
+            self.imported.extend(entries)
+            self.registry_path.write_text(json.dumps(self.imported, ensure_ascii=False, indent=2)+'\n')
+        return [{k:v for k,v in e.items() if k!='path'} for e in entries]
 
-    request = make_gmss_service_request(dataset_config=dataset_config, solver_config=solver_config)
-    request["task_id"] = str(payload.get("task_id", ""))
-    request["model_id"] = str(payload.get("model_id", ""))
-    request["scenario_id"] = str(payload.get("scenario_id", ""))
-    return request
+    def create(self, dataset_id, algorithm):
+        from .core import ALGORITHMS
+        if algorithm not in ALGORITHMS:
+            raise ValueError('请选择支持的潮流算法')
+        source, label, builtin = self.resolve(dataset_id)
+        if not source.is_file():
+            raise ValueError('数据文件不存在')
+        task_id = uuid.uuid4().hex
+        task = {'id': task_id, 'dataset_id': dataset_id, 'algorithm': algorithm, 'status': 'queued',
+                'events': [], 'condition': threading.Condition(), 'result': None, 'started': time.perf_counter()}
+        with self.lock:
+            self.jobs[task_id] = task
+        self.emit(task, 'log', {'message': '任务已创建，等待求解器', 'status': 'queued'})
+        self.executor.submit(self._work, task, source, label, builtin)
+        return task
 
+    def emit(self, task, kind, data):
+        with task['condition']:
+            if kind in ('completed', 'failed'):
+                task['status'] = kind
+            event = {'id': len(task['events'])+1, 'type': kind,
+                     'timestamp': datetime.now(timezone.utc).isoformat(),
+                     'elapsed_ms': (time.perf_counter()-task['started'])*1000, **data}
+            task['events'].append(event)
+            task['condition'].notify_all()
 
-def simplify_response(response: Dict[str, Any], api_request: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
-    """Return the compact fields expected by an external caller."""
-    request = response.get("request", {})
-    api_request = api_request or {}
-    gmss_result = response.get("gmss_result", {})
-    node_summary = gmss_result.get("node_summary", {})
-    solver_config = gmss_result.get("solver_config", {})
-    return {
-        "schema_version": SERVICE_SCHEMA_VERSION,
-        "status": response.get("status", "unknown"),
-        "task_id": api_request.get("task_id", request.get("task_id", "")),
-        "model_id": api_request.get("model_id", request.get("model_id", "")),
-        "scenario_id": api_request.get("scenario_id", request.get("scenario_id", "")),
-        "summary": {
-            "dataset_id": node_summary.get("dataset_id"),
-            "scenario_id": node_summary.get("scenario_id"),
-            "bus_count": node_summary.get("bus_count"),
-            "line_count": node_summary.get("line_count"),
-            "trafo_count": node_summary.get("trafo_count"),
-            "main_bus_count": node_summary.get("main_bus_count"),
-            "distribution_bus_count": node_summary.get("distribution_bus_count"),
-            "td_transformer_count": node_summary.get("td_transformer_count"),
-            "td_boundary_bus_count": node_summary.get("td_boundary_bus_count"),
-            "distribution_component_count": node_summary.get("distribution_component_count"),
-            "nD": node_summary.get("nD"),
-            "total_mg": node_summary.get("total_mg"),
-            "total_nodes": node_summary.get("total_nodes"),
-            "microgrid_enabled": node_summary.get("microgrid_enabled"),
-            "microgrid_model_type": node_summary.get("microgrid_model_type"),
-            "microgrid_bus_count": node_summary.get("microgrid_bus_count"),
-            "microgrid_nodes_total": node_summary.get("microgrid_nodes_total"),
-            "microgrid_p_mw_total": node_summary.get("microgrid_p_mw_total"),
-            "microgrid_q_mvar_total": node_summary.get("microgrid_q_mvar_total"),
-            "microgrid_coupling_iterations": node_summary.get("microgrid_coupling_iterations"),
-            "microgrid_parallel": node_summary.get("microgrid_parallel"),
-            "time_point": node_summary.get("time_point"),
-            "feeder_profile_enabled": node_summary.get("feeder_profile_enabled"),
-            "feeder_profile_matched_rows": node_summary.get("feeder_profile_matched_rows"),
-            "feeder_profile_updated_buses": node_summary.get("feeder_profile_updated_buses"),
-            "d_partition_enabled": node_summary.get("d_partition_enabled"),
-            "d_partition_mode": node_summary.get("d_partition_mode"),
-            "d_n_parts": node_summary.get("d_n_parts"),
-            "d_partition_converged": node_summary.get("d_partition_converged"),
-            "d_partition_failed": node_summary.get("d_partition_failed"),
-            "d_graph_algorithm": node_summary.get("d_graph_algorithm"),
-            "d_metis_partition_count": node_summary.get("d_metis_partition_count"),
-            "d_metis_split_component_count": node_summary.get("d_metis_split_component_count"),
-            "d_metis_total_edge_cuts": node_summary.get("d_metis_total_edge_cuts"),
-            "d_metis_connectivity_repairs": node_summary.get("d_metis_connectivity_repairs"),
-            "d_metis_tiny_group_merges": node_summary.get("d_metis_tiny_group_merges"),
-            "t_solver": solver_config.get("t_solver"),
-            "t_partition_mode": solver_config.get("t_partition_mode"),
-            "t_n_parts": solver_config.get("t_n_parts"),
-            "d_solver": solver_config.get("d_solver"),
-            "d_local_parallel": solver_config.get("d_local_parallel"),
-            "d_target_buses_per_part": solver_config.get("d_target_buses_per_part"),
-        },
-        "result": gmss_result.get("last_state", {}),
-        "artifacts": response.get("artifacts", {}),
-    }
+    def _work(self, task, source, label, builtin):
+        task['status'] = 'running'
+        try:
+            result = run_case(source, task['algorithm'], lambda k,d: self.emit(task,k,d), label, builtin)
+            result['run'].update(task_id=task['id'], dataset_id=task['dataset_id'])
+            task_dir = self.runtime / 'runs' / task['id']
+            task_dir.mkdir(parents=True)
+            (task_dir / 'result.json').write_text(json.dumps(result, ensure_ascii=False, allow_nan=False)+'\n')
+            task['result'] = result
+            self.emit(task, 'completed', {'run': result['run'], 'message': '本次真实计算结果已就绪'})
+        except Exception as error:
+            self.emit(task, 'failed', {'message': f'计算失败：{error}', 'error': str(error)})
+        finally:
+            task_dir = self.runtime / 'runs' / task['id']
+            task_dir.mkdir(parents=True, exist_ok=True)
+            (task_dir / 'events.jsonl').write_text(''.join(json.dumps(e, ensure_ascii=False, allow_nan=False)+'\n' for e in task['events']))
 
-
-def run_api_request(payload: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
-    request = make_api_request(payload)
-    return simplify_response(run_gmss_service(request), request)
-
-
-__all__ = [
-    "SERVICE_SCHEMA_VERSION",
-    "DATASET_KEYS",
-    "SOLVER_KEYS",
-    "default_run_gmss_solver_config",
-    "normalize_run_gmss_solver_config",
-    "make_gmss_service_request",
-    "describe_gmss_service_contract",
-    "run_gmss_service",
-    "run_gmss_service_from_configs",
-    "make_api_request",
-    "simplify_response",
-    "run_api_request",
-]
+    def get(self, task_id):
+        with self.lock:
+            if task_id not in self.jobs:
+                raise KeyError('计算任务不存在或服务已重启')
+            return self.jobs[task_id]
