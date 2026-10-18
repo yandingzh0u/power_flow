@@ -1,0 +1,20 @@
+[
+  {
+    "scenario": "13",
+    "type": "unvalidated_sensitivity_only",
+    "changed_only_system_base_mva": 100,
+    "original_base_mva": 1000.0,
+    "source_file_modified": false,
+    "converged": false,
+    "error": "Newton iteration left the admissible voltage range"
+  },
+  {
+    "scenario": "20",
+    "type": "unvalidated_sensitivity_only",
+    "changed_only_system_base_mva": 100,
+    "original_base_mva": 1000.0,
+    "source_file_modified": false,
+    "converged": false,
+    "error": "Newton iteration left the admissible voltage range"
+  }
+]

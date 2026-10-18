@@ -1,0 +1,38 @@
+{
+  "input_file": "/home/y/Desktop/power_flow/raw_dataset/extracted/13点sim2合并anony.dat",
+  "structure_check": {
+    "status": "ok",
+    "sections": {
+      "(POWERFLOW": true,
+      "/NETWORK_DATA": true,
+      "/SOLUTION": true,
+      "(END)": true
+    }
+  },
+  "base_mva": 1000.0,
+  "bpa_bus_metadata_preserved": true,
+  "card_counts": {
+    "B ": 2071,
+    "BE": 49,
+    "T ": 91,
+    "BS": 1,
+    "L ": 2036
+  },
+  "zone_count": 2,
+  "bpa_counts": {
+    "buses": 2121,
+    "branches": 2127,
+    "voltage_control_generators": 50
+  },
+  "pandapower_counts": {
+    "bus": 2121,
+    "load": 698,
+    "sgen": 121,
+    "gen": 49,
+    "ext_grid": 1,
+    "line": 2036,
+    "trafo": 73,
+    "impedance": 18
+  },
+  "zero_impedance_l_cards_adjusted": 26
+}

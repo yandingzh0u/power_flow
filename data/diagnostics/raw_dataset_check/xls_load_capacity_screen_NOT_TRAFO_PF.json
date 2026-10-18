@@ -1,0 +1,272 @@
+[
+  {
+    "file": "raw_dataset/extracted/各10kV馈线/1反送程度分类/DD线.xls",
+    "rows_with_positive_capacity": 34,
+    "max_s_over_load_capacity": {
+      "file": "raw_dataset/extracted/各10kV馈线/1反送程度分类/DD线.xls",
+      "excel_row": 31,
+      "to_node": 90.0,
+      "time": "17:15",
+      "capacity_kva": 800.0,
+      "p_mw": 1.2966,
+      "q_mvar": 0.57,
+      "s_over_load_capacity_percent": 177.04481953731377
+    },
+    "sample_count_over_200_percent": 0
+  },
+  {
+    "file": "raw_dataset/extracted/各10kV馈线/2负载率分类/CW  线.xls",
+    "rows_with_positive_capacity": 16,
+    "max_s_over_load_capacity": {
+      "file": "raw_dataset/extracted/各10kV馈线/2负载率分类/CW  线.xls",
+      "excel_row": 37,
+      "to_node": 35.0,
+      "time": "21:45",
+      "capacity_kva": 3000.0,
+      "p_mw": 2.0303999999999998,
+      "q_mvar": 0.07851999999999999,
+      "s_over_load_capacity_percent": 67.73059008880533
+    },
+    "sample_count_over_200_percent": 0
+  },
+  {
+    "file": "raw_dataset/extracted/各10kV馈线/2负载率分类/ZF  东线.xls",
+    "rows_with_positive_capacity": 11,
+    "max_s_over_load_capacity": {
+      "file": "raw_dataset/extracted/各10kV馈线/2负载率分类/ZF  东线.xls",
+      "excel_row": 25,
+      "to_node": 23.0,
+      "time": "21:00",
+      "capacity_kva": 315.0,
+      "p_mw": 0.18581999999999999,
+      "q_mvar": 0.0029000000000000002,
+      "s_over_load_capacity_percent": 58.997659697959456
+    },
+    "sample_count_over_200_percent": 0
+  },
+  {
+    "file": "raw_dataset/extracted/各10kV馈线/3馈线变压器容量分类/GK  线.xls",
+    "rows_with_positive_capacity": 54,
+    "max_s_over_load_capacity": {
+      "file": "raw_dataset/extracted/各10kV馈线/3馈线变压器容量分类/GK  线.xls",
+      "excel_row": 22,
+      "to_node": 29.0,
+      "time": "11:45",
+      "capacity_kva": 100.0,
+      "p_mw": 0.21147,
+      "q_mvar": 0.07684999999999999,
+      "s_over_load_capacity_percent": 225.00107421965788
+    },
+    "sample_count_over_200_percent": 3
+  },
+  {
+    "file": "raw_dataset/extracted/各10kV馈线/3馈线变压器容量分类/XR  线.xls",
+    "rows_with_positive_capacity": 15,
+    "max_s_over_load_capacity": {
+      "file": "raw_dataset/extracted/各10kV馈线/3馈线变压器容量分类/XR  线.xls",
+      "excel_row": 15,
+      "to_node": 13.0,
+      "time": "9:30",
+      "capacity_kva": 400.0,
+      "p_mw": 0.18588,
+      "q_mvar": 0.08097599999999999,
+      "s_over_load_capacity_percent": 50.68806995733809
+    },
+    "sample_count_over_200_percent": 0
+  },
+  {
+    "file": "raw_dataset/extracted/各10kV馈线/3馈线变压器容量分类/YW  厂线.xls",
+    "rows_with_positive_capacity": 82,
+    "max_s_over_load_capacity": {
+      "file": "raw_dataset/extracted/各10kV馈线/3馈线变压器容量分类/YW  厂线.xls",
+      "excel_row": 200,
+      "to_node": 195.0,
+      "time": "19:15",
+      "capacity_kva": 80.0,
+      "p_mw": 0.1824,
+      "q_mvar": 0.07804,
+      "s_over_load_capacity_percent": 247.99194039323135
+    },
+    "sample_count_over_200_percent": 7
+  },
+  {
+    "file": "raw_dataset/extracted/各10kV馈线/4馈线所带用户性质分类/KQ线.xls",
+    "rows_with_positive_capacity": 5,
+    "max_s_over_load_capacity": {
+      "file": "raw_dataset/extracted/各10kV馈线/4馈线所带用户性质分类/KQ线.xls",
+      "excel_row": 16,
+      "to_node": 14.0,
+      "time": "19:30",
+      "capacity_kva": 1345.0,
+      "p_mw": 0.01239,
+      "q_mvar": -0.02331,
+      "s_over_load_capacity_percent": 1.9626960079094073
+    },
+    "sample_count_over_200_percent": 0
+  },
+  {
+    "file": "raw_dataset/extracted/各10kV馈线/4馈线所带用户性质分类/NV  院1线.xls",
+    "rows_with_positive_capacity": 2,
+    "max_s_over_load_capacity": {
+      "file": "raw_dataset/extracted/各10kV馈线/4馈线所带用户性质分类/NV  院1线.xls",
+      "excel_row": 6,
+      "to_node": 5.0,
+      "time": "8:30",
+      "capacity_kva": 2600.0,
+      "p_mw": 1.08013,
+      "q_mvar": 0.10396999999999999,
+      "s_over_load_capacity_percent": 41.73547612235618
+    },
+    "sample_count_over_200_percent": 0
+  },
+  {
+    "file": "raw_dataset/extracted/各10kV馈线/4馈线所带用户性质分类/QL  大学线.xls",
+    "rows_with_positive_capacity": 1,
+    "max_s_over_load_capacity": {
+      "file": "raw_dataset/extracted/各10kV馈线/4馈线所带用户性质分类/QL  大学线.xls",
+      "excel_row": 5,
+      "to_node": 4.0,
+      "time": "16:30",
+      "capacity_kva": 12500.0,
+      "p_mw": 0.9302100000000001,
+      "q_mvar": 0.16271000000000002,
+      "s_over_load_capacity_percent": 7.554665581268308
+    },
+    "sample_count_over_200_percent": 0
+  },
+  {
+    "file": "raw_dataset/extracted/各10kV馈线/5联络线数量分类/EA  线.xls",
+    "rows_with_positive_capacity": 58,
+    "max_s_over_load_capacity": {
+      "file": "raw_dataset/extracted/各10kV馈线/5联络线数量分类/EA  线.xls",
+      "excel_row": 7,
+      "to_node": 5.0,
+      "time": "11:00",
+      "capacity_kva": 100.0,
+      "p_mw": 0.16527,
+      "q_mvar": 0.06939000000000001,
+      "s_over_load_capacity_percent": 179.24604598149438
+    },
+    "sample_count_over_200_percent": 0
+  },
+  {
+    "file": "raw_dataset/extracted/各10kV馈线/5联络线数量分类/VG  线.xls",
+    "rows_with_positive_capacity": 115,
+    "max_s_over_load_capacity": {
+      "file": "raw_dataset/extracted/各10kV馈线/5联络线数量分类/VG  线.xls",
+      "excel_row": 120,
+      "to_node": 117.0,
+      "time": "9:45",
+      "capacity_kva": 360.0,
+      "p_mw": 0.40026,
+      "q_mvar": 0.11513999999999999,
+      "s_over_load_capacity_percent": 115.69212255906717
+    },
+    "sample_count_over_200_percent": 0
+  },
+  {
+    "file": "raw_dataset/extracted/各10kV馈线/5联络线数量分类/VH  线.xls",
+    "rows_with_positive_capacity": 57,
+    "max_s_over_load_capacity": {
+      "file": "raw_dataset/extracted/各10kV馈线/5联络线数量分类/VH  线.xls",
+      "excel_row": 67,
+      "to_node": 53.0,
+      "time": "7:30",
+      "capacity_kva": 80.0,
+      "p_mw": 0.12333300000000001,
+      "q_mvar": 0.004305,
+      "s_over_load_capacity_percent": 154.2601390205033
+    },
+    "sample_count_over_200_percent": 0
+  },
+  {
+    "file": "raw_dataset/extracted/各10kV馈线/5联络线数量分类/YE  村线.xls",
+    "rows_with_positive_capacity": 61,
+    "max_s_over_load_capacity": {
+      "file": "raw_dataset/extracted/各10kV馈线/5联络线数量分类/YE  村线.xls",
+      "excel_row": 92,
+      "to_node": 87.0,
+      "time": "11:30",
+      "capacity_kva": 400.0,
+      "p_mw": 0.23707999999999999,
+      "q_mvar": 0.051272000000000005,
+      "s_over_load_capacity_percent": 60.64020138488988
+    },
+    "sample_count_over_200_percent": 0
+  },
+  {
+    "file": "raw_dataset/extracted/各10kV馈线/6线路类型分类/GA  熙湖线.xls",
+    "rows_with_positive_capacity": 8,
+    "max_s_over_load_capacity": {
+      "file": "raw_dataset/extracted/各10kV馈线/6线路类型分类/GA  熙湖线.xls",
+      "excel_row": 10,
+      "to_node": 14.0,
+      "time": "22:30",
+      "capacity_kva": 2500.0,
+      "p_mw": 0.5354399999999999,
+      "q_mvar": -0.05635999999999999,
+      "s_over_load_capacity_percent": 21.535921366869815
+    },
+    "sample_count_over_200_percent": 0
+  },
+  {
+    "file": "raw_dataset/extracted/各10kV馈线/6线路类型分类/IB  路南线.xls",
+    "rows_with_positive_capacity": 37,
+    "max_s_over_load_capacity": {
+      "file": "raw_dataset/extracted/各10kV馈线/6线路类型分类/IB  路南线.xls",
+      "excel_row": 53,
+      "to_node": 45.0,
+      "time": "14:00",
+      "capacity_kva": 615.0,
+      "p_mw": 0.5491,
+      "q_mvar": 0.28844,
+      "s_over_load_capacity_percent": 100.85344633501398
+    },
+    "sample_count_over_200_percent": 0
+  },
+  {
+    "file": "raw_dataset/extracted/各10kV馈线/7线路长度分类/JK  2线.xls",
+    "rows_with_positive_capacity": 26,
+    "max_s_over_load_capacity": {
+      "file": "raw_dataset/extracted/各10kV馈线/7线路长度分类/JK  2线.xls",
+      "excel_row": 82,
+      "to_node": 78.0,
+      "time": "17:00",
+      "capacity_kva": 400.0,
+      "p_mw": 0.17954399999999998,
+      "q_mvar": 0.3016559999999999,
+      "s_over_load_capacity_percent": 87.76117815982187
+    },
+    "sample_count_over_200_percent": 0
+  },
+  {
+    "file": "raw_dataset/extracted/各10kV馈线/7线路长度分类/NR  线.xls",
+    "rows_with_positive_capacity": 23,
+    "max_s_over_load_capacity": {
+      "file": "raw_dataset/extracted/各10kV馈线/7线路长度分类/NR  线.xls",
+      "excel_row": 46,
+      "to_node": 42.0,
+      "time": "13:30",
+      "capacity_kva": 250.0,
+      "p_mw": -0.18275999999999998,
+      "q_mvar": 0.014320000000000001,
+      "s_over_load_capacity_percent": 73.32806284090695
+    },
+    "sample_count_over_200_percent": 0
+  },
+  {
+    "file": "raw_dataset/extracted/各10kV馈线/7线路长度分类/ZF  线.xls",
+    "rows_with_positive_capacity": 57,
+    "max_s_over_load_capacity": {
+      "file": "raw_dataset/extracted/各10kV馈线/7线路长度分类/ZF  线.xls",
+      "excel_row": 18,
+      "to_node": 24.0,
+      "time": "13:00",
+      "capacity_kva": 50.0,
+      "p_mw": -4.5016,
+      "q_mvar": 0.23680000000000004,
+      "s_over_load_capacity_percent": 9015.647907943167
+    },
+    "sample_count_over_200_percent": 58
+  }
+]

@@ -434,13 +434,25 @@ def _ensure_reference_per_island(netp: pp.pandapowerNet,
     _harmonize_voltage_setpoints(netp, boundary_fixed or {})
 
 def _run_local_pf_ladder(netp: pp.pandapowerNet):
+    # A numerical retry must solve the same physical problem as the reference.
+    # Partition networks inherit the reference run's options through deepcopy.
+    policy = netp.get("_options", {})
+    user_policy = netp.get("user_pf_options", {})
+    enforce_q_lims = bool(policy.get("enforce_q_lims", user_policy.get("enforce_q_lims", False)))
+    controlled_buses = set()
+    for table in (netp.gen, netp.ext_grid):
+        controlled_buses.update(int(b) for b in table.loc[table.in_service, "bus"])
+    has_pq_bus = any(int(b) not in controlled_buses for b in netp.bus.index[netp.bus.in_service])
     attempts = [
         dict(calculate_voltage_angles=True, tolerance_mva=1e-8, max_iteration=60, init="dc"),
-        dict(calculate_voltage_angles=True, tolerance_mva=1e-7, max_iteration=120, init="flat", algorithm="iwamoto_nr", enforce_q_lims=True),
-        dict(calculate_voltage_angles=True, tolerance_mva=1e-6, max_iteration=160, init="flat", algorithm="nr", enforce_q_lims=True),
+        # Reactive-limit enforcement needs NR. Iwamoto's multiplier can also
+        # degenerate on all-PV/reference networks with no PQ voltage variables.
+        dict(calculate_voltage_angles=True, tolerance_mva=1e-7, max_iteration=120, init="flat", algorithm="iwamoto_nr" if has_pq_bus and not enforce_q_lims else "nr"),
+        dict(calculate_voltage_angles=True, tolerance_mva=1e-6, max_iteration=160, init="flat", algorithm="nr"),
     ]
     last_err = None
     for kwargs in attempts:
+        kwargs["enforce_q_lims"] = enforce_q_lims
         try:
             with warnings.catch_warnings():
                 warnings.filterwarnings("ignore", category=RuntimeWarning, module=r"pandapower\\.pf\\.create_jacobian")
@@ -3512,11 +3524,19 @@ def _summarize_demo_distribution_partition_result(
     max_vm_delta = None
     max_va_delta = None
     if converged:
+        invalid_buses = [
+            bus_idx for bus_idx in internal_buses
+            if bus_idx not in solve_result or bus_idx not in net.res_bus.index
+            or not np.all(np.isfinite(solve_result[bus_idx]))
+            or not np.all(np.isfinite(net.res_bus.loc[bus_idx, ["vm_pu", "va_degree"]].to_numpy(dtype=float)))
+        ]
+        if invalid_buses:
+            error = f"Missing or non-finite partition/reference voltages at buses {invalid_buses[:10]}"
+            converged = False
+    if converged:
         max_vm = 0.0
         max_va = 0.0
         for bus_idx in internal_buses:
-            if bus_idx not in solve_result or bus_idx not in net.res_bus.index:
-                continue
             vm_local, va_local = solve_result[bus_idx]
             max_vm = max(max_vm, abs(float(vm_local) - float(net.res_bus.at[bus_idx, "vm_pu"])))
             max_va = max(max_va, angle_diff_deg(float(va_local), float(net.res_bus.at[bus_idx, "va_degree"])))
@@ -3562,6 +3582,10 @@ def _run_demo_distribution_partitions(
     target_buses_per_part: int = 150,
     local_parallel: bool = True,
 ) -> Dict[str, Any]:
+    """Validate local solves using boundary voltages from the full-network result.
+
+    This does not independently solve the coupled network or replace net.res_*.
+    """
     mode = str(partition_mode or "metis").strip().lower()
     partitions_meta = _build_demo_distribution_partitions(
         net,
@@ -3690,6 +3714,9 @@ def _run_demo_distribution_partitions(
     return {
         "enabled": True,
         "status": "ok" if converged_count == len(partition_results) else "partial",
+        "solution_role": "partition_validation_against_full_network",
+        "boundary_source": "full_network_res_bus",
+        "independent_partition_solve": False,
         "mode": mode,
         "n_parts": int(len(partition_results)),
         "parallel": bool(use_pool),

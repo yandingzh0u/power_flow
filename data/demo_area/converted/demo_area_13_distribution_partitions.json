@@ -3,7 +3,7 @@
   "status": "ok",
   "mode": "metis",
   "n_parts": 63,
-  "parallel": true,
+  "parallel": false,
   "converged_partitions": 63,
   "failed_partitions": 0,
   "unique_internal_bus_count": 2054,

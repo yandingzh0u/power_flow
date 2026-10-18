@@ -1,0 +1,2961 @@
+{
+  "scope": "Read-only original-input and converted-model checks; not field validation",
+  "pandapower_version": "3.4.0",
+  "profiles": {
+    "feeders": 18,
+    "rows": 1663,
+    "time_labels": [
+      "00:00",
+      "00:15",
+      "00:30",
+      "00:45",
+      "01:00",
+      "01:15",
+      "01:30",
+      "01:45",
+      "02:00",
+      "02:15",
+      "02:30",
+      "02:45",
+      "03:00",
+      "03:15",
+      "03:30",
+      "03:45",
+      "04:00",
+      "04:15",
+      "04:30",
+      "04:45",
+      "05:00",
+      "05:15",
+      "05:30",
+      "05:45",
+      "06:00",
+      "06:15",
+      "06:30",
+      "06:45",
+      "07:00",
+      "07:15",
+      "07:30",
+      "07:45",
+      "08:00",
+      "08:15",
+      "08:30",
+      "08:45",
+      "09:00",
+      "09:15",
+      "09:30",
+      "09:45",
+      "10:00",
+      "10:15",
+      "10:30",
+      "10:45",
+      "11:00",
+      "11:15",
+      "11:30",
+      "11:45",
+      "12:00",
+      "12:15",
+      "12:30",
+      "12:45",
+      "13:00",
+      "13:15",
+      "13:30",
+      "13:45",
+      "14:00",
+      "14:15",
+      "14:30",
+      "14:45",
+      "15:00",
+      "15:15",
+      "15:30",
+      "15:45",
+      "16:00",
+      "16:15",
+      "16:30",
+      "16:45",
+      "17:00",
+      "17:15",
+      "17:30",
+      "17:45",
+      "18:00",
+      "18:15",
+      "18:30",
+      "18:45",
+      "19:00",
+      "19:15",
+      "19:30",
+      "19:45",
+      "20:00",
+      "20:15",
+      "20:30",
+      "20:45",
+      "21:00",
+      "21:15",
+      "21:30",
+      "21:45",
+      "22:00",
+      "22:15",
+      "22:30",
+      "22:45",
+      "23:00",
+      "23:15",
+      "23:30",
+      "23:45"
+    ],
+    "label_count": 96,
+    "duplicate_labels": [],
+    "incorrect_profile_lengths": 0,
+    "nonfinite_profile_values": 0,
+    "negative_p_values": 2914,
+    "negative_q_values": 16476,
+    "empty_bus_names": 2,
+    "missing_line_type_rows": 17,
+    "nonpositive_length_rows": 14,
+    "source_cells": {
+      "numeric_profile_cells": 318912,
+      "blank_profile_cells": 384
+    },
+    "blank_profile_rows": [
+      {
+        "source": "data/demo_area/raw/各10kV馈线/4馈线所带用户性质分类/QL  大学线.xls",
+        "excel_row": 7,
+        "identity_empty": true
+      },
+      {
+        "source": "data/demo_area/raw/各10kV馈线/4馈线所带用户性质分类/QL  大学线.xls",
+        "excel_row": 8,
+        "identity_empty": true
+      }
+    ],
+    "numeric_conversion_mismatches": [],
+    "missing_line_type_samples": [
+      {
+        "source": "data/demo_area/raw/各10kV馈线/2负载率分类/CW  线.xls",
+        "excel_row": 17
+      },
+      {
+        "source": "data/demo_area/raw/各10kV馈线/3馈线变压器容量分类/YW  厂线.xls",
+        "excel_row": 4
+      },
+      {
+        "source": "data/demo_area/raw/各10kV馈线/3馈线变压器容量分类/YW  厂线.xls",
+        "excel_row": 15
+      },
+      {
+        "source": "data/demo_area/raw/各10kV馈线/3馈线变压器容量分类/YW  厂线.xls",
+        "excel_row": 16
+      },
+      {
+        "source": "data/demo_area/raw/各10kV馈线/3馈线变压器容量分类/YW  厂线.xls",
+        "excel_row": 78
+      },
+      {
+        "source": "data/demo_area/raw/各10kV馈线/4馈线所带用户性质分类/KQ线.xls",
+        "excel_row": 17
+      },
+      {
+        "source": "data/demo_area/raw/各10kV馈线/4馈线所带用户性质分类/NV  院1线.xls",
+        "excel_row": 2
+      },
+      {
+        "source": "data/demo_area/raw/各10kV馈线/4馈线所带用户性质分类/NV  院1线.xls",
+        "excel_row": 6
+      },
+      {
+        "source": "data/demo_area/raw/各10kV馈线/4馈线所带用户性质分类/NV  院1线.xls",
+        "excel_row": 7
+      },
+      {
+        "source": "data/demo_area/raw/各10kV馈线/4馈线所带用户性质分类/NV  院1线.xls",
+        "excel_row": 9
+      }
+    ]
+  },
+  "catalogue": {
+    "listed_rows": 21,
+    "unique_names": 20,
+    "duplicate_names": {
+      "DD线": 2
+    },
+    "listed_without_same_named_file": [
+      "UF现线",
+      "YE线"
+    ],
+    "files_without_same_named_catalogue_entry": [],
+    "normalization": "Whitespace and trailing full stops removed only; possible renamings are not assumed."
+  },
+  "cases": {
+    "13": {
+      "source_sha256": "f8837c9b035b2929bf51332f274117edd0bb67d249b21b060d518394ce391dee",
+      "counts": {
+        "bus": 2121,
+        "line": 2036,
+        "trafo": 73,
+        "impedance": 18,
+        "load": 698,
+        "gen": 49,
+        "sgen": 121,
+        "ext_grid": 1,
+        "switch": 0,
+        "shunt": 0,
+        "storage": 0
+      },
+      "connected_components": 1,
+      "duplicate_bpa_name_voltage_keys": 0,
+      "feeder_matching": {
+        "matched_rows": 1559,
+        "unique_buses": 1559,
+        "unmatched_rows": [
+          {
+            "feeder": "CW  线",
+            "source": "data/demo_area/raw/各10kV馈线/2负载率分类/CW  线.xls",
+            "excel_row": 5,
+            "candidates": [
+              "CW36"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "QL  大学线",
+            "source": "data/demo_area/raw/各10kV馈线/4馈线所带用户性质分类/QL  大学线.xls",
+            "excel_row": 7,
+            "candidates": [
+              ""
+            ],
+            "empty_bus_name": true,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "QL  大学线",
+            "source": "data/demo_area/raw/各10kV馈线/4馈线所带用户性质分类/QL  大学线.xls",
+            "excel_row": 8,
+            "candidates": [
+              ""
+            ],
+            "empty_bus_name": true,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 142,
+            "candidates": [
+              "VG288"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 151,
+            "candidates": [
+              "VG286"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 152,
+            "candidates": [
+              "VG287"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.011118,
+            "q_mvar_at_named_hour": 0.004056
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 186,
+            "candidates": [
+              "VG285"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.000402,
+            "q_mvar_at_named_hour": 0.00072
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 194,
+            "candidates": [
+              "VG189"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.13308,
+            "q_mvar_at_named_hour": 0.002604
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 195,
+            "candidates": [
+              "VG193"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 196,
+            "candidates": [
+              "VG190"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 197,
+            "candidates": [
+              "VG191"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.00719,
+            "q_mvar_at_named_hour": 0.00065
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 198,
+            "candidates": [
+              "VG192"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.04362,
+            "q_mvar_at_named_hour": -0.00248
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 199,
+            "candidates": [
+              "VG194"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 200,
+            "candidates": [
+              "VG283"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 201,
+            "candidates": [
+              "VG195"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": -0.029934,
+            "q_mvar_at_named_hour": 0.025986
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 202,
+            "candidates": [
+              "VG198"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 203,
+            "candidates": [
+              "VG196"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.03912,
+            "q_mvar_at_named_hour": 0.001236
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 204,
+            "candidates": [
+              "VG197"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": -0.045174,
+            "q_mvar_at_named_hour": 0.007436
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 205,
+            "candidates": [
+              "VG199"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 206,
+            "candidates": [
+              "VG281"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.0384,
+            "q_mvar_at_named_hour": 0.01572
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 207,
+            "candidates": [
+              "VG200"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": -0.054312,
+            "q_mvar_at_named_hour": 0.001644
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 208,
+            "candidates": [
+              "VG222"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 209,
+            "candidates": [
+              "VG201"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.05088,
+            "q_mvar_at_named_hour": 0.01261
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 210,
+            "candidates": [
+              "VG202"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": -0.05508,
+            "q_mvar_at_named_hour": 0.00204
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 211,
+            "candidates": [
+              "VG203"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 212,
+            "candidates": [
+              "VG204"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": -0.016272,
+            "q_mvar_at_named_hour": -0.000192
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 213,
+            "candidates": [
+              "VG205"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 214,
+            "candidates": [
+              "VG210"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.000162,
+            "q_mvar_at_named_hour": 0.00024
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 215,
+            "candidates": [
+              "VG206"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 216,
+            "candidates": [
+              "VG208"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 217,
+            "candidates": [
+              "VG207"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.00039,
+            "q_mvar_at_named_hour": 0.00036
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 218,
+            "candidates": [
+              "VG209"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": -0.000462,
+            "q_mvar_at_named_hour": 0.001275
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 219,
+            "candidates": [
+              "VG211"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 220,
+            "candidates": [
+              "VG212"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.000126,
+            "q_mvar_at_named_hour": 6e-06
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 221,
+            "candidates": [
+              "VG213"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 222,
+            "candidates": [
+              "VG214"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 223,
+            "candidates": [
+              "VG215"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 224,
+            "candidates": [
+              "VG216"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 225,
+            "candidates": [
+              "VG221"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.001728,
+            "q_mvar_at_named_hour": 0.00012
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 226,
+            "candidates": [
+              "VG217"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 227,
+            "candidates": [
+              "VG220"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.0042,
+            "q_mvar_at_named_hour": 0.00624
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 228,
+            "candidates": [
+              "VG218"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 229,
+            "candidates": [
+              "VG219"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 230,
+            "candidates": [
+              "VG223"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 231,
+            "candidates": [
+              "VG224"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 232,
+            "candidates": [
+              "VG225"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 233,
+            "candidates": [
+              "VG226"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 234,
+            "candidates": [
+              "VG280"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": -0.013269,
+            "q_mvar_at_named_hour": 0.017811
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 235,
+            "candidates": [
+              "VG227"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 236,
+            "candidates": [
+              "VG228"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 237,
+            "candidates": [
+              "VG271"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 238,
+            "candidates": [
+              "VG229"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": -0.006792,
+            "q_mvar_at_named_hour": 0.026484
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 239,
+            "candidates": [
+              "VG230"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 240,
+            "candidates": [
+              "VG231"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 241,
+            "candidates": [
+              "VG254"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 242,
+            "candidates": [
+              "VG232"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": -0.133464,
+            "q_mvar_at_named_hour": 0.030186
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 243,
+            "candidates": [
+              "VG233"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 244,
+            "candidates": [
+              "VG234"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 245,
+            "candidates": [
+              "VG235"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 246,
+            "candidates": [
+              "VG253"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": -0.054126,
+            "q_mvar_at_named_hour": 0.000966
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 247,
+            "candidates": [
+              "VG236"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": -0.041388,
+            "q_mvar_at_named_hour": 0.019776
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 248,
+            "candidates": [
+              "VG237"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": -0.05003,
+            "q_mvar_at_named_hour": 0.00277
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 249,
+            "candidates": [
+              "VG238"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 250,
+            "candidates": [
+              "VG239"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 251,
+            "candidates": [
+              "VG245"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": -0.06277,
+            "q_mvar_at_named_hour": 0.02049
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 252,
+            "candidates": [
+              "VG246"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 253,
+            "candidates": [
+              "VG240"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 254,
+            "candidates": [
+              "VG244"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": -0.07296,
+            "q_mvar_at_named_hour": 0.01264
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 255,
+            "candidates": [
+              "VG241"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 256,
+            "candidates": [
+              "VG242"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.000174,
+            "q_mvar_at_named_hour": 0.000138
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 257,
+            "candidates": [
+              "VG243"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.001152,
+            "q_mvar_at_named_hour": -0.000684
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 258,
+            "candidates": [
+              "VG247"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.02413,
+            "q_mvar_at_named_hour": 0.01726
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 259,
+            "candidates": [
+              "VG252"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": -0.108216,
+            "q_mvar_at_named_hour": 0.001656
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 260,
+            "candidates": [
+              "VG248"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 261,
+            "candidates": [
+              "VG249"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 262,
+            "candidates": [
+              "VG250"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.000264,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 263,
+            "candidates": [
+              "VG251"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.00018,
+            "q_mvar_at_named_hour": 6e-06
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 264,
+            "candidates": [
+              "VG255"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 265,
+            "candidates": [
+              "VG270"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": -0.03149,
+            "q_mvar_at_named_hour": -0.00039
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 266,
+            "candidates": [
+              "VG256"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 267,
+            "candidates": [
+              "VG257"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.000762,
+            "q_mvar_at_named_hour": -4.8e-05
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 268,
+            "candidates": [
+              "VG258"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 269,
+            "candidates": [
+              "VG259"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.001758,
+            "q_mvar_at_named_hour": -0.00039
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 270,
+            "candidates": [
+              "VG268"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.00544,
+            "q_mvar_at_named_hour": 0.000455
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 271,
+            "candidates": [
+              "VG260"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 272,
+            "candidates": [
+              "VG261"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 273,
+            "candidates": [
+              "VG262"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 274,
+            "candidates": [
+              "VG265"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 275,
+            "candidates": [
+              "VG263"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.00146,
+            "q_mvar_at_named_hour": 5e-05
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 276,
+            "candidates": [
+              "VG264"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 277,
+            "candidates": [
+              "VG266"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 278,
+            "candidates": [
+              "VG267"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.00152,
+            "q_mvar_at_named_hour": 0.0022
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 279,
+            "candidates": [
+              "VG269"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 280,
+            "candidates": [
+              "VG272"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 281,
+            "candidates": [
+              "VG273"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 282,
+            "candidates": [
+              "VG279"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.00674,
+            "q_mvar_at_named_hour": 0.00023
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 283,
+            "candidates": [
+              "VG274"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.02652,
+            "q_mvar_at_named_hour": 0.01597
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 284,
+            "candidates": [
+              "VG275"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 285,
+            "candidates": [
+              "VG276"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": -0.002094,
+            "q_mvar_at_named_hour": 0.003174
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 286,
+            "candidates": [
+              "VG277"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 287,
+            "candidates": [
+              "VG278"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.034356,
+            "q_mvar_at_named_hour": 0.025116
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 288,
+            "candidates": [
+              "VG282"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.003225,
+            "q_mvar_at_named_hour": -0.000138
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 289,
+            "candidates": [
+              "VG284"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.01459,
+            "q_mvar_at_named_hour": 0.00612
+          },
+          {
+            "feeder": "ZF  线",
+            "source": "data/demo_area/raw/各10kV馈线/7线路长度分类/ZF  线.xls",
+            "excel_row": 15,
+            "candidates": [
+              "ZFA128"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.002295,
+            "q_mvar_at_named_hour": -0.000147
+          }
+        ],
+        "duplicate_target_bus_count": 0,
+        "per_feeder": [
+          {
+            "feeder": "DD线",
+            "matched": 94,
+            "rows": 94
+          },
+          {
+            "feeder": "CW  线",
+            "matched": 35,
+            "rows": 36
+          },
+          {
+            "feeder": "ZF  东线",
+            "matched": 35,
+            "rows": 35
+          },
+          {
+            "feeder": "GK  线",
+            "matched": 104,
+            "rows": 104
+          },
+          {
+            "feeder": "XR  线",
+            "matched": 46,
+            "rows": 46
+          },
+          {
+            "feeder": "YW  厂线",
+            "matched": 212,
+            "rows": 212
+          },
+          {
+            "feeder": "KQ线",
+            "matched": 16,
+            "rows": 16
+          },
+          {
+            "feeder": "NV  院1线",
+            "matched": 8,
+            "rows": 8
+          },
+          {
+            "feeder": "QL  大学线",
+            "matched": 5,
+            "rows": 7
+          },
+          {
+            "feeder": "EA  线",
+            "matched": 115,
+            "rows": 115
+          },
+          {
+            "feeder": "VG  线",
+            "matched": 188,
+            "rows": 288
+          },
+          {
+            "feeder": "VH  线",
+            "matched": 133,
+            "rows": 133
+          },
+          {
+            "feeder": "YE  村线",
+            "matched": 188,
+            "rows": 188
+          },
+          {
+            "feeder": "GA  熙湖线",
+            "matched": 21,
+            "rows": 21
+          },
+          {
+            "feeder": "IB  路南线",
+            "matched": 97,
+            "rows": 97
+          },
+          {
+            "feeder": "JK  2线",
+            "matched": 88,
+            "rows": 88
+          },
+          {
+            "feeder": "NR  线",
+            "matched": 47,
+            "rows": 47
+          },
+          {
+            "feeder": "ZF  线",
+            "matched": 127,
+            "rows": 128
+          }
+        ]
+      },
+      "nonpositive_line_ratings": 0,
+      "nonpositive_trafo_ratings": 0,
+      "line_length_unique_values": [
+        1.0
+      ],
+      "negative_reactance_impedance_elements": 0,
+      "negative_vk_trafo_elements": 21,
+      "voltage_min_limits": [
+        0.9
+      ],
+      "voltage_max_limits": [
+        1.1
+      ],
+      "geo_nonempty_bus_rows": 0,
+      "geo_nonempty_line_rows": 0,
+      "dat_vs_curve_load_totals_at_named_hour": [
+        {
+          "feeder": "DD线",
+          "dat_model_load_p_mw": 3.321,
+          "xls_curve_load_p_mw": 2.3422497999999994,
+          "difference_mw": -0.9787502000000008
+        },
+        {
+          "feeder": "CW  线",
+          "dat_model_load_p_mw": 3.131,
+          "xls_curve_load_p_mw": 3.8518959999999995,
+          "difference_mw": 0.7208959999999998
+        },
+        {
+          "feeder": "ZF  东线",
+          "dat_model_load_p_mw": 0.19,
+          "xls_curve_load_p_mw": 0.245801,
+          "difference_mw": 0.05580099999999999
+        },
+        {
+          "feeder": "GK  线",
+          "dat_model_load_p_mw": 0.9030000000000001,
+          "xls_curve_load_p_mw": 1.3454270000000004,
+          "difference_mw": 0.44242700000000024
+        },
+        {
+          "feeder": "XR  线",
+          "dat_model_load_p_mw": 0.531,
+          "xls_curve_load_p_mw": 0.51262,
+          "difference_mw": -0.018380000000000063
+        },
+        {
+          "feeder": "YW  厂线",
+          "dat_model_load_p_mw": 6.082999999999999,
+          "xls_curve_load_p_mw": 6.943593,
+          "difference_mw": 0.8605930000000006
+        },
+        {
+          "feeder": "KQ线",
+          "dat_model_load_p_mw": 1.1319999999999995,
+          "xls_curve_load_p_mw": 0.05638,
+          "difference_mw": -1.0756199999999994
+        },
+        {
+          "feeder": "NV  院1线",
+          "dat_model_load_p_mw": 0.152,
+          "xls_curve_load_p_mw": 1.01779,
+          "difference_mw": 0.86579
+        },
+        {
+          "feeder": "QL  大学线",
+          "dat_model_load_p_mw": 0.746,
+          "xls_curve_load_p_mw": 0.5043300000000001,
+          "difference_mw": -0.24166999999999994
+        },
+        {
+          "feeder": "EA  线",
+          "dat_model_load_p_mw": 1.5579999999999996,
+          "xls_curve_load_p_mw": 1.7423010000000003,
+          "difference_mw": 0.18430100000000071
+        },
+        {
+          "feeder": "VG  线",
+          "dat_model_load_p_mw": 1.9489999999999998,
+          "xls_curve_load_p_mw": 0.6676890000000001,
+          "difference_mw": -1.2813109999999996
+        },
+        {
+          "feeder": "VH  线",
+          "dat_model_load_p_mw": 2.751,
+          "xls_curve_load_p_mw": 2.309964,
+          "difference_mw": -0.441036
+        },
+        {
+          "feeder": "YE  村线",
+          "dat_model_load_p_mw": 1.3940000000000001,
+          "xls_curve_load_p_mw": 1.9549240000000003,
+          "difference_mw": 0.5609240000000002
+        },
+        {
+          "feeder": "GA  熙湖线",
+          "dat_model_load_p_mw": 1.413,
+          "xls_curve_load_p_mw": 1.5259566,
+          "difference_mw": 0.11295659999999996
+        },
+        {
+          "feeder": "IB  路南线",
+          "dat_model_load_p_mw": 1.5710000000000002,
+          "xls_curve_load_p_mw": 1.5332944999999996,
+          "difference_mw": -0.037705500000000614
+        },
+        {
+          "feeder": "JK  2线",
+          "dat_model_load_p_mw": 0.464,
+          "xls_curve_load_p_mw": 0.9676899999999999,
+          "difference_mw": 0.50369
+        },
+        {
+          "feeder": "NR  线",
+          "dat_model_load_p_mw": 0.754,
+          "xls_curve_load_p_mw": -0.09320200000000006,
+          "difference_mw": -0.847202
+        },
+        {
+          "feeder": "ZF  线",
+          "dat_model_load_p_mw": 1.9019999999999997,
+          "xls_curve_load_p_mw": -2.0036569999999996,
+          "difference_mw": -3.9056569999999993
+        }
+      ]
+    },
+    "20": {
+      "source_sha256": "09a3448f08feab33530ab23fae23b9d3fb63f568209fadf40edcea19982c771f",
+      "counts": {
+        "bus": 2122,
+        "line": 2038,
+        "trafo": 73,
+        "impedance": 18,
+        "load": 664,
+        "gen": 48,
+        "sgen": 6,
+        "ext_grid": 1,
+        "switch": 0,
+        "shunt": 0,
+        "storage": 0
+      },
+      "connected_components": 1,
+      "duplicate_bpa_name_voltage_keys": 0,
+      "feeder_matching": {
+        "matched_rows": 1559,
+        "unique_buses": 1559,
+        "unmatched_rows": [
+          {
+            "feeder": "CW  线",
+            "source": "data/demo_area/raw/各10kV馈线/2负载率分类/CW  线.xls",
+            "excel_row": 5,
+            "candidates": [
+              "CW36"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "QL  大学线",
+            "source": "data/demo_area/raw/各10kV馈线/4馈线所带用户性质分类/QL  大学线.xls",
+            "excel_row": 7,
+            "candidates": [
+              ""
+            ],
+            "empty_bus_name": true,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "QL  大学线",
+            "source": "data/demo_area/raw/各10kV馈线/4馈线所带用户性质分类/QL  大学线.xls",
+            "excel_row": 8,
+            "candidates": [
+              ""
+            ],
+            "empty_bus_name": true,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 142,
+            "candidates": [
+              "VG288"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 151,
+            "candidates": [
+              "VG286"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.000252,
+            "q_mvar_at_named_hour": 0.000276
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 152,
+            "candidates": [
+              "VG287"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.004536,
+            "q_mvar_at_named_hour": -3e-05
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 186,
+            "candidates": [
+              "VG285"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 194,
+            "candidates": [
+              "VG189"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.131196,
+            "q_mvar_at_named_hour": 0.00012
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 195,
+            "candidates": [
+              "VG193"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 196,
+            "candidates": [
+              "VG190"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 197,
+            "candidates": [
+              "VG191"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.00296,
+            "q_mvar_at_named_hour": 0.00048
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 198,
+            "candidates": [
+              "VG192"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.04798,
+            "q_mvar_at_named_hour": -0.00244
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 199,
+            "candidates": [
+              "VG194"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 200,
+            "candidates": [
+              "VG283"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 201,
+            "candidates": [
+              "VG195"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.035511,
+            "q_mvar_at_named_hour": 0.011145
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 202,
+            "candidates": [
+              "VG198"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 203,
+            "candidates": [
+              "VG196"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.080172,
+            "q_mvar_at_named_hour": 0.000486
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 204,
+            "candidates": [
+              "VG197"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.118014,
+            "q_mvar_at_named_hour": 0.009174
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 205,
+            "candidates": [
+              "VG199"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 206,
+            "candidates": [
+              "VG281"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.04728,
+            "q_mvar_at_named_hour": 0.011376
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 207,
+            "candidates": [
+              "VG200"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.062436,
+            "q_mvar_at_named_hour": 0.018588
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 208,
+            "candidates": [
+              "VG222"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 209,
+            "candidates": [
+              "VG201"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.16015,
+            "q_mvar_at_named_hour": 0.01413
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 210,
+            "candidates": [
+              "VG202"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.045912,
+            "q_mvar_at_named_hour": -0.000534
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 211,
+            "candidates": [
+              "VG203"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 212,
+            "candidates": [
+              "VG204"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 4.8e-05,
+            "q_mvar_at_named_hour": -0.000192
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 213,
+            "candidates": [
+              "VG205"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 214,
+            "candidates": [
+              "VG210"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.000156,
+            "q_mvar_at_named_hour": 0.000228
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 215,
+            "candidates": [
+              "VG206"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 216,
+            "candidates": [
+              "VG208"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 217,
+            "candidates": [
+              "VG207"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.00645,
+            "q_mvar_at_named_hour": -0.00048
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 218,
+            "candidates": [
+              "VG209"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.014679,
+            "q_mvar_at_named_hour": -0.000534
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 219,
+            "candidates": [
+              "VG211"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 220,
+            "candidates": [
+              "VG212"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.000144,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 221,
+            "candidates": [
+              "VG213"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 222,
+            "candidates": [
+              "VG214"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 223,
+            "candidates": [
+              "VG215"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 224,
+            "candidates": [
+              "VG216"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 225,
+            "candidates": [
+              "VG221"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.003288,
+            "q_mvar_at_named_hour": 6e-05
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 226,
+            "candidates": [
+              "VG217"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 227,
+            "candidates": [
+              "VG220"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.00448,
+            "q_mvar_at_named_hour": 0.00232
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 228,
+            "candidates": [
+              "VG218"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 229,
+            "candidates": [
+              "VG219"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 230,
+            "candidates": [
+              "VG223"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 231,
+            "candidates": [
+              "VG224"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 232,
+            "candidates": [
+              "VG225"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 233,
+            "candidates": [
+              "VG226"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 234,
+            "candidates": [
+              "VG280"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.018198,
+            "q_mvar_at_named_hour": 0.015831
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 235,
+            "candidates": [
+              "VG227"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 236,
+            "candidates": [
+              "VG228"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 237,
+            "candidates": [
+              "VG271"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 238,
+            "candidates": [
+              "VG229"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.028974,
+            "q_mvar_at_named_hour": 0.001596
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 239,
+            "candidates": [
+              "VG230"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 240,
+            "candidates": [
+              "VG231"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 241,
+            "candidates": [
+              "VG254"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 242,
+            "candidates": [
+              "VG232"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.091008,
+            "q_mvar_at_named_hour": 0.012114
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 243,
+            "candidates": [
+              "VG233"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 244,
+            "candidates": [
+              "VG234"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 245,
+            "candidates": [
+              "VG235"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 246,
+            "candidates": [
+              "VG253"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.038304,
+            "q_mvar_at_named_hour": -0.00129
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 247,
+            "candidates": [
+              "VG236"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.10668,
+            "q_mvar_at_named_hour": 0.013932
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 248,
+            "candidates": [
+              "VG237"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.07329,
+            "q_mvar_at_named_hour": -0.001
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 249,
+            "candidates": [
+              "VG238"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 250,
+            "candidates": [
+              "VG239"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 251,
+            "candidates": [
+              "VG245"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.09984,
+            "q_mvar_at_named_hour": 0.01642
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 252,
+            "candidates": [
+              "VG246"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 253,
+            "candidates": [
+              "VG240"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 254,
+            "candidates": [
+              "VG244"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.08479,
+            "q_mvar_at_named_hour": 0.00847
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 255,
+            "candidates": [
+              "VG241"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 256,
+            "candidates": [
+              "VG242"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.000333,
+            "q_mvar_at_named_hour": 0.000492
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 257,
+            "candidates": [
+              "VG243"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.00126,
+            "q_mvar_at_named_hour": -0.000672
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 258,
+            "candidates": [
+              "VG247"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.13011,
+            "q_mvar_at_named_hour": 0.0143
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 259,
+            "candidates": [
+              "VG252"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.000312,
+            "q_mvar_at_named_hour": -0.00012
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 260,
+            "candidates": [
+              "VG248"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 261,
+            "candidates": [
+              "VG249"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 262,
+            "candidates": [
+              "VG250"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.000144,
+            "q_mvar_at_named_hour": -2.4e-05
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 263,
+            "candidates": [
+              "VG251"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.00018,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 264,
+            "candidates": [
+              "VG255"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 265,
+            "candidates": [
+              "VG270"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.009585,
+            "q_mvar_at_named_hour": -0.00118
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 266,
+            "candidates": [
+              "VG256"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 267,
+            "candidates": [
+              "VG257"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.000444,
+            "q_mvar_at_named_hour": -0.000144
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 268,
+            "candidates": [
+              "VG258"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 269,
+            "candidates": [
+              "VG259"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.0018,
+            "q_mvar_at_named_hour": -0.00036
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 270,
+            "candidates": [
+              "VG268"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.00486,
+            "q_mvar_at_named_hour": 7e-05
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 271,
+            "candidates": [
+              "VG260"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 272,
+            "candidates": [
+              "VG261"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 273,
+            "candidates": [
+              "VG262"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 274,
+            "candidates": [
+              "VG265"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 275,
+            "candidates": [
+              "VG263"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.00042,
+            "q_mvar_at_named_hour": 0.00018
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 276,
+            "candidates": [
+              "VG264"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 277,
+            "candidates": [
+              "VG266"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 278,
+            "candidates": [
+              "VG267"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.00232,
+            "q_mvar_at_named_hour": 0.00168
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 279,
+            "candidates": [
+              "VG269"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 280,
+            "candidates": [
+              "VG272"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 281,
+            "candidates": [
+              "VG273"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 282,
+            "candidates": [
+              "VG279"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.00704,
+            "q_mvar_at_named_hour": -0.0001
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 283,
+            "candidates": [
+              "VG274"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.07245,
+            "q_mvar_at_named_hour": 0.01652
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 284,
+            "candidates": [
+              "VG275"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 285,
+            "candidates": [
+              "VG276"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.057828,
+            "q_mvar_at_named_hour": 0.002244
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 286,
+            "candidates": [
+              "VG277"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.0,
+            "q_mvar_at_named_hour": 0.0
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 287,
+            "candidates": [
+              "VG278"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.088566,
+            "q_mvar_at_named_hour": 0.021852
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 288,
+            "candidates": [
+              "VG282"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.003396,
+            "q_mvar_at_named_hour": 3.3e-05
+          },
+          {
+            "feeder": "VG  线",
+            "source": "data/demo_area/raw/各10kV馈线/5联络线数量分类/VG  线.xls",
+            "excel_row": 289,
+            "candidates": [
+              "VG284"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.00956,
+            "q_mvar_at_named_hour": 0.00033
+          },
+          {
+            "feeder": "ZF  线",
+            "source": "data/demo_area/raw/各10kV馈线/7线路长度分类/ZF  线.xls",
+            "excel_row": 15,
+            "candidates": [
+              "ZFA128"
+            ],
+            "empty_bus_name": false,
+            "p_mw_at_named_hour": 0.002235,
+            "q_mvar_at_named_hour": -0.000126
+          }
+        ],
+        "duplicate_target_bus_count": 0,
+        "per_feeder": [
+          {
+            "feeder": "DD线",
+            "matched": 94,
+            "rows": 94
+          },
+          {
+            "feeder": "CW  线",
+            "matched": 35,
+            "rows": 36
+          },
+          {
+            "feeder": "ZF  东线",
+            "matched": 35,
+            "rows": 35
+          },
+          {
+            "feeder": "GK  线",
+            "matched": 104,
+            "rows": 104
+          },
+          {
+            "feeder": "XR  线",
+            "matched": 46,
+            "rows": 46
+          },
+          {
+            "feeder": "YW  厂线",
+            "matched": 212,
+            "rows": 212
+          },
+          {
+            "feeder": "KQ线",
+            "matched": 16,
+            "rows": 16
+          },
+          {
+            "feeder": "NV  院1线",
+            "matched": 8,
+            "rows": 8
+          },
+          {
+            "feeder": "QL  大学线",
+            "matched": 5,
+            "rows": 7
+          },
+          {
+            "feeder": "EA  线",
+            "matched": 115,
+            "rows": 115
+          },
+          {
+            "feeder": "VG  线",
+            "matched": 188,
+            "rows": 288
+          },
+          {
+            "feeder": "VH  线",
+            "matched": 133,
+            "rows": 133
+          },
+          {
+            "feeder": "YE  村线",
+            "matched": 188,
+            "rows": 188
+          },
+          {
+            "feeder": "GA  熙湖线",
+            "matched": 21,
+            "rows": 21
+          },
+          {
+            "feeder": "IB  路南线",
+            "matched": 97,
+            "rows": 97
+          },
+          {
+            "feeder": "JK  2线",
+            "matched": 88,
+            "rows": 88
+          },
+          {
+            "feeder": "NR  线",
+            "matched": 47,
+            "rows": 47
+          },
+          {
+            "feeder": "ZF  线",
+            "matched": 127,
+            "rows": 128
+          }
+        ]
+      },
+      "nonpositive_line_ratings": 0,
+      "nonpositive_trafo_ratings": 0,
+      "line_length_unique_values": [
+        1.0
+      ],
+      "negative_reactance_impedance_elements": 0,
+      "negative_vk_trafo_elements": 21,
+      "voltage_min_limits": [
+        0.9
+      ],
+      "voltage_max_limits": [
+        1.1
+      ],
+      "geo_nonempty_bus_rows": 0,
+      "geo_nonempty_line_rows": 0,
+      "dat_vs_curve_load_totals_at_named_hour": [
+        {
+          "feeder": "DD线",
+          "dat_model_load_p_mw": 4.3740000000000006,
+          "xls_curve_load_p_mw": 5.370779300000001,
+          "difference_mw": 0.9967793
+        },
+        {
+          "feeder": "CW  线",
+          "dat_model_load_p_mw": 3.792,
+          "xls_curve_load_p_mw": 4.6377060000000006,
+          "difference_mw": 0.8457060000000007
+        },
+        {
+          "feeder": "ZF  东线",
+          "dat_model_load_p_mw": 0.30800000000000005,
+          "xls_curve_load_p_mw": 0.40394699999999994,
+          "difference_mw": 0.0959469999999999
+        },
+        {
+          "feeder": "GK  线",
+          "dat_model_load_p_mw": 1.503,
+          "xls_curve_load_p_mw": 1.7630199999999996,
+          "difference_mw": 0.2600199999999997
+        },
+        {
+          "feeder": "XR  线",
+          "dat_model_load_p_mw": 0.32,
+          "xls_curve_load_p_mw": 0.471235,
+          "difference_mw": 0.151235
+        },
+        {
+          "feeder": "YW  厂线",
+          "dat_model_load_p_mw": 5.994,
+          "xls_curve_load_p_mw": 6.9608700000000026,
+          "difference_mw": 0.9668700000000028
+        },
+        {
+          "feeder": "KQ线",
+          "dat_model_load_p_mw": 0.866,
+          "xls_curve_load_p_mw": 0.0462,
+          "difference_mw": -0.8198
+        },
+        {
+          "feeder": "NV  院1线",
+          "dat_model_load_p_mw": 0.152,
+          "xls_curve_load_p_mw": 0.35284,
+          "difference_mw": 0.20084
+        },
+        {
+          "feeder": "QL  大学线",
+          "dat_model_load_p_mw": 0.464,
+          "xls_curve_load_p_mw": 0.46259,
+          "difference_mw": -0.0014100000000000223
+        },
+        {
+          "feeder": "EA  线",
+          "dat_model_load_p_mw": 2.102,
+          "xls_curve_load_p_mw": 2.6328894999999997,
+          "difference_mw": 0.5308894999999998
+        },
+        {
+          "feeder": "VG  线",
+          "dat_model_load_p_mw": 1.712,
+          "xls_curve_load_p_mw": 1.9516300000000004,
+          "difference_mw": 0.23963000000000045
+        },
+        {
+          "feeder": "VH  线",
+          "dat_model_load_p_mw": 2.449,
+          "xls_curve_load_p_mw": 2.7612359999999994,
+          "difference_mw": 0.3122359999999995
+        },
+        {
+          "feeder": "YE  村线",
+          "dat_model_load_p_mw": 1.5890000000000002,
+          "xls_curve_load_p_mw": 1.8067585000000002,
+          "difference_mw": 0.21775849999999997
+        },
+        {
+          "feeder": "GA  熙湖线",
+          "dat_model_load_p_mw": 1.523,
+          "xls_curve_load_p_mw": 1.6414528000000002,
+          "difference_mw": 0.11845280000000025
+        },
+        {
+          "feeder": "IB  路南线",
+          "dat_model_load_p_mw": 0.8500000000000002,
+          "xls_curve_load_p_mw": 0.9137104999999998,
+          "difference_mw": 0.06371049999999956
+        },
+        {
+          "feeder": "JK  2线",
+          "dat_model_load_p_mw": 0.8800000000000001,
+          "xls_curve_load_p_mw": 1.4949229999999996,
+          "difference_mw": 0.6149229999999994
+        },
+        {
+          "feeder": "NR  线",
+          "dat_model_load_p_mw": 1.015,
+          "xls_curve_load_p_mw": 1.2753900000000002,
+          "difference_mw": 0.26039000000000034
+        },
+        {
+          "feeder": "ZF  线",
+          "dat_model_load_p_mw": 2.617,
+          "xls_curve_load_p_mw": 2.7193644999999993,
+          "difference_mw": 0.1023644999999993
+        }
+      ]
+    }
+  }
+}
