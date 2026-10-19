@@ -5,10 +5,10 @@ const state = {
   selected:null, color:'partition', layers:{main:true,interface:true,distribution:true,microgrid:true},
   scale:1, offset:{x:0,y:0}, search:'', running:false, importing:false, flow:false, labels:false,
   log:[], run:null, source:'等待上传数据', phase:'等待上传数据', activePartition:null, task:null, dragging:false,
-  focusArea:null, elementPage:0, partitionPage:0,
+  focusArea:null, elementPage:0, partitionPage:0, clientElapsedMs:null,
 };
 const canvas = $('topology'), ctx = canvas.getContext('2d');
-let size = {w:0,h:0}, nodes = new Map(), edgeLookup = new Map(), stream = null, timer = null, started = 0;
+let size = {w:0,h:0}, nodes = new Map(), edgeLookup = new Map(), stream = null, timer = null, started = null;
 let lastFrame = 0, lastPointer = null;
 let paintPending = false, flowStats={eligible:0,animated:0,zero:0};
 let areaNodes=new Map(), areaEdges=new Map(), visibleBuses=[], visibleLines=[], visibleTrafos=[], interties=[], analysisEdges=null;
@@ -126,7 +126,7 @@ function renderAnalysis(){
   }else method.textContent=state.dataset?'现场运行后显示加权分区依据和候选评价。':'请先上传原始数据文件夹。';
   const storedRun=r;
   $('partitionExplain').textContent=storedRun?.algorithm==='partitioned-nr'?'各分区并行消元 → 交流边界方程协调 → 电压修正回传':storedRun?.partition_check==='not requested'?'本次使用全网算法；未追加固定边界局部校核':'现场运行后显示本次分区求解记录';
-  metrics('runRecord',r?[['求解算法',r.algorithm_label],['牛顿迭代次数',String(r.iterations)],['边界协调轮数',String(r.boundary_iterations||0)],['CPU 计算线程',String(r.workers||1)],['最终残差 MVA',exp(r.residual_mva)],['数值求解耗时（含结构准备）',`${fmt(r.solver_ms,2)} ms`],['任务总耗时',`${fmt(r.total_ms,2)} ms`],['分区失败',String(r.partition_failed)],['开始时间',new Date(r.started_at).toLocaleString('zh-CN')],['结束时间',new Date(r.completed_at).toLocaleString('zh-CN')],['数据集',r.dataset_name||'—'],['计算时刻／断面',r.snapshot_label||'—'],['输入范围',r.reference_file_count?`所选 DAT；${r.reference_file_count} 份 Excel 仅保存，未接入模型`:'所选 DAT'],['本次输入',r.source_name],['输入 SHA-256（求解前后相同）',r.source_sha256,true]]:[['结果来源',state.source],['现场计算',selectedSnapshot()?'点击运行开始新任务':state.dataset?'请先选择计算时刻':'请先上传原始数据集文件夹']]);
+  metrics('runRecord',r?[['求解算法',r.algorithm_label],['牛顿迭代次数',String(r.iterations)],['边界协调轮数',String(r.boundary_iterations||0)],['CPU 计算线程',String(r.workers||1)],['最终残差 MVA',exp(r.residual_mva)],['数值求解耗时（含结构准备）',`${fmt(r.solver_ms,2)} ms`],['页面总用时（含排队与传输）',state.clientElapsedMs===null?'—':`${(state.clientElapsedMs/1000).toFixed(3)} s`],['后端任务耗时（不含排队与网络）',`${fmt(r.total_ms,2)} ms`],['分区失败',String(r.partition_failed)],['开始时间',new Date(r.started_at).toLocaleString('zh-CN')],['结束时间',new Date(r.completed_at).toLocaleString('zh-CN')],['数据集',r.dataset_name||'—'],['计算时刻／断面',r.snapshot_label||'—'],['输入范围',r.reference_file_count?`所选 DAT；${r.reference_file_count} 份 Excel 仅保存，未接入模型`:'所选 DAT'],['本次输入',r.source_name],['输入 SHA-256（求解前后相同）',r.source_sha256,true]]:[['结果来源',state.source],['现场计算',selectedSnapshot()?'点击运行开始新任务':state.dataset?'请先选择计算时刻':'请先上传原始数据集文件夹']]);
   $('runRecordTag').textContent=r?'本次现场运行':selectedSnapshot()?'等待运行':state.dataset?'等待选择时刻':'等待上传';
   if(r?.impedance_policy){const row=document.createElement('div');row.className='detail-metric wide';traceText(row,'span','阻抗基准设置');traceText(row,'strong',r.impedance_policy.label);$('runRecord').append(row);}
   if(r?.algorithm==='partitioned-nr'&&r.solver_details){
@@ -289,13 +289,19 @@ async function api(path,options={}){
 }
 function disableControls(locked){const ready=!!selectedSnapshot();$('runBtn').disabled=locked||!ready;$('runBtn').title=ready?'使用所选计算时刻的 DAT 现场求解':state.dataset?'请先选择计算时刻':'请先上传数据集文件夹';$('algorithmSelect').disabled=locked||!ready;$('uploadBtn').disabled=locked;document.querySelectorAll('.snapshot-option').forEach(button=>button.disabled=locked);}
 function lockControls(locked){disableControls(locked);$('runText').textContent=locked?'正在计算…':'运行潮流校核';$('runIcon').textContent=locked?'◌':'▶';$('runIcon').className=locked?'spinner':'';}
-function finish(){flushLogs();state.running=false;setFlow(false);state.activePartition=null;setPhase(null);lockControls(false);if(timer)clearInterval(timer);timer=null;if(stream)stream.close();stream=null;renderSelection();requestDraw();}
+function updateElapsed(){
+  if(!state.running||started===null)return;
+  state.clientElapsedMs=performance.now()-started;
+  $('timeKpi').textContent=`${(state.clientElapsedMs/1000).toFixed(2)} s`;
+  $('runElapsed').textContent=`页面用时 ${(state.clientElapsedMs/1000).toFixed(3)} s`;
+}
+function finish(){flushLogs();updateElapsed();state.running=false;setFlow(false);state.activePartition=null;setPhase(null);lockControls(false);if(timer)clearInterval(timer);timer=null;if(stream)stream.close();stream=null;renderSelection();requestDraw();}
 function failRun(message){state.source=state.scene.buses.length?(state.scene.result_status==='waiting'?'未收敛迭代值（非最终结果）':'本次失败 · 上次运行结果'):'本次失败 · 无计算结果';finish();addLog(message,'failed');origin('本次失败 · 未生成新结果','failed');stage('本次计算失败',message,true);$('timeSub').textContent='本次失败；原有结果不代表本次计算';}
 async function run(){
   if(!selectedSnapshot()){addLog(state.dataset?'请先选择这套数据集的计算时刻。':'请先上传原始数据集文件夹。','failed');return;}
-  if(state.running||state.importing)return;if(trace.viewing)restoreFinal();resetTrace();setFlow(false);state.running=true;state.run=null;state.task=null;started=performance.now();lockControls(true);activateTab('topology');stage('正在创建计算任务','读取所选数据与算法');origin('现场计算中');
+  if(state.running||state.importing)return;if(trace.viewing)restoreFinal();resetTrace();setFlow(false);state.running=true;state.run=null;state.task=null;state.clientElapsedMs=0;started=performance.now();$('uploadStatus').hidden=true;updateElapsed();$('timeSub').textContent='本次任务进行中 · 含排队与传输';$('timeSub').title='';lockControls(true);activateTab('topology');stage('正在创建计算任务','读取所选数据与算法');origin('现场计算中');
   addLog(`提交数据集 ${state.dataset.label} · ${selectedSnapshot().label} · ${$('algorithmSelect').selectedOptions[0].textContent}`);
-  timer=setInterval(()=>{const elapsed=(performance.now()-started)/1000;$('runElapsed').textContent=`${elapsed.toFixed(3)} s`;$('timeKpi').textContent=`${elapsed.toFixed(2)} s`;$('timeSub').textContent='本次任务进行中';},80);
+  timer=setInterval(updateElapsed,80);
   try{
     const task=await api('/api/runs',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({dataset_id:state.dataset.id,snapshot_id:state.snapshot,algorithm:$('algorithmSelect').value})});
     state.task=task.task_id;stream=new EventSource(`/api/runs/${task.task_id}/events`);
@@ -320,8 +326,9 @@ async function run(){
         if(e.type==='completed'){
           stream.close();stream=null;
           const result=await api(`/api/runs/${task.task_id}/result`);if(state.task!==task.task_id)return;
-          state.run=result.run;setScene(result,'本次现场计算结果');finish();captureFinal();
-          $('timeKpi').textContent=`${fmt(result.run.total_ms,1)} ms`;$('timeSub').textContent=`数值求解 ${fmt(result.run.solver_ms,1)} ms · ${result.run.iterations} 次牛顿迭代`;$('runElapsed').textContent=`${(result.run.total_ms/1000).toFixed(3)} s`;
+          state.run=result.run;setScene(result,'本次现场计算结果');captureFinal();finish();
+          $('timeSub').textContent=`后端 ${fmt(result.run.total_ms,1)} ms · 求解 ${fmt(result.run.solver_ms,1)} ms`;
+          $('timeSub').title='后端耗时不含排队和网络；求解耗时为后端耗时的一部分。主卡片始终显示从点击运行到结果就绪的页面总用时。';
           const hasFailures=result.run.partition_failed>0;
           stage(hasFailures?'全网收敛 · 部分分区未通过':'本次潮流计算完成',`残差 ${exp(result.run.residual_mva)} MVA · ${result.run.iterations} 次迭代`,hasFailures);
           origin(`${state.scene.label} · 本次结果`,hasFailures?'failed':'live');renderAnalysis();
@@ -367,7 +374,7 @@ function changeSnapshot(id){
   if(!state.dataset||state.running||(id!=null&&!state.dataset.snapshots.some(s=>s.id===id)))return;
   if(trace.viewing)restoreFinal();resetTrace();setFlow(false);$('replayDetails').open=false;state.snapshot=id;state.run=null;state.selected=null;state.activePartition=null;
   state.elementPage=0;state.partitionPage=0;state.search='';$('search').value='';$('elementSearch').value='';
-  $('timeKpi').textContent='—';$('timeSub').textContent='等待现场运行';$('runElapsed').textContent='0.000 s';state.task=null;
+  started=null;state.clientElapsedMs=null;$('timeKpi').textContent='—';$('timeSub').textContent='等待现场运行';$('timeSub').title='';$('runElapsed').textContent='页面用时 0.000 s';state.task=null;
   const snapshot=selectedSnapshot();
   setScene({scenario:emptyScene(),layout:{}},snapshot?'已选择运行断面 · 尚未求解':'数据集已上传 · 等待选择计算时刻');
   stage(snapshot?`已选择 ${snapshot.label} 运行断面`:'数据集已上传','选择计算时刻 → 运行潮流校核');
@@ -376,26 +383,61 @@ function changeSnapshot(id){
   renderDataset();disableControls(state.importing);
   if(snapshot)addLog(`数据集 ${state.dataset.label} · 选择计算时刻／断面：${snapshot.label}（${snapshot.filename}）`);
 }
+function transferSize(bytes){return bytes<1024**2?`${(bytes/1024).toFixed(1)} KiB`:`${(bytes/1024**2).toFixed(2)} MiB`;}
+function setUploadStatus(phase,title,detail,percent=null){
+  $('uploadStatus').hidden=false;$('uploadStatus').dataset.phase=phase;
+  $('uploadStage').textContent=title;$('uploadDetail').textContent=detail;$('uploadDetail').title=detail;
+  if(percent===null)$('uploadProgress').removeAttribute('value');else $('uploadProgress').value=Math.max(0,Math.min(100,percent));
+  $('uploadPercent').textContent=phase==='failed'?'失败':percent===null?(phase==='recognizing'?'识别中':phase==='uploading'?'上传中':'准备中'):`${Math.floor(percent)}%`;
+  $('uploadProgress').setAttribute('aria-valuetext',`${title}，${$('uploadPercent').textContent}，${detail}`);
+}
+function uploadDataset(files){
+  return new Promise((resolve,reject)=>{
+    const xhr=new XMLHttpRequest();xhr.open('POST','/api/datasets/import');xhr.responseType='json';xhr.timeout=120000;
+    xhr.setRequestHeader('Content-Type','application/json');
+    xhr.upload.onprogress=event=>{
+      const detail=event.lengthComputable?`${transferSize(event.loaded)} / ${transferSize(event.total)}（传输数据）`:`已传输 ${transferSize(event.loaded)}`;
+      setUploadStatus('uploading','正在上传数据集',detail,event.lengthComputable?event.loaded/event.total*100:null);
+    };
+    xhr.upload.onload=()=>setUploadStatus('recognizing','文件已上传，正在识别','服务端正在校验原文件并识别 DAT 运行断面');
+    xhr.onload=()=>{
+      if(xhr.status<200||xhr.status>=300){reject(new Error(xhr.response?.error||`上传服务返回 HTTP ${xhr.status}`));return;}
+      if(!xhr.response?.dataset?.snapshots?.length){reject(new Error('服务端未返回有效的数据集，请确认计算服务正常后重试'));return;}
+      resolve(xhr.response);
+    };
+    xhr.onerror=()=>reject(new Error('上传连接中断，请检查网络后重试'));
+    xhr.ontimeout=()=>reject(new Error('上传或识别超时，请检查网络及服务状态后重试'));
+    xhr.onabort=()=>reject(new Error('上传已取消'));
+    setUploadStatus('uploading','正在上传数据集','正在建立上传连接',0);
+    xhr.send(JSON.stringify({files}));
+  });
+}
 async function importFolder(event){
   if(!event.target.files.length)return;
-  const files=[...event.target.files].filter(f=>/\.(dat|xls|xlsx)$/i.test(f.name));
-  if(!files.some(f=>/\.dat$/i.test(f.name))){addLog('导入失败：所选数据集文件夹中没有 DAT 运行断面','failed');event.target.value='';return;}
-  if(files.reduce((n,f)=>n+f.size,0)>32*1024**2){addLog('导入失败：文件总大小超过 32 MiB','failed');event.target.value='';return;}
+  if(state.running||state.importing){event.target.value='';return;}
   state.importing=true;disableControls(true);
   try{
+    const files=[...event.target.files].filter(f=>/\.(dat|xls|xlsx)$/i.test(f.name));
+    if(!files.some(f=>/\.dat$/i.test(f.name)))throw new Error('所选数据集文件夹中没有 DAT 运行断面');
+    if(files.length>500)throw new Error('文件数量超过 500 个');
+    if(files.reduce((n,f)=>n+f.size,0)>32*1024**2||files.some(f=>f.size>16*1024**2))throw new Error('上传总大小限 32 MiB，单文件限 16 MiB');
+    setUploadStatus('preparing','准备文件',`0 / ${files.length} 个文件`);
+    await new Promise(requestAnimationFrame);
     addLog(`正在上传 1 套数据集，共 ${files.length} 个 DAT / Excel 文件，保留原始字节`);
     const payload=[];
     for(const file of files){
+      setUploadStatus('preparing','准备文件',`${payload.length} / ${files.length} 个文件 · ${file.name}`);
       const bytes=new Uint8Array(await file.arrayBuffer());let raw='';
       for(let i=0;i<bytes.length;i+=16384)raw+=String.fromCharCode(...bytes.subarray(i,i+16384));
       payload.push({path:file.webkitRelativePath||file.name,content:btoa(raw)});
     }
-    const result=await api('/api/datasets/import',{method:'POST',headers:{'Content-Type':'application/json'},timeoutMs:120000,body:JSON.stringify({files:payload})});
+    const result=await uploadDataset(payload);
     state.dataset=result.dataset;
     changeSnapshot(state.dataset.snapshots.length===1?state.dataset.snapshots[0].id:null);
+    setUploadStatus('completed','导入完成',`${state.dataset.summary.file_count} 个文件 · ${state.dataset.snapshots.length} 个运行断面`,100);
     addLog(`成功导入 1 套数据集：${state.dataset.label}，含 ${state.dataset.snapshots.length} 个运行断面。${selectedSnapshot()?'已选择唯一断面。':'请选择计算时刻。'}`,'completed');
     if(state.dataset.files.some(f=>f.usage==='reference_only'))addLog('馈线表与目录属于本数据集；原文件已保存，当前不参与 DAT 潮流求解。');
-  }catch(error){addLog(`导入失败：${error.message}`,'failed');}
+  }catch(error){setUploadStatus('failed','导入失败',error.message,0);addLog(`导入失败：${error.message}`,'failed');}
   finally{state.importing=false;disableControls(false);$('folderInput').value='';}
 }
 function download(name,text,type='text/plain;charset=utf-8'){const url=URL.createObjectURL(new Blob([text],{type})),a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),500);}

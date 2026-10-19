@@ -19,6 +19,12 @@ main{height:calc(100dvh - 50px);width:100%;padding:10px 16px;display:flex;flex-d
 .commandbar .button{padding:9px 12px;font-size:12px;flex-shrink:0}.commandbar>.primary{margin-left:0}
 .commandbar>label{margin-left:auto;font-size:10px;gap:6px;min-width:0}.commandbar select{min-width:0;max-width:245px;padding:8px;font-size:11px}
 .commandbar .snapshot-group{display:flex;gap:8px;align-items:center;margin:0;padding:0;border:0;flex-shrink:0}
+.upload-status{flex:none;display:flex;align-items:center;gap:12px;min-width:0;padding:8px 12px;border:1px solid #cfe0ee;border-radius:8px;background:#f3f8fc;color:#3279a8;font-size:11px}
+.upload-status[hidden]{display:none}.upload-status-text{display:flex;align-items:center;gap:10px;min-width:0;flex:1}
+.upload-status-text strong{white-space:nowrap}.upload-status-text>span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--muted)}
+.upload-status progress{width:clamp(100px,20vw,300px);height:9px;accent-color:#3285bb}.upload-status>span{min-width:42px;text-align:right;font-variant-numeric:tabular-nums}
+.upload-status[data-phase="completed"]{color:#27856c;border-color:#c9e5db;background:#f1faf6}.upload-status[data-phase="completed"] progress{accent-color:#27856c}
+.upload-status[data-phase="failed"]{color:#bf4354;border-color:#efcbd1;background:#fff5f6}.upload-status[data-phase="failed"] progress{accent-color:#bf4354}
 .snapshot-group>strong{font-size:10px;color:var(--muted);font-weight:500}.snapshot-options{gap:4px;margin:0}
 .snapshot-option{min-width:0;padding:7px 9px}.snapshot-option strong{font-size:12px}.snapshot-option.active{box-shadow:none}
 .kpis{grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin:0;flex:none}
@@ -61,6 +67,7 @@ main{height:calc(100dvh - 50px);width:100%;padding:10px 16px;display:flex;flex-d
   .commandbar .dataset-current{flex:1;max-width:none}.commandbar>label{margin-left:auto}.commandbar .snapshot-group{order:0}
   .commandbar>label select{max-width:none}.commandbar .primary{width:auto;margin-left:auto}
   .kpis,.tabs{margin-bottom:8px}.workspace{height:auto;grid-template-columns:1fr}
+  .upload-status{margin-bottom:8px}
   .topology-panel{height:auto}.map-wrap{height:clamp(280px,48dvh,500px);flex:none}
   .sidebar{height:auto;overflow:visible;display:grid;grid-template-columns:1fr 1fr}.detail-panel{max-height:340px}.trace-panel{max-height:300px}
   .log-panel{min-height:260px;grid-column:1/-1}.log{max-height:250px}
@@ -70,6 +77,7 @@ main{height:calc(100dvh - 50px);width:100%;padding:10px 16px;display:flex;flex-d
   .topbar{padding:0 12px}.brand h1{font-size:14px}.brand p{display:none}.connection{font-size:9px;max-width:100px}
   .commandbar{gap:7px;padding:8px}.commandbar .button{font-size:11px;padding:8px 10px}
   .commandbar>label{flex:1 1 60%;font-size:9px}.commandbar .snapshot-group{flex-basis:100%}.commandbar .primary{width:auto;margin-left:0}
+  .upload-status{flex-wrap:wrap;gap:6px}.upload-status-text{flex-basis:100%}.upload-status progress{flex:1}
   .kpis{gap:4px;grid-template-columns:repeat(5,minmax(0,1fr))}.kpi{padding:6px}.kpi strong{font-size:14px}.kpi>span{font-size:8px}.kpi small{display:none}.kpi:last-child{grid-column:auto}
   .map-toolbar{flex-wrap:wrap}.map-toolbar>input{flex-basis:100%}.layer-strip{gap:4px}.layer{padding:5px;font-size:9px}
   .sidebar{display:flex}.detail-panel{max-height:400px}.log-panel{min-height:280px}.result-origin{max-width:40%;font-size:9px}

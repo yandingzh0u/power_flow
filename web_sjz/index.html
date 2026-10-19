@@ -21,12 +21,16 @@
     <label>潮流算法<select id="algorithmSelect" disabled><option value="partitioned-nr">加权分区 + 并行 Newton–Schur</option><option value="nr">普通牛顿法</option><option value="damped-nr">阻尼牛顿法</option><option value="bpa-style">解耦启动 + 牛顿法</option></select></label>
     <button class="button primary" id="runBtn" disabled><span id="runIcon">▶</span> <span id="runText">运行潮流校核</span></button>
   </section>
+  <section id="uploadStatus" class="upload-status" data-phase="preparing" role="status" aria-live="polite" hidden>
+    <div class="upload-status-text"><strong id="uploadStage">准备文件</strong><span id="uploadDetail"></span></div>
+    <progress id="uploadProgress" max="100" aria-labelledby="uploadStage"></progress><span id="uploadPercent">准备中</span>
+  </section>
   <section class="kpis" aria-label="网络概况">
     <div class="kpi"><span>网络规模</span><strong id="busKpi">—</strong><small id="busSub">母线</small></div>
     <div class="kpi"><span>线路 / 变压器</span><strong id="edgeKpi">—</strong><small>全部 L / T 卡均计入统计</small></div>
     <div class="kpi"><span>T 支路最高电流负载率</span><strong id="loadingKpi">—</strong><small id="loadingSub">线路与 T 支路分别统计</small></div>
     <div class="kpi"><span>配网分区收敛</span><strong id="partitionKpi">—</strong><small id="partitionSub">并行消元 · 边界协调 · 电压回传</small></div>
-    <div class="kpi"><span>本次计算用时</span><strong id="timeKpi">—</strong><small id="timeSub">等待现场运行</small></div>
+    <div class="kpi" title="从点击运行到结果就绪，包含排队、网络传输和页面处理"><span>本次总用时</span><strong id="timeKpi">—</strong><small id="timeSub">等待现场运行</small></div>
   </section>
   <nav class="tabs"><button class="tab active" data-tab="topology">主配微拓扑</button><button class="tab" data-tab="analysis">潮流与分区分析</button><span id="resultOrigin" class="result-origin">等待上传数据</span></nav>
   <section id="view-topology" class="view active">
@@ -53,7 +57,7 @@
       <aside class="sidebar">
         <article class="panel detail-panel"><div class="panel-head"><div><span class="eyebrow">LIVE ELEMENT STATUS</span><h2 id="detailTitle">节点与元件状态</h2></div><span id="detailTag" class="badge">等待选择</span></div><div id="detailEmpty" class="detail-empty">点击左侧母线、线路或变压器<br><small>所选元件会随本次计算持续更新</small></div><div id="detailGrid" class="detail-grid" hidden></div><div id="detailUpdated" class="detail-updated">状态来源：等待上传数据</div></article>
         <article class="panel trace-panel"><details id="partitionDetails"><summary>所选分区 · 边界迭代明细</summary><div id="partitionTrace" class="partition-trace">点击配网节点，查看所属分区、线程、残差及边界两侧 P/Q。</div></details></article>
-        <article class="panel log-panel"><div class="panel-head"><div><span class="eyebrow">COMPUTATION STREAM</span><h2>实时计算日志 <span id="logCount">0</span></h2></div><button id="downloadLog" class="text-button">下载完整记录</button></div><div class="run-summary"><span id="runPhase">等待上传数据</span><span id="runElapsed">0.000 s</span></div><div id="workerStatus" class="worker-status">CPU 资源在运行时自动识别</div><div id="phaseStrip" class="phase-strip"><span data-phase="local-elimination">① 并行消元</span><span data-phase="boundary-coordination">② 边界协调</span><span data-phase="back-substitution">③ 修正回传</span></div><div id="log" class="log" role="log" aria-live="polite"></div><div class="log-footer"><span id="logFollow">自动跟随最新日志</span><button id="clearLog" class="text-button">清空显示</button></div></article>
+        <article class="panel log-panel"><div class="panel-head"><div><span class="eyebrow">COMPUTATION STREAM</span><h2>实时计算日志 <span id="logCount">0</span></h2></div><button id="downloadLog" class="text-button">下载完整记录</button></div><div class="run-summary"><span id="runPhase">等待上传数据</span><span id="runElapsed">页面用时 0.000 s</span></div><div id="workerStatus" class="worker-status">CPU 资源在运行时自动识别</div><div id="phaseStrip" class="phase-strip"><span data-phase="local-elimination">① 并行消元</span><span data-phase="boundary-coordination">② 边界协调</span><span data-phase="back-substitution">③ 修正回传</span></div><div id="log" class="log" role="log" aria-live="polite"></div><div class="log-footer"><span id="logFollow">自动跟随最新日志</span><button id="clearLog" class="text-button">清空显示</button></div></article>
       </aside>
     </div>
   </section>
