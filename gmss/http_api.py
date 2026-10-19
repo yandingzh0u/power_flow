@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 from functools import partial
 import hashlib
+import gzip
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from io import BytesIO
 import json
@@ -25,7 +26,7 @@ class Handler(SimpleHTTPRequestHandler):
         if urlparse(self.path).path in ('/', '/index.html'):
             root = Path(self.directory)
             html = (root / 'index.html').read_text(encoding='utf-8')
-            for name in ('styles.css', 'data.js', 'app.js'):
+            for name in ('styles.css', 'trace.js', 'app.js'):
                 version = hashlib.sha256((root / name).read_bytes()).hexdigest()[:16]
                 html = html.replace(f'{name}?v=__ASSET_VERSION__', f'{name}?v={version}')
             data = html.encode('utf-8')
@@ -41,11 +42,28 @@ class Handler(SimpleHTTPRequestHandler):
     def service(self):
         return self.server.service
 
-    def send_json(self, code, payload):
-        data = json.dumps(payload, ensure_ascii=False, allow_nan=False).encode()
+    def send_json(self, code, payload, filename=None):
+        data = json.dumps(payload, ensure_ascii=False, allow_nan=False, separators=(',', ':')).encode()
+        compress = False
+        for item in self.headers.get('Accept-Encoding', '').split(','):
+            name, *options = item.strip().split(';')
+            if name != 'gzip':
+                continue
+            quality = next((p.strip()[2:] for p in options if p.strip().startswith('q=')), '1')
+            try:
+                compress = float(quality) > 0 and len(data) >= 1024
+            except ValueError:
+                pass
+        if compress:
+            data = gzip.compress(data, compresslevel=1)
         self.send_response(code)
         self.send_header('Content-Type', 'application/json; charset=utf-8')
         self.send_header('Cache-Control', 'no-store')
+        self.send_header('Vary', 'Accept-Encoding')
+        if filename:
+            self.send_header('Content-Disposition', f'attachment; filename="{filename}"')
+        if compress:
+            self.send_header('Content-Encoding', 'gzip')
         self.send_header('Content-Length', str(len(data)))
         self.end_headers()
         self.wfile.write(data)
@@ -71,7 +89,13 @@ class Handler(SimpleHTTPRequestHandler):
                 if parts[3] == 'result':
                     if task['status'] != 'completed':
                         return self.send_json(409, {'status':task['status']})
-                    return self.send_json(200, task['result'])
+                    return self.send_json(200, self.service.result(task))
+                if parts[3] == 'trace':
+                    # A plain HTTP download preserves full structured telemetry,
+                    # even if the browser's visible log has been cleared.
+                    with task['condition']:
+                        snapshot = {'task_id': task['id'], 'status': task['status'], 'events': list(self.service.events(task))}
+                    return self.send_json(200, snapshot, f"powerflow-{task['id']}-trace.json")
             if path.startswith('/api/'):
                 return self.send_json(404, {'error':'接口不存在'})
             return super().do_GET()
@@ -87,10 +111,12 @@ class Handler(SimpleHTTPRequestHandler):
             path = urlparse(self.path).path
             payload = self.payload()
             if path == '/api/datasets/import':
-                return self.send_json(201, {'datasets':self.service.import_folder(payload.get('files'))})
+                return self.send_json(201, {'dataset':self.service.import_folder(payload.get('files'))})
             if path == '/api/runs':
-                task = self.service.create(str(payload.get('dataset_id','13')), str(payload.get('algorithm','nr')))
-                return self.send_json(202, {'task_id':task['id'], 'status':task['status']})
+                task = self.service.create(str(payload.get('dataset_id') or ''), str(payload.get('algorithm','partitioned-nr')),
+                                           str(payload.get('snapshot_id') or ''))
+                return self.send_json(202, {'task_id':task['id'], 'status':task['status'],
+                                            'dataset_id':task['dataset_id'], 'snapshot_id':task['snapshot_id']})
             return self.send_json(404, {'error':'接口不存在'})
         except (ValueError, KeyError, TypeError, UnicodeError) as error:
             self.send_json(400, {'error':str(error)})
@@ -98,6 +124,8 @@ class Handler(SimpleHTTPRequestHandler):
             self.send_json(500, {'error':str(error)})
 
     def stream(self, task):
+        if task.get('archived'):
+            task = {**task, 'events': self.service.events(task), 'event_frames': None}
         last = self.headers.get('Last-Event-ID','0')
         index = max(0, int(last))
         self.send_response(200)
@@ -113,9 +141,13 @@ class Handler(SimpleHTTPRequestHandler):
                     if index >= len(task['events']) and task['status'] not in ('completed','failed'):
                         task['condition'].wait(timeout=1)
                     events = task['events'][index:]
-                for event in events:
-                    data = json.dumps(event, ensure_ascii=False, allow_nan=False)
-                    self.wfile.write(f"id: {event['id']}\ndata: {data}\n\n".encode())
+                    frames = task.get('event_frames')
+                    frames = frames[index:] if frames is not None else [None] * len(events)
+                for event, frame in zip(events, frames):
+                    if frame is None:
+                        data = json.dumps(event, ensure_ascii=False, allow_nan=False, separators=(',', ':'))
+                        frame = f"id: {event['id']}\ndata: {data}\n\n".encode()
+                    self.wfile.write(frame)
                     index = event['id']
                 self.wfile.write(b': heartbeat\n\n')
                 self.wfile.flush()

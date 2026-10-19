@@ -11,7 +11,7 @@ from gmss.raw_solver import solve
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--raw-dir',type=Path,default=ROOT/'raw_dataset/extracted')
-    parser.add_argument('--algorithm',choices=('nr','damped-nr','bpa-style'),default='nr')
+    parser.add_argument('--algorithm',choices=('nr','damped-nr','bpa-style','partitioned-nr'),default='partitioned-nr')
     parser.add_argument('--output-dir',type=Path,default=ROOT/'runtime/exports')
     args=parser.parse_args()
     args.output_dir.mkdir(parents=True,exist_ok=True)

@@ -1,0 +1,107 @@
+{
+  "kind": "synthetic_replication",
+  "version": 1,
+  "source_name": "13点sim2合并anony.dat",
+  "source_sha256": "ae840c888ccac947ac76cd4a43d3fa4352495685690ee3467998c09ba0918e9c",
+  "base_mva": 1000.0,
+  "copies": 5,
+  "connection": "ring",
+  "area_prefixes": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E"
+  ],
+  "source_bus_count": 2121,
+  "source_branch_count": 2127,
+  "bus_count": 10605,
+  "branch_count": 10640,
+  "global_slack": "AVOE21",
+  "slack_changes": [
+    {
+      "bus": "BVOE21",
+      "from": "BS",
+      "to": "BE",
+      "scheduled_p_mw": 241.7,
+      "voltage_target_pu": 1.0
+    },
+    {
+      "bus": "CVOE21",
+      "from": "BS",
+      "to": "BE",
+      "scheduled_p_mw": 241.7,
+      "voltage_target_pu": 1.0
+    },
+    {
+      "bus": "DVOE21",
+      "from": "BS",
+      "to": "BE",
+      "scheduled_p_mw": 241.7,
+      "voltage_target_pu": 1.0
+    },
+    {
+      "bus": "EVOE21",
+      "from": "BS",
+      "to": "BE",
+      "scheduled_p_mw": 241.7,
+      "voltage_target_pu": 1.0
+    }
+  ],
+  "intertie_template_source_line": 291,
+  "interties": [
+    {
+      "from": "ACBE21",
+      "to": "BQUA21",
+      "kv": 230.0,
+      "r_pu": 0.0007,
+      "x_pu": 0.0049,
+      "half_g_pu": 0.0,
+      "half_b_pu": 0.0093,
+      "rate_mva": 549.7529263223616
+    },
+    {
+      "from": "BCBE21",
+      "to": "CQUA21",
+      "kv": 230.0,
+      "r_pu": 0.0007,
+      "x_pu": 0.0049,
+      "half_g_pu": 0.0,
+      "half_b_pu": 0.0093,
+      "rate_mva": 549.7529263223616
+    },
+    {
+      "from": "CCBE21",
+      "to": "DQUA21",
+      "kv": 230.0,
+      "r_pu": 0.0007,
+      "x_pu": 0.0049,
+      "half_g_pu": 0.0,
+      "half_b_pu": 0.0093,
+      "rate_mva": 549.7529263223616
+    },
+    {
+      "from": "DCBE21",
+      "to": "EQUA21",
+      "kv": 230.0,
+      "r_pu": 0.0007,
+      "x_pu": 0.0049,
+      "half_g_pu": 0.0,
+      "half_b_pu": 0.0093,
+      "rate_mva": 549.7529263223616
+    },
+    {
+      "from": "ECBE21",
+      "to": "AQUA21",
+      "kv": 230.0,
+      "r_pu": 0.0007,
+      "x_pu": 0.0049,
+      "half_g_pu": 0.0,
+      "half_b_pu": 0.0093,
+      "rate_mva": 549.7529263223616
+    }
+  ],
+  "policy": "Research hypothesis: duplicate internal cards; rename buses; retain one BS; convert other BS to BE preserving original P and voltage targets; add template L ties. No load scaling, impedance adjustment or rating enlargement.",
+  "generated_file": "sjz_13_x5_ring.dat",
+  "generated_sha256": "a2a7f550b4ef049d3aa522637a9fb41d7aa12239cfe963f3c8316bf600c145c8"
+}

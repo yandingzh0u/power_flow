@@ -66,7 +66,7 @@ def validate_bpa_scope(path, buses):
 def solve(path, output=None, algorithm="nr", observer=None, include_results=False):
     digest = hashlib.sha256(path.read_bytes()).hexdigest()
     base, buses, branches, instructions = read_dat(path)
-    if algorithm not in ("nr", "damped-nr", "bpa-style"):
+    if algorithm not in ("nr", "damped-nr", "bpa-style", "partitioned-nr"):
         raise ValueError(f"Unknown algorithm: {algorithm}")
     validate_bpa_scope(path, buses)
     lookup = {b["key"]: i for i, b in enumerate(buses)}
@@ -122,18 +122,27 @@ def solve(path, output=None, algorithm="nr", observer=None, include_results=Fals
                    shape=(len(buses), len(reduced))).tocsr()
     y_original = stamp(base, buses, ordinary)
     y_reduced = (c.T @ y_original @ c).tocsr()
+    model = {'kind': 'model', 'base': base, 'buses': buses, 'branches': branches,
+             'reduced': reduced, 'group_index': group_index, 'y_reduced': y_reduced}
     if observer:
-        observer({'kind': 'model', 'base': base, 'buses': buses, 'branches': branches,
-                  'reduced': reduced, 'group_index': group_index, 'y_reduced': y_reduced})
+        observer(model)
 
     def progress(row, value):
         if observer:
-            observer({'kind': 'iteration', **row, 'voltage': value[group_index], 'base': base})
+            observer({'kind': 'iteration', **row, 'voltage': value[group_index] if value is not None else None, 'base': base})
 
     solver_details = None
     reference_voltage = None
     numerical_started = time.perf_counter()
-    if algorithm == "bpa-style":
+    if algorithm == "partitioned-nr":
+        from .coupled import solve_coupled
+        from .partition import build_partitions
+        parts = model.get('parts')
+        if parts is None:
+            parts = build_partitions(model)
+        v_reduced, solver_details = solve_coupled(base, reduced, y_reduced, parts, progress)
+        history = solver_details['history']
+    elif algorithm == "bpa-style":
         options = SolutionOptions.from_instructions(instructions)
         v_reduced, solver_details = solve_bpa_style(base, reduced, y_reduced, options, progress)
         history = [row["max_mismatch_pu"] for row in solver_details["trace"]]
@@ -193,7 +202,7 @@ def solve(path, output=None, algorithm="nr", observer=None, include_results=Fals
                       "apparent_power_loading_percent": float(abs(power) / rate * 100) if rate else None,
                       "active_power_ratio_percent": float(abs(power.real) / rate * 100) if rate else None})
     flows.sort(key=lambda r: r["source_line"])
-    if solver_details is not None:
+    if algorithm == 'bpa-style':
         for row in flows:
             for quantity in ("current", "apparent_power"):
                 loading = row[quantity + "_loading_percent"]
@@ -210,7 +219,7 @@ def solve(path, output=None, algorithm="nr", observer=None, include_results=Fals
                  "net_q_injection_mvar": float(recovered[i].imag),
                  "be_q_mvar": float(recovered[i].imag + b["load_q"]) if b["subtype"] == "E" else None}
                 for i, b in enumerate(buses)]
-    if solver_details is not None:
+    if algorithm == 'bpa-style':
         for bus, row in zip(buses, bus_rows):
             row.update({"raw_qmax_mvar": bus["raw_qmax_mvar"], "raw_qmin_mvar": bus["raw_qmin_mvar"],
                         "required_voltage_support_q_mvar": None, "allocated_q_generation_mvar": None,
@@ -240,7 +249,7 @@ def solve(path, output=None, algorithm="nr", observer=None, include_results=Fals
             "above_100_percent": sum(r["current_loading_percent"] > 100 for r in rated),
             "above_200_percent": sum(r["current_loading_percent"] > 200 for r in rated),
             "top_5": sorted(rated, key=lambda r: r["current_loading_percent"], reverse=True)[:5]}
-    if solver_details is not None:
+    if reference_voltage is not None:
         comparison = {"max_complex_voltage_difference_pu": float(max(abs(voltage - reference_voltage))),
                       "max_ordinary_branch_end_power_difference_mva": 0.0,
                       "target_loading_difference_percentage_points": 0.0}
@@ -272,6 +281,9 @@ def solve(path, output=None, algorithm="nr", observer=None, include_results=Fals
                             "current_loading_percent": "100 * max(|S_from|/|V_from_pu|, |S_to|/|V_to_pu|) / rate_MVA",
                             "apparent_power_loading_percent": "100 * max(|S_from|, |S_to|) / rate_MVA",
                             "overload_excess_percent": "max(loading_percent - 100, 0); differs from loading percent"}})
+    if solver_details is not None:
+        summary['solver_details'] = solver_details
+    summary['partitioning'] = model.get('partitioning')
     name = path.name.split("点")[0]
     if output is not None:
         output = Path(output)

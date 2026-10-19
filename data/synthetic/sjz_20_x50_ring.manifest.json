@@ -1,0 +1,932 @@
+{
+  "kind": "synthetic_replication",
+  "version": 1,
+  "source_name": "20点sim2合并anony.dat",
+  "source_sha256": "f9712bf7c5e03185b77d8648f3ffc4c550ee383dca6df07003e17eff0c890dc5",
+  "base_mva": 1000.0,
+  "copies": 50,
+  "connection": "ring",
+  "area_prefixes": [
+    "01",
+    "02",
+    "03",
+    "04",
+    "05",
+    "06",
+    "07",
+    "08",
+    "09",
+    "10",
+    "11",
+    "12",
+    "13",
+    "14",
+    "15",
+    "16",
+    "17",
+    "18",
+    "19",
+    "20",
+    "21",
+    "22",
+    "23",
+    "24",
+    "25",
+    "26",
+    "27",
+    "28",
+    "29",
+    "30",
+    "31",
+    "32",
+    "33",
+    "34",
+    "35",
+    "36",
+    "37",
+    "38",
+    "39",
+    "40",
+    "41",
+    "42",
+    "43",
+    "44",
+    "45",
+    "46",
+    "47",
+    "48",
+    "49",
+    "50"
+  ],
+  "source_bus_count": 2122,
+  "source_branch_count": 2129,
+  "bus_count": 106100,
+  "branch_count": 106500,
+  "global_slack": "01VOE21",
+  "slack_changes": [
+    {
+      "bus": "02VOE21",
+      "from": "BS",
+      "to": "BE",
+      "scheduled_p_mw": 207.9,
+      "voltage_target_pu": 1.01
+    },
+    {
+      "bus": "03VOE21",
+      "from": "BS",
+      "to": "BE",
+      "scheduled_p_mw": 207.9,
+      "voltage_target_pu": 1.01
+    },
+    {
+      "bus": "04VOE21",
+      "from": "BS",
+      "to": "BE",
+      "scheduled_p_mw": 207.9,
+      "voltage_target_pu": 1.01
+    },
+    {
+      "bus": "05VOE21",
+      "from": "BS",
+      "to": "BE",
+      "scheduled_p_mw": 207.9,
+      "voltage_target_pu": 1.01
+    },
+    {
+      "bus": "06VOE21",
+      "from": "BS",
+      "to": "BE",
+      "scheduled_p_mw": 207.9,
+      "voltage_target_pu": 1.01
+    },
+    {
+      "bus": "07VOE21",
+      "from": "BS",
+      "to": "BE",
+      "scheduled_p_mw": 207.9,
+      "voltage_target_pu": 1.01
+    },
+    {
+      "bus": "08VOE21",
+      "from": "BS",
+      "to": "BE",
+      "scheduled_p_mw": 207.9,
+      "voltage_target_pu": 1.01
+    },
+    {
+      "bus": "09VOE21",
+      "from": "BS",
+      "to": "BE",
+      "scheduled_p_mw": 207.9,
+      "voltage_target_pu": 1.01
+    },
+    {
+      "bus": "10VOE21",
+      "from": "BS",
+      "to": "BE",
+      "scheduled_p_mw": 207.9,
+      "voltage_target_pu": 1.01
+    },
+    {
+      "bus": "11VOE21",
+      "from": "BS",
+      "to": "BE",
+      "scheduled_p_mw": 207.9,
+      "voltage_target_pu": 1.01
+    },
+    {
+      "bus": "12VOE21",
+      "from": "BS",
+      "to": "BE",
+      "scheduled_p_mw": 207.9,
+      "voltage_target_pu": 1.01
+    },
+    {
+      "bus": "13VOE21",
+      "from": "BS",
+      "to": "BE",
+      "scheduled_p_mw": 207.9,
+      "voltage_target_pu": 1.01
+    },
+    {
+      "bus": "14VOE21",
+      "from": "BS",
+      "to": "BE",
+      "scheduled_p_mw": 207.9,
+      "voltage_target_pu": 1.01
+    },
+    {
+      "bus": "15VOE21",
+      "from": "BS",
+      "to": "BE",
+      "scheduled_p_mw": 207.9,
+      "voltage_target_pu": 1.01
+    },
+    {
+      "bus": "16VOE21",
+      "from": "BS",
+      "to": "BE",
+      "scheduled_p_mw": 207.9,
+      "voltage_target_pu": 1.01
+    },
+    {
+      "bus": "17VOE21",
+      "from": "BS",
+      "to": "BE",
+      "scheduled_p_mw": 207.9,
+      "voltage_target_pu": 1.01
+    },
+    {
+      "bus": "18VOE21",
+      "from": "BS",
+      "to": "BE",
+      "scheduled_p_mw": 207.9,
+      "voltage_target_pu": 1.01
+    },
+    {
+      "bus": "19VOE21",
+      "from": "BS",
+      "to": "BE",
+      "scheduled_p_mw": 207.9,
+      "voltage_target_pu": 1.01
+    },
+    {
+      "bus": "20VOE21",
+      "from": "BS",
+      "to": "BE",
+      "scheduled_p_mw": 207.9,
+      "voltage_target_pu": 1.01
+    },
+    {
+      "bus": "21VOE21",
+      "from": "BS",
+      "to": "BE",
+      "scheduled_p_mw": 207.9,
+      "voltage_target_pu": 1.01
+    },
+    {
+      "bus": "22VOE21",
+      "from": "BS",
+      "to": "BE",
+      "scheduled_p_mw": 207.9,
+      "voltage_target_pu": 1.01
+    },
+    {
+      "bus": "23VOE21",
+      "from": "BS",
+      "to": "BE",
+      "scheduled_p_mw": 207.9,
+      "voltage_target_pu": 1.01
+    },
+    {
+      "bus": "24VOE21",
+      "from": "BS",
+      "to": "BE",
+      "scheduled_p_mw": 207.9,
+      "voltage_target_pu": 1.01
+    },
+    {
+      "bus": "25VOE21",
+      "from": "BS",
+      "to": "BE",
+      "scheduled_p_mw": 207.9,
+      "voltage_target_pu": 1.01
+    },
+    {
+      "bus": "26VOE21",
+      "from": "BS",
+      "to": "BE",
+      "scheduled_p_mw": 207.9,
+      "voltage_target_pu": 1.01
+    },
+    {
+      "bus": "27VOE21",
+      "from": "BS",
+      "to": "BE",
+      "scheduled_p_mw": 207.9,
+      "voltage_target_pu": 1.01
+    },
+    {
+      "bus": "28VOE21",
+      "from": "BS",
+      "to": "BE",
+      "scheduled_p_mw": 207.9,
+      "voltage_target_pu": 1.01
+    },
+    {
+      "bus": "29VOE21",
+      "from": "BS",
+      "to": "BE",
+      "scheduled_p_mw": 207.9,
+      "voltage_target_pu": 1.01
+    },
+    {
+      "bus": "30VOE21",
+      "from": "BS",
+      "to": "BE",
+      "scheduled_p_mw": 207.9,
+      "voltage_target_pu": 1.01
+    },
+    {
+      "bus": "31VOE21",
+      "from": "BS",
+      "to": "BE",
+      "scheduled_p_mw": 207.9,
+      "voltage_target_pu": 1.01
+    },
+    {
+      "bus": "32VOE21",
+      "from": "BS",
+      "to": "BE",
+      "scheduled_p_mw": 207.9,
+      "voltage_target_pu": 1.01
+    },
+    {
+      "bus": "33VOE21",
+      "from": "BS",
+      "to": "BE",
+      "scheduled_p_mw": 207.9,
+      "voltage_target_pu": 1.01
+    },
+    {
+      "bus": "34VOE21",
+      "from": "BS",
+      "to": "BE",
+      "scheduled_p_mw": 207.9,
+      "voltage_target_pu": 1.01
+    },
+    {
+      "bus": "35VOE21",
+      "from": "BS",
+      "to": "BE",
+      "scheduled_p_mw": 207.9,
+      "voltage_target_pu": 1.01
+    },
+    {
+      "bus": "36VOE21",
+      "from": "BS",
+      "to": "BE",
+      "scheduled_p_mw": 207.9,
+      "voltage_target_pu": 1.01
+    },
+    {
+      "bus": "37VOE21",
+      "from": "BS",
+      "to": "BE",
+      "scheduled_p_mw": 207.9,
+      "voltage_target_pu": 1.01
+    },
+    {
+      "bus": "38VOE21",
+      "from": "BS",
+      "to": "BE",
+      "scheduled_p_mw": 207.9,
+      "voltage_target_pu": 1.01
+    },
+    {
+      "bus": "39VOE21",
+      "from": "BS",
+      "to": "BE",
+      "scheduled_p_mw": 207.9,
+      "voltage_target_pu": 1.01
+    },
+    {
+      "bus": "40VOE21",
+      "from": "BS",
+      "to": "BE",
+      "scheduled_p_mw": 207.9,
+      "voltage_target_pu": 1.01
+    },
+    {
+      "bus": "41VOE21",
+      "from": "BS",
+      "to": "BE",
+      "scheduled_p_mw": 207.9,
+      "voltage_target_pu": 1.01
+    },
+    {
+      "bus": "42VOE21",
+      "from": "BS",
+      "to": "BE",
+      "scheduled_p_mw": 207.9,
+      "voltage_target_pu": 1.01
+    },
+    {
+      "bus": "43VOE21",
+      "from": "BS",
+      "to": "BE",
+      "scheduled_p_mw": 207.9,
+      "voltage_target_pu": 1.01
+    },
+    {
+      "bus": "44VOE21",
+      "from": "BS",
+      "to": "BE",
+      "scheduled_p_mw": 207.9,
+      "voltage_target_pu": 1.01
+    },
+    {
+      "bus": "45VOE21",
+      "from": "BS",
+      "to": "BE",
+      "scheduled_p_mw": 207.9,
+      "voltage_target_pu": 1.01
+    },
+    {
+      "bus": "46VOE21",
+      "from": "BS",
+      "to": "BE",
+      "scheduled_p_mw": 207.9,
+      "voltage_target_pu": 1.01
+    },
+    {
+      "bus": "47VOE21",
+      "from": "BS",
+      "to": "BE",
+      "scheduled_p_mw": 207.9,
+      "voltage_target_pu": 1.01
+    },
+    {
+      "bus": "48VOE21",
+      "from": "BS",
+      "to": "BE",
+      "scheduled_p_mw": 207.9,
+      "voltage_target_pu": 1.01
+    },
+    {
+      "bus": "49VOE21",
+      "from": "BS",
+      "to": "BE",
+      "scheduled_p_mw": 207.9,
+      "voltage_target_pu": 1.01
+    },
+    {
+      "bus": "50VOE21",
+      "from": "BS",
+      "to": "BE",
+      "scheduled_p_mw": 207.9,
+      "voltage_target_pu": 1.01
+    }
+  ],
+  "intertie_template_source_line": 290,
+  "interties": [
+    {
+      "from": "01CBE21",
+      "to": "02QUA21",
+      "kv": 230.0,
+      "r_pu": 0.0007,
+      "x_pu": 0.0049,
+      "half_g_pu": 0.0,
+      "half_b_pu": 0.0093,
+      "rate_mva": 549.7529263223616
+    },
+    {
+      "from": "02CBE21",
+      "to": "03QUA21",
+      "kv": 230.0,
+      "r_pu": 0.0007,
+      "x_pu": 0.0049,
+      "half_g_pu": 0.0,
+      "half_b_pu": 0.0093,
+      "rate_mva": 549.7529263223616
+    },
+    {
+      "from": "03CBE21",
+      "to": "04QUA21",
+      "kv": 230.0,
+      "r_pu": 0.0007,
+      "x_pu": 0.0049,
+      "half_g_pu": 0.0,
+      "half_b_pu": 0.0093,
+      "rate_mva": 549.7529263223616
+    },
+    {
+      "from": "04CBE21",
+      "to": "05QUA21",
+      "kv": 230.0,
+      "r_pu": 0.0007,
+      "x_pu": 0.0049,
+      "half_g_pu": 0.0,
+      "half_b_pu": 0.0093,
+      "rate_mva": 549.7529263223616
+    },
+    {
+      "from": "05CBE21",
+      "to": "06QUA21",
+      "kv": 230.0,
+      "r_pu": 0.0007,
+      "x_pu": 0.0049,
+      "half_g_pu": 0.0,
+      "half_b_pu": 0.0093,
+      "rate_mva": 549.7529263223616
+    },
+    {
+      "from": "06CBE21",
+      "to": "07QUA21",
+      "kv": 230.0,
+      "r_pu": 0.0007,
+      "x_pu": 0.0049,
+      "half_g_pu": 0.0,
+      "half_b_pu": 0.0093,
+      "rate_mva": 549.7529263223616
+    },
+    {
+      "from": "07CBE21",
+      "to": "08QUA21",
+      "kv": 230.0,
+      "r_pu": 0.0007,
+      "x_pu": 0.0049,
+      "half_g_pu": 0.0,
+      "half_b_pu": 0.0093,
+      "rate_mva": 549.7529263223616
+    },
+    {
+      "from": "08CBE21",
+      "to": "09QUA21",
+      "kv": 230.0,
+      "r_pu": 0.0007,
+      "x_pu": 0.0049,
+      "half_g_pu": 0.0,
+      "half_b_pu": 0.0093,
+      "rate_mva": 549.7529263223616
+    },
+    {
+      "from": "09CBE21",
+      "to": "10QUA21",
+      "kv": 230.0,
+      "r_pu": 0.0007,
+      "x_pu": 0.0049,
+      "half_g_pu": 0.0,
+      "half_b_pu": 0.0093,
+      "rate_mva": 549.7529263223616
+    },
+    {
+      "from": "10CBE21",
+      "to": "11QUA21",
+      "kv": 230.0,
+      "r_pu": 0.0007,
+      "x_pu": 0.0049,
+      "half_g_pu": 0.0,
+      "half_b_pu": 0.0093,
+      "rate_mva": 549.7529263223616
+    },
+    {
+      "from": "11CBE21",
+      "to": "12QUA21",
+      "kv": 230.0,
+      "r_pu": 0.0007,
+      "x_pu": 0.0049,
+      "half_g_pu": 0.0,
+      "half_b_pu": 0.0093,
+      "rate_mva": 549.7529263223616
+    },
+    {
+      "from": "12CBE21",
+      "to": "13QUA21",
+      "kv": 230.0,
+      "r_pu": 0.0007,
+      "x_pu": 0.0049,
+      "half_g_pu": 0.0,
+      "half_b_pu": 0.0093,
+      "rate_mva": 549.7529263223616
+    },
+    {
+      "from": "13CBE21",
+      "to": "14QUA21",
+      "kv": 230.0,
+      "r_pu": 0.0007,
+      "x_pu": 0.0049,
+      "half_g_pu": 0.0,
+      "half_b_pu": 0.0093,
+      "rate_mva": 549.7529263223616
+    },
+    {
+      "from": "14CBE21",
+      "to": "15QUA21",
+      "kv": 230.0,
+      "r_pu": 0.0007,
+      "x_pu": 0.0049,
+      "half_g_pu": 0.0,
+      "half_b_pu": 0.0093,
+      "rate_mva": 549.7529263223616
+    },
+    {
+      "from": "15CBE21",
+      "to": "16QUA21",
+      "kv": 230.0,
+      "r_pu": 0.0007,
+      "x_pu": 0.0049,
+      "half_g_pu": 0.0,
+      "half_b_pu": 0.0093,
+      "rate_mva": 549.7529263223616
+    },
+    {
+      "from": "16CBE21",
+      "to": "17QUA21",
+      "kv": 230.0,
+      "r_pu": 0.0007,
+      "x_pu": 0.0049,
+      "half_g_pu": 0.0,
+      "half_b_pu": 0.0093,
+      "rate_mva": 549.7529263223616
+    },
+    {
+      "from": "17CBE21",
+      "to": "18QUA21",
+      "kv": 230.0,
+      "r_pu": 0.0007,
+      "x_pu": 0.0049,
+      "half_g_pu": 0.0,
+      "half_b_pu": 0.0093,
+      "rate_mva": 549.7529263223616
+    },
+    {
+      "from": "18CBE21",
+      "to": "19QUA21",
+      "kv": 230.0,
+      "r_pu": 0.0007,
+      "x_pu": 0.0049,
+      "half_g_pu": 0.0,
+      "half_b_pu": 0.0093,
+      "rate_mva": 549.7529263223616
+    },
+    {
+      "from": "19CBE21",
+      "to": "20QUA21",
+      "kv": 230.0,
+      "r_pu": 0.0007,
+      "x_pu": 0.0049,
+      "half_g_pu": 0.0,
+      "half_b_pu": 0.0093,
+      "rate_mva": 549.7529263223616
+    },
+    {
+      "from": "20CBE21",
+      "to": "21QUA21",
+      "kv": 230.0,
+      "r_pu": 0.0007,
+      "x_pu": 0.0049,
+      "half_g_pu": 0.0,
+      "half_b_pu": 0.0093,
+      "rate_mva": 549.7529263223616
+    },
+    {
+      "from": "21CBE21",
+      "to": "22QUA21",
+      "kv": 230.0,
+      "r_pu": 0.0007,
+      "x_pu": 0.0049,
+      "half_g_pu": 0.0,
+      "half_b_pu": 0.0093,
+      "rate_mva": 549.7529263223616
+    },
+    {
+      "from": "22CBE21",
+      "to": "23QUA21",
+      "kv": 230.0,
+      "r_pu": 0.0007,
+      "x_pu": 0.0049,
+      "half_g_pu": 0.0,
+      "half_b_pu": 0.0093,
+      "rate_mva": 549.7529263223616
+    },
+    {
+      "from": "23CBE21",
+      "to": "24QUA21",
+      "kv": 230.0,
+      "r_pu": 0.0007,
+      "x_pu": 0.0049,
+      "half_g_pu": 0.0,
+      "half_b_pu": 0.0093,
+      "rate_mva": 549.7529263223616
+    },
+    {
+      "from": "24CBE21",
+      "to": "25QUA21",
+      "kv": 230.0,
+      "r_pu": 0.0007,
+      "x_pu": 0.0049,
+      "half_g_pu": 0.0,
+      "half_b_pu": 0.0093,
+      "rate_mva": 549.7529263223616
+    },
+    {
+      "from": "25CBE21",
+      "to": "26QUA21",
+      "kv": 230.0,
+      "r_pu": 0.0007,
+      "x_pu": 0.0049,
+      "half_g_pu": 0.0,
+      "half_b_pu": 0.0093,
+      "rate_mva": 549.7529263223616
+    },
+    {
+      "from": "26CBE21",
+      "to": "27QUA21",
+      "kv": 230.0,
+      "r_pu": 0.0007,
+      "x_pu": 0.0049,
+      "half_g_pu": 0.0,
+      "half_b_pu": 0.0093,
+      "rate_mva": 549.7529263223616
+    },
+    {
+      "from": "27CBE21",
+      "to": "28QUA21",
+      "kv": 230.0,
+      "r_pu": 0.0007,
+      "x_pu": 0.0049,
+      "half_g_pu": 0.0,
+      "half_b_pu": 0.0093,
+      "rate_mva": 549.7529263223616
+    },
+    {
+      "from": "28CBE21",
+      "to": "29QUA21",
+      "kv": 230.0,
+      "r_pu": 0.0007,
+      "x_pu": 0.0049,
+      "half_g_pu": 0.0,
+      "half_b_pu": 0.0093,
+      "rate_mva": 549.7529263223616
+    },
+    {
+      "from": "29CBE21",
+      "to": "30QUA21",
+      "kv": 230.0,
+      "r_pu": 0.0007,
+      "x_pu": 0.0049,
+      "half_g_pu": 0.0,
+      "half_b_pu": 0.0093,
+      "rate_mva": 549.7529263223616
+    },
+    {
+      "from": "30CBE21",
+      "to": "31QUA21",
+      "kv": 230.0,
+      "r_pu": 0.0007,
+      "x_pu": 0.0049,
+      "half_g_pu": 0.0,
+      "half_b_pu": 0.0093,
+      "rate_mva": 549.7529263223616
+    },
+    {
+      "from": "31CBE21",
+      "to": "32QUA21",
+      "kv": 230.0,
+      "r_pu": 0.0007,
+      "x_pu": 0.0049,
+      "half_g_pu": 0.0,
+      "half_b_pu": 0.0093,
+      "rate_mva": 549.7529263223616
+    },
+    {
+      "from": "32CBE21",
+      "to": "33QUA21",
+      "kv": 230.0,
+      "r_pu": 0.0007,
+      "x_pu": 0.0049,
+      "half_g_pu": 0.0,
+      "half_b_pu": 0.0093,
+      "rate_mva": 549.7529263223616
+    },
+    {
+      "from": "33CBE21",
+      "to": "34QUA21",
+      "kv": 230.0,
+      "r_pu": 0.0007,
+      "x_pu": 0.0049,
+      "half_g_pu": 0.0,
+      "half_b_pu": 0.0093,
+      "rate_mva": 549.7529263223616
+    },
+    {
+      "from": "34CBE21",
+      "to": "35QUA21",
+      "kv": 230.0,
+      "r_pu": 0.0007,
+      "x_pu": 0.0049,
+      "half_g_pu": 0.0,
+      "half_b_pu": 0.0093,
+      "rate_mva": 549.7529263223616
+    },
+    {
+      "from": "35CBE21",
+      "to": "36QUA21",
+      "kv": 230.0,
+      "r_pu": 0.0007,
+      "x_pu": 0.0049,
+      "half_g_pu": 0.0,
+      "half_b_pu": 0.0093,
+      "rate_mva": 549.7529263223616
+    },
+    {
+      "from": "36CBE21",
+      "to": "37QUA21",
+      "kv": 230.0,
+      "r_pu": 0.0007,
+      "x_pu": 0.0049,
+      "half_g_pu": 0.0,
+      "half_b_pu": 0.0093,
+      "rate_mva": 549.7529263223616
+    },
+    {
+      "from": "37CBE21",
+      "to": "38QUA21",
+      "kv": 230.0,
+      "r_pu": 0.0007,
+      "x_pu": 0.0049,
+      "half_g_pu": 0.0,
+      "half_b_pu": 0.0093,
+      "rate_mva": 549.7529263223616
+    },
+    {
+      "from": "38CBE21",
+      "to": "39QUA21",
+      "kv": 230.0,
+      "r_pu": 0.0007,
+      "x_pu": 0.0049,
+      "half_g_pu": 0.0,
+      "half_b_pu": 0.0093,
+      "rate_mva": 549.7529263223616
+    },
+    {
+      "from": "39CBE21",
+      "to": "40QUA21",
+      "kv": 230.0,
+      "r_pu": 0.0007,
+      "x_pu": 0.0049,
+      "half_g_pu": 0.0,
+      "half_b_pu": 0.0093,
+      "rate_mva": 549.7529263223616
+    },
+    {
+      "from": "40CBE21",
+      "to": "41QUA21",
+      "kv": 230.0,
+      "r_pu": 0.0007,
+      "x_pu": 0.0049,
+      "half_g_pu": 0.0,
+      "half_b_pu": 0.0093,
+      "rate_mva": 549.7529263223616
+    },
+    {
+      "from": "41CBE21",
+      "to": "42QUA21",
+      "kv": 230.0,
+      "r_pu": 0.0007,
+      "x_pu": 0.0049,
+      "half_g_pu": 0.0,
+      "half_b_pu": 0.0093,
+      "rate_mva": 549.7529263223616
+    },
+    {
+      "from": "42CBE21",
+      "to": "43QUA21",
+      "kv": 230.0,
+      "r_pu": 0.0007,
+      "x_pu": 0.0049,
+      "half_g_pu": 0.0,
+      "half_b_pu": 0.0093,
+      "rate_mva": 549.7529263223616
+    },
+    {
+      "from": "43CBE21",
+      "to": "44QUA21",
+      "kv": 230.0,
+      "r_pu": 0.0007,
+      "x_pu": 0.0049,
+      "half_g_pu": 0.0,
+      "half_b_pu": 0.0093,
+      "rate_mva": 549.7529263223616
+    },
+    {
+      "from": "44CBE21",
+      "to": "45QUA21",
+      "kv": 230.0,
+      "r_pu": 0.0007,
+      "x_pu": 0.0049,
+      "half_g_pu": 0.0,
+      "half_b_pu": 0.0093,
+      "rate_mva": 549.7529263223616
+    },
+    {
+      "from": "45CBE21",
+      "to": "46QUA21",
+      "kv": 230.0,
+      "r_pu": 0.0007,
+      "x_pu": 0.0049,
+      "half_g_pu": 0.0,
+      "half_b_pu": 0.0093,
+      "rate_mva": 549.7529263223616
+    },
+    {
+      "from": "46CBE21",
+      "to": "47QUA21",
+      "kv": 230.0,
+      "r_pu": 0.0007,
+      "x_pu": 0.0049,
+      "half_g_pu": 0.0,
+      "half_b_pu": 0.0093,
+      "rate_mva": 549.7529263223616
+    },
+    {
+      "from": "47CBE21",
+      "to": "48QUA21",
+      "kv": 230.0,
+      "r_pu": 0.0007,
+      "x_pu": 0.0049,
+      "half_g_pu": 0.0,
+      "half_b_pu": 0.0093,
+      "rate_mva": 549.7529263223616
+    },
+    {
+      "from": "48CBE21",
+      "to": "49QUA21",
+      "kv": 230.0,
+      "r_pu": 0.0007,
+      "x_pu": 0.0049,
+      "half_g_pu": 0.0,
+      "half_b_pu": 0.0093,
+      "rate_mva": 549.7529263223616
+    },
+    {
+      "from": "49CBE21",
+      "to": "50QUA21",
+      "kv": 230.0,
+      "r_pu": 0.0007,
+      "x_pu": 0.0049,
+      "half_g_pu": 0.0,
+      "half_b_pu": 0.0093,
+      "rate_mva": 549.7529263223616
+    },
+    {
+      "from": "50CBE21",
+      "to": "01QUA21",
+      "kv": 230.0,
+      "r_pu": 0.0007,
+      "x_pu": 0.0049,
+      "half_g_pu": 0.0,
+      "half_b_pu": 0.0093,
+      "rate_mva": 549.7529263223616
+    }
+  ],
+  "policy": "Research hypothesis: duplicate internal cards; rename buses; retain one BS; convert other BS to BE preserving original P and voltage targets; add template L ties. No load scaling, impedance adjustment or rating enlargement.",
+  "prefix_width": 2,
+  "bus_aliases": {
+    "Z00342": "GA  B10",
+    "Z00343": "GA  B11",
+    "Z00344": "GA  B12",
+    "Z00345": "GA  B13",
+    "Z00346": "GA  B14",
+    "Z00347": "GA  B15",
+    "Z00348": "GA  B16",
+    "Z00349": "GA  B17",
+    "Z00350": "GA  B18",
+    "Z00351": "GA  B19",
+    "Z00353": "GA  B20",
+    "Z00354": "GA  B21"
+  },
+  "generated_file": "sjz_20_x50_ring.dat",
+  "generated_sha256": "4ac616edf7d0dfab8ed0c8451626c83e82854f1fee7b9c0bba00b123f36a6f7e"
+}

@@ -40,9 +40,9 @@ class CoreTests(unittest.TestCase):
         for hour,expected in (('13',397.89571637),('20',489.25963521)):
             source=ROOT/f'raw_dataset/extracted/{hour}点sim2合并anony.dat'
             digest=hashlib.sha256(source.read_bytes()).hexdigest()
-            for algorithm in ('nr','damped-nr','bpa-style'):
+            for algorithm in ('nr','damped-nr','bpa-style','partitioned-nr'):
                 events=[]
-                result=run_case(source,algorithm,lambda kind,data:events.append((kind,data)),builtin=True)
+                result=run_case(source,algorithm,lambda kind,data:events.append((kind,data)),builtin=True,partitioned=algorithm!='partitioned-nr')
                 scene=result['scenario']; run=result['run']; lookup={b['id']:b for b in scene['buses']}
                 target=next(t for t in scene['trafos'] if lookup[t['from']]['name']=='GXVS2' and lookup[t['to']]['name']=='GXVY2')
                 self.assertAlmostEqual(target['loading'],expected,places=5)
@@ -53,11 +53,16 @@ class CoreTests(unittest.TestCase):
                 self.assertLess(run['residual_mva'],1e-4)
                 self.assertLessEqual(run['solver_ms'],run['total_ms'])
                 self.assertTrue(any(kind=='iteration' for kind,_ in events))
-                self.assertTrue(any(kind=='partition' for kind,_ in events))
+                if algorithm == 'partitioned-nr':
+                    self.assertTrue(all(e['stage']=='partition-schur' for k,e in events if k=='iteration'))
+                    self.assertTrue(all(p['max_equation_residual_mva']<1e-4 for p in scene['partitions']))
+                else:
+                    self.assertTrue(any(kind=='partition' for kind,_ in events))
                 membership=[i for p in scene['partitions'] for i in p['internal_buses']]
                 self.assertEqual(len(membership),len(set(membership)))
                 self.assertEqual(set(membership),{b['id'] for b in scene['buses'] if b['kv']<35})
-                self.assertLess(scene['summary']['max_vm_error'],1e-5)
+                if algorithm != 'partitioned-nr':
+                    self.assertLess(scene['summary']['max_vm_error'],1e-5)
                 json.dumps(result,allow_nan=False)
             self.assertEqual(hashlib.sha256(source.read_bytes()).hexdigest(),digest)
 
@@ -84,7 +89,7 @@ class CoreTests(unittest.TestCase):
             path=Path(directory)/'custom.dat'
             path.write_text('\n'.join(['(POWERFLOW)','/MVA_BASE=100\\','/NETWORK_DATA\\',
                                        *rows,'/SOLUTION\\','>SOL_ITER,DECOUPLED=2,NEWTON=15<','(END)'])+'\n',encoding='gbk')
-            for algorithm in ('nr','damped-nr','bpa-style'):
+            for algorithm in ('nr','damped-nr','bpa-style','partitioned-nr'):
                 result=run_case(path,algorithm,builtin=False)
                 self.assertTrue(result['run']['converged'])
                 self.assertEqual(result['scenario']['bus_count'],2)
