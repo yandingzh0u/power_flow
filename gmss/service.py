@@ -17,6 +17,7 @@ from .core import ROOT, run_case
 from .dat import read_dat
 from .raw_solver import validate_bpa_scope
 from .expansion import MARKER, read_expansion
+from .uploads import archive_files
 
 
 def snapshot_metadata(filename):
@@ -114,6 +115,11 @@ class JobService:
                     raise ValueError('复制扩展算例已停用，请上传原始 DAT 数据')
                 return dataset, snapshot, path
         raise ValueError('未找到所选数据集，请重新导入')
+
+    def import_archive(self, name, data):
+        files = archive_files(name, data)
+        return self.import_folder([{'path': str(path), 'content': base64.b64encode(content).decode('ascii')}
+                                   for path, content in files])
 
     def import_folder(self, files):
         if not isinstance(files, list) or not 1 <= len(files) <= 500:
@@ -216,17 +222,25 @@ class JobService:
             task['condition'].notify_all()
 
     def _work(self, task, source, label, builtin):
+        work_started = time.perf_counter()
         task['status'] = 'running'
         try:
             result = run_case(source, task['algorithm'], lambda k,d: self.emit(task,k,d), label, builtin)
+            calculation_done = time.perf_counter()
             result['run'].update(task_id=task['id'], **{k:task[k] for k in (
                 'dataset_id', 'dataset_name', 'snapshot_id', 'snapshot_time', 'snapshot_label',
                 'dataset_file_count', 'reference_file_count')}, excel_integrated=False)
             task_dir = self.runtime / 'runs' / task['id']
             task_dir.mkdir(parents=True)
             (task_dir / 'result.json').write_text(json.dumps(result, ensure_ascii=False, allow_nan=False, separators=(',', ':'))+'\n')
+            ready = time.perf_counter()
+            task['timing'] = {'queue_ms': (work_started-task['started'])*1000,
+                              'execution_ms': (calculation_done-work_started)*1000,
+                              'persistence_ms': (ready-calculation_done)*1000,
+                              'ready_ms': (ready-task['started'])*1000}
+            (task_dir / 'timing.json').write_text(json.dumps(task['timing'])+'\n')
             task['result'] = result
-            self.emit(task, 'completed', {'run': result['run'], 'message': '本次真实计算结果已就绪'})
+            self.emit(task, 'completed', {'run': self.result(task)['run'], 'message': '本次真实计算结果已就绪'})
         except Exception as error:
             self.emit(task, 'failed', {'message': f'计算失败：{error}', 'error': str(error)})
         finally:
@@ -252,8 +266,12 @@ class JobService:
 
     def result(self, task):
         if task.get('archived'):
-            return json.loads((self.runtime/'runs'/task['id']/'result.json').read_text(encoding='utf-8'))
-        return task['result']
+            result = json.loads((self.runtime/'runs'/task['id']/'result.json').read_text(encoding='utf-8'))
+        else:
+            result = task['result']
+        if result is not None and task.get('timing'):
+            return {**result, 'run': {**result['run'], 'service_timing': task['timing']}}
+        return result
 
     def events(self, task):
         if task.get('archived'):

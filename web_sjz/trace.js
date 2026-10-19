@@ -21,7 +21,6 @@ function indexTrace(){
 }
 function setPhase(name, replay=false){
   trace.phase=name;
-  document.querySelectorAll('[data-phase]').forEach(node=>node.classList.toggle('active',node.dataset.phase===name));
   if(replay)$('replayLabel').textContent=`回放第 ${trace.frames[trace.index]?.iteration??0} 轮 · ${phaseNames[name]||'初始状态'}（顶部为最终统计）`;
   requestDraw();
 }

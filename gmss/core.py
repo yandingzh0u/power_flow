@@ -137,5 +137,5 @@ def run_case(source, algorithm='partitioned-nr', emit=None, label=None, builtin=
     emit('log', {'message': f"最高电流负载率：线路 {result['L_loading']['max_current_loading_percent'] or 0:.2f}%；"
                  f"T 支路 {result['T_loading']['max_current_loading_percent'] or 0:.2f}%；"
                  f"T 支路最高视在功率容量比 {result['T_loading']['max_apparent_power_loading_percent'] or 0:.2f}%（独立口径）"})
-    emit('log', {'message': f"本次计算结束：总耗时 {payload['run']['total_ms']:.1f} ms，{overloads} 个元件过载；越限按计算结果保留"})
+    emit('log', {'message': f"本次建模与计算结束：后端 {payload['run']['total_ms']:.1f} ms（含数值求解 {solve_ms:.1f} ms，不含排队、结果保存及网络），{overloads} 个元件过载；越限按计算结果保留"})
     return payload

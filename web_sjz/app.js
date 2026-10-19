@@ -14,7 +14,7 @@ let paintPending = false, flowStats={eligible:0,animated:0,zero:0};
 let areaNodes=new Map(), areaEdges=new Map(), visibleBuses=[], visibleLines=[], visibleTrafos=[], interties=[], analysisEdges=null;
 function requestDraw(){if(paintPending)return;paintPending=true;requestAnimationFrame(now=>{paintPending=false;draw(now);});}
 function selectedSnapshot(){return state.dataset?.snapshots.find(s=>s.id===state.snapshot);}
-function datasetNote(){const snapshot=selectedSnapshot();$('datasetNote').textContent=!state.dataset?'尚未上传数据 · 一个文件夹作为一套数据集':snapshot?`当前数据集：${state.dataset.label} · 计算时刻／断面：${snapshot.label} · T 卡按 100 MVA 假设解释；原文件不变，过载完整保留`:'一套数据集已上传 · 请选择其中的计算时刻，再运行潮流校核';}
+function datasetNote(){const snapshot=selectedSnapshot();$('datasetNote').textContent=!state.dataset?'尚未上传数据 · 每次上传作为一套数据集':snapshot?`当前数据集：${state.dataset.label} · 计算时刻／断面：${snapshot.label} · T 卡按 100 MVA 假设解释；原文件不变，过载完整保留`:'一套数据集已上传 · 请选择其中的计算时刻，再运行潮流校核';}
 const colors = ['#358abd','#419d89','#bd914b','#9273b9','#c96c82','#5197a6','#849c4a','#b980aa','#5d80a8','#b78465'];
 const fmt = (v,d=2) => v == null || !Number.isFinite(Number(v)) ? '—' : Number(v).toLocaleString('zh-CN',{maximumFractionDigits:d});
 const exp = v => v == null ? '—' : Number(v).toExponential(3);
@@ -108,7 +108,7 @@ function render(){
   $('mainCount').textContent=s.layers.main_bus_count||0;$('interfaceCount').textContent=s.layers.interface_trafo_count||0;$('distributionCount').textContent=q.parts||0;$('microCount').textContent=s.microgrids.length;
   syncView();
   $('mapEmpty').hidden=!!s.buses.length;
-  $('mapEmpty').textContent=selected?`已选择 ${selected.label} 运行断面，点击“运行潮流校核”生成拓扑与结果`:state.dataset?'数据集已上传，请先选择本次计算时刻':'请先点击“选择数据文件夹”，上传一套原始数据集';
+  $('mapEmpty').textContent=selected?`已选择 ${selected.label} 运行断面，点击“运行潮流校核”生成拓扑与结果`:state.dataset?'数据集已上传，请先选择本次计算时刻':'请先上传数据文件夹或压缩包（内含 DAT）';
   $('exportBtn').disabled=!state.run;
   $('flowToggle').disabled=!s.buses.length;
   renderSelection();renderAnalysis();requestDraw();
@@ -123,10 +123,11 @@ function renderAnalysis(){
     traceText(method,'div','边权：归一化串联导纳的平方根；点权：交流未知量数 × (连接度 + 1)²。保持连通性；小分区成批调度。');
     for(const c of partitioning.candidates){const n=traceText(method,'span',`粒度 ${c.target_size}：${c.partition_count} 区 / ${c.interface_unknowns} 边界未知量 / 预计负载比 ${fmt(c.estimated_schedule_imbalance,3)} / 成本估计 ${fmt(c.estimated_cost,0)}${c.target_size===partitioning.target_size?' ✓':''}`,'candidate');if(c.target_size===partitioning.target_size)n.style.color='#247cae';}
     traceText(method,'div',`结构估计用于选型；分区准备 ${fmt(partitioning.elapsed_ms,2)} ms，实测时间见运行记录。`);
-  }else method.textContent=state.dataset?'现场运行后显示加权分区依据和候选评价。':'请先上传原始数据文件夹。';
+  }else method.textContent=state.dataset?'现场运行后显示加权分区依据和候选评价。':'请先上传原始数据文件夹或压缩包。';
   const storedRun=r;
   $('partitionExplain').textContent=storedRun?.algorithm==='partitioned-nr'?'各分区并行消元 → 交流边界方程协调 → 电压修正回传':storedRun?.partition_check==='not requested'?'本次使用全网算法；未追加固定边界局部校核':'现场运行后显示本次分区求解记录';
-  metrics('runRecord',r?[['求解算法',r.algorithm_label],['牛顿迭代次数',String(r.iterations)],['边界协调轮数',String(r.boundary_iterations||0)],['CPU 计算线程',String(r.workers||1)],['最终残差 MVA',exp(r.residual_mva)],['数值求解耗时（含结构准备）',`${fmt(r.solver_ms,2)} ms`],['页面总用时（含排队与传输）',state.clientElapsedMs===null?'—':`${(state.clientElapsedMs/1000).toFixed(3)} s`],['后端任务耗时（不含排队与网络）',`${fmt(r.total_ms,2)} ms`],['分区失败',String(r.partition_failed)],['开始时间',new Date(r.started_at).toLocaleString('zh-CN')],['结束时间',new Date(r.completed_at).toLocaleString('zh-CN')],['数据集',r.dataset_name||'—'],['计算时刻／断面',r.snapshot_label||'—'],['输入范围',r.reference_file_count?`所选 DAT；${r.reference_file_count} 份 Excel 仅保存，未接入模型`:'所选 DAT'],['本次输入',r.source_name],['输入 SHA-256（求解前后相同）',r.source_sha256,true]]:[['结果来源',state.source],['现场计算',selectedSnapshot()?'点击运行开始新任务':state.dataset?'请先选择计算时刻':'请先上传原始数据集文件夹']]);
+  metrics('runRecord',r?[['求解算法',r.algorithm_label],['牛顿迭代次数',String(r.iterations)],['边界协调轮数',String(r.boundary_iterations||0)],['CPU 计算线程',String(r.workers||1)],['最终残差 MVA',exp(r.residual_mva)],['数值求解耗时（含结构准备）',`${fmt(r.solver_ms,2)} ms`],['页面总用时（含排队与传输）',state.clientElapsedMs===null?'—':`${(state.clientElapsedMs/1000).toFixed(3)} s`],['后端建模与计算（含数值求解）',`${fmt(r.total_ms,2)} ms`],['分区失败',String(r.partition_failed)],['开始时间',new Date(r.started_at).toLocaleString('zh-CN')],['结束时间',new Date(r.completed_at).toLocaleString('zh-CN')],['数据集',r.dataset_name||'—'],['计算时刻／断面',r.snapshot_label||'—'],['输入范围',r.reference_file_count?`所选 DAT；${r.reference_file_count} 份 Excel 仅保存，未接入模型`:'所选 DAT'],['本次输入',r.source_name],['输入 SHA-256（求解前后相同）',r.source_sha256,true]]:[['结果来源',state.source],['现场计算',selectedSnapshot()?'点击运行开始新任务':state.dataset?'请先选择计算时刻':'请先上传原始数据集文件夹']]);
+  const timing=timingBreakdown();if(timing)for(const [label,ms] of timing.rows){const row=traceText($('runRecord'),'div','','detail-metric');traceText(row,'span',label);traceText(row,'strong',`${ms.toFixed(1)} ms`);}
   $('runRecordTag').textContent=r?'本次现场运行':selectedSnapshot()?'等待运行':state.dataset?'等待选择时刻':'等待上传';
   if(r?.impedance_policy){const row=document.createElement('div');row.className='detail-metric wide';traceText(row,'span','阻抗基准设置');traceText(row,'strong',r.impedance_policy.label);$('runRecord').append(row);}
   if(r?.algorithm==='partitioned-nr'&&r.solver_details){
@@ -287,7 +288,7 @@ async function api(path,options={}){
   }catch(error){if(error.name==='AbortError')throw new Error('计算服务响应超时，请确认本地服务已启动后重试');throw error;}
   finally{clearTimeout(timeout);}
 }
-function disableControls(locked){const ready=!!selectedSnapshot();$('runBtn').disabled=locked||!ready;$('runBtn').title=ready?'使用所选计算时刻的 DAT 现场求解':state.dataset?'请先选择计算时刻':'请先上传数据集文件夹';$('algorithmSelect').disabled=locked||!ready;$('uploadBtn').disabled=locked;document.querySelectorAll('.snapshot-option').forEach(button=>button.disabled=locked);}
+function disableControls(locked){const ready=!!selectedSnapshot();$('runBtn').disabled=locked||!ready;$('runBtn').title=ready?'使用所选计算时刻的 DAT 现场求解':state.dataset?'请先选择计算时刻':'请先上传数据集文件夹或压缩包';$('algorithmSelect').disabled=locked||!ready;$('uploadBtn').disabled=locked;$('archiveBtn').disabled=locked;document.querySelectorAll('.snapshot-option').forEach(button=>button.disabled=locked);}
 function lockControls(locked){disableControls(locked);$('runText').textContent=locked?'正在计算…':'运行潮流校核';$('runIcon').textContent=locked?'◌':'▶';$('runIcon').className=locked?'spinner':'';}
 function updateElapsed(){
   if(!state.running||started===null)return;
@@ -295,11 +296,34 @@ function updateElapsed(){
   $('timeKpi').textContent=`${(state.clientElapsedMs/1000).toFixed(2)} s`;
   $('runElapsed').textContent=`页面用时 ${(state.clientElapsedMs/1000).toFixed(3)} s`;
 }
+function timingBreakdown(){
+  const r=state.run,t=r?.service_timing,total=state.clientElapsedMs;
+  if(!t||total===null||total<t.ready_ms)return null;
+  const backend=t.execution_ms+t.persistence_ms;
+  return {total,backend,rows:[
+    ['排队',t.queue_ms,'任务在服务器等待计算线程的时间'],
+    ['数值求解',r.solver_ms,'包含求解结构准备、牛顿迭代及迭代回调；属于后端处理的一部分'],
+    ['后端其他处理',backend-r.solver_ms,'读取 DAT、建模、分区、生成结果，以及结果 JSON 序列化和保存；不重复计入数值求解'],
+    ['通信与页面等待（差额）',total-t.ready_ms,'页面总用时减去服务器已测时间；包含请求与事件传输、结果响应编码与下载、浏览器处理等，不能单独视为网络耗时'],
+  ]};
+}
+function renderTiming(){
+  const timing=timingBreakdown();$('timingRows').replaceChildren();
+  if(!timing)return;
+  $('timingTotal').textContent=`${timing.total.toFixed(1)} ms`;
+  for(const [label,ms,description] of timing.rows){
+    const row=traceText($('timingRows'),'div','','timing-row'),head=traceText(row,'div','','timing-row-head');
+    traceText(head,'span',label);traceText(head,'strong',`${ms.toFixed(1)} ms`);
+    const bar=traceText(row,'div','','timing-bar');traceText(bar,'i','').style.width=`${ms/timing.total*100}%`;
+    traceText(row,'p',description);
+  }
+  $('timingBackend').textContent=`后端处理 ${timing.backend.toFixed(1)} ms = 数值求解 + 后端其他处理；排队另计。`;
+}
 function finish(){flushLogs();updateElapsed();state.running=false;setFlow(false);state.activePartition=null;setPhase(null);lockControls(false);if(timer)clearInterval(timer);timer=null;if(stream)stream.close();stream=null;renderSelection();requestDraw();}
 function failRun(message){state.source=state.scene.buses.length?(state.scene.result_status==='waiting'?'未收敛迭代值（非最终结果）':'本次失败 · 上次运行结果'):'本次失败 · 无计算结果';finish();addLog(message,'failed');origin('本次失败 · 未生成新结果','failed');stage('本次计算失败',message,true);$('timeSub').textContent='本次失败；原有结果不代表本次计算';}
 async function run(){
   if(!selectedSnapshot()){addLog(state.dataset?'请先选择这套数据集的计算时刻。':'请先上传原始数据集文件夹。','failed');return;}
-  if(state.running||state.importing)return;if(trace.viewing)restoreFinal();resetTrace();setFlow(false);state.running=true;state.run=null;state.task=null;state.clientElapsedMs=0;started=performance.now();$('uploadStatus').hidden=true;updateElapsed();$('timeSub').textContent='本次任务进行中 · 含排队与传输';$('timeSub').title='';lockControls(true);activateTab('topology');stage('正在创建计算任务','读取所选数据与算法');origin('现场计算中');
+  if(state.running||state.importing)return;if(trace.viewing)restoreFinal();resetTrace();setFlow(false);state.running=true;state.run=null;state.task=null;state.clientElapsedMs=0;started=performance.now();$('timingBtn').disabled=true;$('timingDialog').close();$('uploadStatus').hidden=true;updateElapsed();$('timeSub').textContent='本次任务进行中 · 含排队与传输';$('timeSub').title='';lockControls(true);activateTab('topology');stage('正在创建计算任务','读取所选数据与算法');origin('现场计算中');
   addLog(`提交数据集 ${state.dataset.label} · ${selectedSnapshot().label} · ${$('algorithmSelect').selectedOptions[0].textContent}`);
   timer=setInterval(updateElapsed,80);
   try{
@@ -327,8 +351,10 @@ async function run(){
           stream.close();stream=null;
           const result=await api(`/api/runs/${task.task_id}/result`);if(state.task!==task.task_id)return;
           state.run=result.run;setScene(result,'本次现场计算结果');captureFinal();finish();
-          $('timeSub').textContent=`后端 ${fmt(result.run.total_ms,1)} ms · 求解 ${fmt(result.run.solver_ms,1)} ms`;
-          $('timeSub').title='后端耗时不含排队和网络；求解耗时为后端耗时的一部分。主卡片始终显示从点击运行到结果就绪的页面总用时。';
+          const timing=timingBreakdown();$('timingBtn').disabled=!timing;
+          $('timeSub').textContent=`后端 ${fmt(timing?.backend??result.run.total_ms,1)} ms（含求解 ${fmt(result.run.solver_ms,1)} ms）`;
+          $('timeSub').title='求解已包含在后端处理时间内，不能相加。点击“明细”查看排队、数值求解、后端其他处理及通信与页面等待。';
+          if(timing)addLog(`用时明细：${timing.rows.map(([label,ms])=>`${label} ${ms.toFixed(1)} ms`).join(' + ')} = 总用时 ${timing.total.toFixed(1)} ms。通信与页面等待为扣除服务器已测时间后的差额。`);
           const hasFailures=result.run.partition_failed>0;
           stage(hasFailures?'全网收敛 · 部分分区未通过':'本次潮流计算完成',`残差 ${exp(result.run.residual_mva)} MVA · ${result.run.iterations} 次迭代`,hasFailures);
           origin(`${state.scene.label} · 本次结果`,hasFailures?'failed':'live');renderAnalysis();
@@ -346,7 +372,7 @@ function renderDataset(){
   $('snapshotGroup').hidden=!dataset;$('datasetComposition').hidden=!dataset;$('dataUsageNote').hidden=!dataset;
   $('fileList').replaceChildren();$('snapshotChoices').replaceChildren();$('datasetComposition').replaceChildren();
   if(!dataset){
-    $('folderName').textContent='尚未上传';$('folderSummary').textContent='请选择数据集文件夹，一个文件夹作为一套数据集';$('fileCount').textContent='(0)';return;
+    $('folderName').textContent='尚未上传';$('folderSummary').textContent='请选择文件夹或压缩包，每次上传作为一套数据集';$('fileCount').textContent='(0)';return;
   }
   const counts=dataset.summary;
   $('folderName').textContent=dataset.label;
@@ -374,7 +400,7 @@ function changeSnapshot(id){
   if(!state.dataset||state.running||(id!=null&&!state.dataset.snapshots.some(s=>s.id===id)))return;
   if(trace.viewing)restoreFinal();resetTrace();setFlow(false);$('replayDetails').open=false;state.snapshot=id;state.run=null;state.selected=null;state.activePartition=null;
   state.elementPage=0;state.partitionPage=0;state.search='';$('search').value='';$('elementSearch').value='';
-  started=null;state.clientElapsedMs=null;$('timeKpi').textContent='—';$('timeSub').textContent='等待现场运行';$('timeSub').title='';$('runElapsed').textContent='页面用时 0.000 s';state.task=null;
+  started=null;state.clientElapsedMs=null;$('timingBtn').disabled=true;$('timingDialog').close();$('timeKpi').textContent='—';$('timeSub').textContent='等待现场运行';$('timeSub').title='';$('runElapsed').textContent='页面用时 0.000 s';state.task=null;
   const snapshot=selectedSnapshot();
   setScene({scenario:emptyScene(),layout:{}},snapshot?'已选择运行断面 · 尚未求解':'数据集已上传 · 等待选择计算时刻');
   stage(snapshot?`已选择 ${snapshot.label} 运行断面`:'数据集已上传','选择计算时刻 → 运行潮流校核');
@@ -391,15 +417,15 @@ function setUploadStatus(phase,title,detail,percent=null){
   $('uploadPercent').textContent=phase==='failed'?'失败':percent===null?(phase==='recognizing'?'识别中':phase==='uploading'?'上传中':'准备中'):`${Math.floor(percent)}%`;
   $('uploadProgress').setAttribute('aria-valuetext',`${title}，${$('uploadPercent').textContent}，${detail}`);
 }
-function uploadDataset(files){
+function uploadDataset(body,path='/api/datasets/import',archive=false){
   return new Promise((resolve,reject)=>{
-    const xhr=new XMLHttpRequest();xhr.open('POST','/api/datasets/import');xhr.responseType='json';xhr.timeout=120000;
-    xhr.setRequestHeader('Content-Type','application/json');
+    const xhr=new XMLHttpRequest();xhr.open('POST',path);xhr.responseType='json';xhr.timeout=120000;
+    xhr.setRequestHeader('Content-Type',archive?'application/octet-stream':'application/json');
     xhr.upload.onprogress=event=>{
       const detail=event.lengthComputable?`${transferSize(event.loaded)} / ${transferSize(event.total)}（传输数据）`:`已传输 ${transferSize(event.loaded)}`;
       setUploadStatus('uploading','正在上传数据集',detail,event.lengthComputable?event.loaded/event.total*100:null);
     };
-    xhr.upload.onload=()=>setUploadStatus('recognizing','文件已上传，正在识别','服务端正在校验原文件并识别 DAT 运行断面');
+    xhr.upload.onload=()=>setUploadStatus('recognizing',archive?'压缩包已上传，正在解包识别':'文件已上传，正在识别','服务端正在校验原文件并识别 DAT 运行断面');
     xhr.onload=()=>{
       if(xhr.status<200||xhr.status>=300){reject(new Error(xhr.response?.error||`上传服务返回 HTTP ${xhr.status}`));return;}
       if(!xhr.response?.dataset?.snapshots?.length){reject(new Error('服务端未返回有效的数据集，请确认计算服务正常后重试'));return;}
@@ -409,41 +435,44 @@ function uploadDataset(files){
     xhr.ontimeout=()=>reject(new Error('上传或识别超时，请检查网络及服务状态后重试'));
     xhr.onabort=()=>reject(new Error('上传已取消'));
     setUploadStatus('uploading','正在上传数据集','正在建立上传连接',0);
-    xhr.send(JSON.stringify({files}));
+    xhr.send(body);
   });
 }
-async function importFolder(event){
+async function importFolder(event,archive=false){
   if(!event.target.files.length)return;
   if(state.running||state.importing){event.target.value='';return;}
   state.importing=true;disableControls(true);
   try{
-    const files=[...event.target.files].filter(f=>/\.(dat|xls|xlsx)$/i.test(f.name));
-    if(!files.some(f=>/\.dat$/i.test(f.name)))throw new Error('所选数据集文件夹中没有 DAT 运行断面');
+    const files=archive?[event.target.files[0]]:[...event.target.files].filter(f=>/\.(dat|xls|xlsx)$/i.test(f.name));
+    if(archive&&!/\.(zip|tar|tar\.gz|tgz)$/i.test(files[0].name))throw new Error('支持 ZIP、TAR、TAR.GZ 和 TGZ 压缩包');
+    if(!archive&&!files.some(f=>/\.dat$/i.test(f.name)))throw new Error('所选数据集文件夹中没有 DAT 运行断面');
     if(files.length>500)throw new Error('文件数量超过 500 个');
-    if(files.reduce((n,f)=>n+f.size,0)>32*1024**2||files.some(f=>f.size>16*1024**2))throw new Error('上传总大小限 32 MiB，单文件限 16 MiB');
+    if(files.reduce((n,f)=>n+f.size,0)>32*1024**2||!archive&&files.some(f=>f.size>16*1024**2))throw new Error('上传总大小限 32 MiB，单个数据文件限 16 MiB');
     setUploadStatus('preparing','准备文件',`0 / ${files.length} 个文件`);
     await new Promise(requestAnimationFrame);
-    addLog(`正在上传 1 套数据集，共 ${files.length} 个 DAT / Excel 文件，保留原始字节`);
+    addLog(archive?`正在上传压缩包 ${files[0].name}，解包后作为 1 套数据集导入`:`正在上传 1 套数据集，共 ${files.length} 个 DAT / Excel 文件，保留原始字节`);
     const payload=[];
-    for(const file of files){
+    for(const file of archive?[]:files){
       setUploadStatus('preparing','准备文件',`${payload.length} / ${files.length} 个文件 · ${file.name}`);
       const bytes=new Uint8Array(await file.arrayBuffer());let raw='';
       for(let i=0;i<bytes.length;i+=16384)raw+=String.fromCharCode(...bytes.subarray(i,i+16384));
       payload.push({path:file.webkitRelativePath||file.name,content:btoa(raw)});
     }
-    const result=await uploadDataset(payload);
+    const result=archive?await uploadDataset(files[0],`/api/datasets/import-archive?name=${encodeURIComponent(files[0].name)}`,true):await uploadDataset(JSON.stringify({files:payload}));
     state.dataset=result.dataset;
     changeSnapshot(state.dataset.snapshots.length===1?state.dataset.snapshots[0].id:null);
     setUploadStatus('completed','导入完成',`${state.dataset.summary.file_count} 个文件 · ${state.dataset.snapshots.length} 个运行断面`,100);
     addLog(`成功导入 1 套数据集：${state.dataset.label}，含 ${state.dataset.snapshots.length} 个运行断面。${selectedSnapshot()?'已选择唯一断面。':'请选择计算时刻。'}`,'completed');
     if(state.dataset.files.some(f=>f.usage==='reference_only'))addLog('馈线表与目录属于本数据集；原文件已保存，当前不参与 DAT 潮流求解。');
   }catch(error){setUploadStatus('failed','导入失败',error.message,0);addLog(`导入失败：${error.message}`,'failed');}
-  finally{state.importing=false;disableControls(false);$('folderInput').value='';}
+  finally{state.importing=false;disableControls(false);event.target.value='';}
 }
 function download(name,text,type='text/plain;charset=utf-8'){const url=URL.createObjectURL(new Blob([text],{type})),a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),500);}
 function exportCSV(){const quote=v=>`"${String(v??'').replaceAll('"','""')}"`;const rows=[['type','source_line','name','from','to','rate_mva','p_from_mw','q_from_mvar','current_loading_percent','apparent_power_loading_percent','input_r_pu','input_x_pu','input_impedance_base_mva','impedance_scale','system_r_pu','system_x_pu','system_base_mva','model_assumption'],...[...state.scene.lines.map(e=>({...e,type:'L'})),...state.scene.trafos.map(e=>({...e,type:'T'}))].map(e=>[e.type,e.source_line,e.name,nodes.get(e.from)?.name,nodes.get(e.to)?.name,e.rate_mva,e.p,e.q,e.loading,e.apparent_power_loading_percent,e.input_r_pu,e.input_x_pu,e.impedance_base_mva,e.impedance_scale,e.r_pu,e.x_pu,state.scene.base_mva,state.run.impedance_policy?.label||state.run.model_policy])];download(`sjz_${state.dataset.id}_${(selectedSnapshot()?.time||selectedSnapshot()?.filename||'result').replaceAll(':','-')}_powerflow.csv`,'\ufeff'+rows.map(r=>r.map(quote).join(',')).join('\n'),'text/csv;charset=utf-8');}
 $('datasetInfoBtn').onclick=()=>$('datasetDialog').showModal();$('closeDatasetInfo').onclick=()=>$('datasetDialog').close();
-$('runBtn').onclick=run;$('uploadBtn').onclick=()=>$('folderInput').click();$('folderInput').onchange=importFolder;
+$('runBtn').onclick=run;$('uploadBtn').onclick=()=>$('folderInput').click();$('folderInput').onchange=event=>importFolder(event);
+$('archiveBtn').onclick=()=>$('archiveInput').click();$('archiveInput').onchange=event=>importFolder(event,true);
+$('timingBtn').onclick=()=>{renderTiming();$('timingDialog').showModal();};$('closeTiming').onclick=()=>$('timingDialog').close();
 $('elementSearch').oninput=()=>{state.elementPage=0;renderAnalysis();};$('search').oninput=e=>{state.search=e.target.value.trim();requestDraw();};$('colorSelect').onchange=e=>{state.color=e.target.value;requestDraw();};$('flowToggle').onchange=e=>setFlow(e.target.checked);$('labelToggle').onchange=e=>{state.labels=e.target.checked;requestDraw();};
 $('areaSelect').onchange=e=>focusArea(e.target.value);
 $('search').onkeydown=e=>{if(e.key!=='Enter'||!state.search)return;const query=state.search.toLowerCase(),bus=state.scene.buses.find(b=>b.name.toLowerCase()===query||String(b.id)===query)||state.scene.buses.find(b=>b.name.toLowerCase().includes(query));if(bus){select('bus',bus.id);return;}const edge=[...state.scene.lines,...state.scene.trafos].find(e=>e.name.toLowerCase()===query)||[...state.scene.lines,...state.scene.trafos].find(e=>e.name.toLowerCase().includes(query));if(edge)select(edge.kind,edge.id);};
@@ -462,8 +491,8 @@ canvas.addEventListener('pointerup',event=>{if(lastPointer&&Math.hypot(event.cli
 window.addEventListener('resize',resize);new ResizeObserver(resize).observe($('mapWrap'));
 rebuildIndex();render();resize();fit();requestAnimationFrame(animation);
 disableControls(false);window.SJZ_BOOT?.ready();
-stage('等待上传原始数据','选择数据文件夹 → 识别 DAT → 运行潮流校核');
+stage('等待上传原始数据','上传文件夹或压缩包 → 识别 DAT → 运行潮流校核');
 renderDataset();
-addLog('等待上传原始数据文件夹；当前未加载任何数据集或计算结果。');
+addLog('等待上传原始数据文件夹或压缩包；当前未加载任何数据集或计算结果。');
 addLog('建模设置：T 卡阻抗按 100 MVA 假设解释，L 卡采用文件系统基准；原始文件、负荷、容量和控制不变，过载完整保留。');
-api('/health').then(()=>{$('connectionDot').className='online';$('connectionText').textContent='本地计算服务已连接';}).catch(error=>{$('connectionDot').className='offline';$('connectionText').textContent='计算服务未连接';addLog(error.message,'failed');});
+api('/health').then(()=>{$('connectionDot').className='online';$('connectionText').textContent='计算服务已连接';}).catch(error=>{$('connectionDot').className='offline';$('connectionText').textContent='计算服务未连接';addLog(error.message,'failed');});

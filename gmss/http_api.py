@@ -8,7 +8,7 @@ from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from io import BytesIO
 import json
 from pathlib import Path
-from urllib.parse import urlparse
+from urllib.parse import parse_qs, urlparse
 
 from .core import ALGORITHMS, ROOT
 from .service import JobService
@@ -68,11 +68,18 @@ class Handler(SimpleHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(data)
 
-    def payload(self):
+    def read_body(self, limit=48 * 1024**2):
         length = int(self.headers.get('Content-Length', '0'))
-        if not 0 < length <= 48 * 1024**2:
+        if not 0 < length <= limit:
+            self.close_connection = True
             raise ValueError('请求为空或超过上传大小限制')
-        return json.loads(self.rfile.read(length))
+        data = self.rfile.read(length)
+        if len(data) != length:
+            raise ValueError('上传内容不完整，请重新上传')
+        return data
+
+    def payload(self):
+        return json.loads(self.read_body())
 
     def do_GET(self):
         path = urlparse(self.path).path
@@ -109,6 +116,9 @@ class Handler(SimpleHTTPRequestHandler):
     def do_POST(self):
         try:
             path = urlparse(self.path).path
+            if path == '/api/datasets/import-archive':
+                name = parse_qs(urlparse(self.path).query).get('name', [''])[0]
+                return self.send_json(201, {'dataset': self.service.import_archive(name, self.read_body(32 * 1024**2))})
             payload = self.payload()
             if path == '/api/datasets/import':
                 return self.send_json(201, {'dataset':self.service.import_folder(payload.get('files'))})

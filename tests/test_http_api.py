@@ -7,9 +7,14 @@ from pathlib import Path
 import re
 import tempfile
 import threading
+import time
 import unittest
 from urllib.error import HTTPError
 from urllib.request import Request, urlopen
+from urllib.parse import quote
+from io import BytesIO
+import tarfile
+import zipfile
 
 from gmss.core import ROOT
 from gmss.http_api import make_server
@@ -97,6 +102,70 @@ class HttpTests(unittest.TestCase):
             with self.subTest(payload=payload), self.assertRaises(HTTPError) as error:
                 self.request('/api/runs',payload)
             self.assertEqual(error.exception.code,400)
+
+    def test_archive_import_preserves_dataset_and_can_run(self):
+        folder = ROOT/'raw_dataset/extracted'
+        sources = sorted(p for p in folder.rglob('*') if p.is_file())
+        for suffix in ('.zip', '.tar.gz'):
+            output = BytesIO()
+            if suffix == '.zip':
+                with zipfile.ZipFile(output, 'w', zipfile.ZIP_DEFLATED) as archive:
+                    for source in sources:
+                        archive.writestr('石家庄/'+source.relative_to(folder).as_posix(), source.read_bytes())
+            else:
+                with tarfile.open(fileobj=output, mode='w:gz') as archive:
+                    for source in sources:
+                        content=source.read_bytes()
+                        member=tarfile.TarInfo('石家庄/'+source.relative_to(folder).as_posix());member.size=len(content)
+                        archive.addfile(member,BytesIO(content))
+            request=Request(self.base+'/api/datasets/import-archive?name='+quote('原始数据'+suffix),
+                            data=output.getvalue(),headers={'Content-Type':'application/octet-stream'})
+            with urlopen(request,timeout=30) as response:
+                self.assertEqual(response.status,201)
+                dataset=json.load(response)['dataset']
+            self.assertEqual(dataset['label'],'石家庄')
+            self.assertEqual(dataset['summary']['file_count'],21)
+            self.assertEqual([s['time'] for s in dataset['snapshots']],['13:00','20:00'])
+            uploaded=Path(self.directory.name)/'uploads'/dataset['id'].removeprefix('upload-')
+            for source in sources:
+                self.assertEqual((uploaded/'石家庄'/source.relative_to(folder)).read_bytes(),source.read_bytes())
+            task=self.submit_dataset(dataset,'nr')
+            self.assertEqual(self.events(task)[-1]['type'],'completed')
+            self.assertTrue(self.request(f"/api/runs/{task['task_id']}/result")['run']['source_unchanged'])
+
+    def test_queue_and_backend_timing_are_disjoint_and_survive_archiving(self):
+        dataset=self.upload_original()
+        entered,release=threading.Event(),threading.Event()
+        def blocker():
+            entered.set();release.wait(10)
+        self.server.service.executor.submit(blocker)
+        self.assertTrue(entered.wait(2))
+        try:
+            task=self.submit_dataset(dataset,'nr')
+            time.sleep(.03)  # Test-only queue wait; the running worker is held by an event.
+        finally:
+            release.set()
+        events=self.events(task)
+        run=self.request(f"/api/runs/{task['task_id']}/result")['run']
+        timing=run['service_timing']
+        self.assertGreaterEqual(timing['queue_ms'],25)
+        self.assertGreaterEqual(timing['execution_ms'],run['total_ms'])
+        self.assertLessEqual(run['solver_ms'],timing['execution_ms'])
+        self.assertAlmostEqual(timing['queue_ms']+timing['execution_ms']+timing['persistence_ms'],timing['ready_ms'],places=7)
+        self.assertEqual(events[-1]['run']['service_timing'],timing)
+        self.assertEqual(json.loads((Path(self.directory.name)/'runs'/task['task_id']/'timing.json').read_text()),timing)
+        archived={**self.server.service.get(task['task_id']),'archived':True,'result':None}
+        self.assertEqual(self.server.service.result(archived)['run']['service_timing'],timing)
+
+    def test_invalid_archive_does_not_register_any_dataset(self):
+        before=self.request('/api/datasets')
+        request=Request(self.base+'/api/datasets/import-archive?name=bad.zip',data=b'broken zip',
+                        headers={'Content-Type':'application/octet-stream'})
+        with self.assertRaises(HTTPError) as error:
+            urlopen(request,timeout=5)
+        self.assertEqual(error.exception.code,400)
+        self.assertIn('压缩包',json.load(error.exception)['error'])
+        self.assertEqual(self.request('/api/datasets'),before)
 
     def test_historical_per_dat_registrations_group_by_folder_after_restart(self):
         from gmss.service import JobService
