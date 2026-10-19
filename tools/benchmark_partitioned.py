@@ -77,6 +77,7 @@ def main():
     report = {'created_at': datetime.now(timezone.utc).isoformat(), 'python': sys.version,
               'platform': platform.platform(), 'cpu_affinity': sorted(os.sched_getaffinity(0)),
               'workers': args.workers, 'tolerance_pu': 1e-8,
+              'impedance_assumption': 'T cards interpreted on 100 MVA; L cards on declared system base; source bytes unchanged',
               'pipeline': args.pipeline,
               'scope': 'fresh DAT/model, original KCL and all branch results; page additionally includes real iteration telemetry and topology, excludes HTTP/persistence/rendering',
               'cache_policy': 'structural indices only; first request, repeated runs, and cleared structural caches reported separately; every call starts flat and reassembles numeric matrices',

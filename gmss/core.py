@@ -1,7 +1,7 @@
 """Shijiazhuang original-data power-flow orchestration.
 
-All solvers consume the same DAT cards. Original inputs stay immutable;
-explicit research copies carry their construction rules in the input metadata.
+All solvers consume the same chosen impedance interpretation. Original inputs
+stay immutable and each result records the user-selected T-card base assumption.
 """
 from __future__ import annotations
 from datetime import datetime, timezone
@@ -12,7 +12,7 @@ import time
 import numpy as np
 
 from .partition import build_partitions, verify_partitions
-from .raw_solver import solve
+from .raw_solver import solve, DEFAULT_TRANSFORMER_BASE_MVA
 from .topology import topology
 from .expansion import read_expansion
 from .telemetry import IterationTrace
@@ -22,7 +22,8 @@ ALGORITHMS = {'partitioned-nr': '加权分区 + 并行 Newton–Schur', 'nr': '�
               'damped-nr': '阻尼牛顿法', 'bpa-style': '解耦启动 + 牛顿法'}
 
 
-def run_case(source, algorithm='partitioned-nr', emit=None, label=None, builtin=False, partitioned=False):
+def run_case(source, algorithm='partitioned-nr', emit=None, label=None, builtin=False, partitioned=False,
+             transformer_base_mva=DEFAULT_TRANSFORMER_BASE_MVA):
     if algorithm not in ALGORITHMS:
         raise ValueError(f'不支持的算法：{algorithm}')
     source = Path(source).resolve()
@@ -46,10 +47,13 @@ def run_case(source, algorithm='partitioned-nr', emit=None, label=None, builtin=
         if kind == 'model':
             event['expansion'] = expansion
             context['model'] = event
+            policy = event['impedance_policy']
+            emit('log', {'message': f"阻抗基准设置：{policy['label']}；T 卡 R/X 换算倍率 {policy['transformer_scale']:g}；原始文件字节不变",
+                         'impedance_policy': policy})
             context['parts'] = build_partitions(event)
             event['parts'] = context['parts']
             context['trace'] = IterationTrace(event, context['parts'])
-            emit('log', {'message': f"模型已建立：{len(event['buses'])} 母线、{len(event['branches'])} 支路；零阻抗理想连接精确合并；源支路、负荷和容量参数保留"})
+            emit('log', {'message': f"模型已建立：{len(event['buses'])} 母线、{len(event['branches'])} 支路；零阻抗理想连接精确合并；负荷、容量和控制不变；阻抗采用已记录的基准解释"})
             context['initial_payload'] = topology(event, context['parts'], label, use_saved_layout=known_layout)
             emit('network', context['initial_payload'])
             info = event['partitioning']
@@ -90,7 +94,8 @@ def run_case(source, algorithm='partitioned-nr', emit=None, label=None, builtin=
                                'available_cpus': event.get('available_cpus'),
                                'message': message, **measurements})
 
-    result = solve(source, algorithm=algorithm, observer=observe, include_results=True)
+    result = solve(source, algorithm=algorithm, observer=observe, include_results=True,
+                   transformer_base_mva=transformer_base_mva)
     solve_ms = result['numerical_solve_ms']
     emit('log', {'message': f"全网潮流收敛：{result['iterations']} 次牛顿迭代；原始节点方程残差 {result['original_bus_equation_residual_mva']:.6e} MVA"})
     if algorithm == 'partitioned-nr':
@@ -123,10 +128,14 @@ def run_case(source, algorithm='partitioned-nr', emit=None, label=None, builtin=
                       'workers': result.get('solver_details', {}).get('workers', 1),
                       'boundary_iterations': result['iterations'] if algorithm == 'partitioned-nr' else 0,
                       'timing_scope': 'solver includes domain plan and iteration callbacks; total includes DAT parsing, partitioning and display payloads',
-                      'model_policy': 'original DAT parameters; no profile writeback or added microgrid injection'}
+                      'impedance_policy': result['impedance_policy'],
+                      'model_policy': result['impedance_policy']['label'] + '；不回写负荷曲线，不新增微网注入'}
     if expansion:
         payload['run']['model_policy'] = expansion['policy']
         payload['run']['expansion'] = expansion
     overloads = sum((e['loading'] or 0)>100 for e in payload['scenario']['lines']+payload['scenario']['trafos'])
+    emit('log', {'message': f"最高电流负载率：线路 {result['L_loading']['max_current_loading_percent'] or 0:.2f}%；"
+                 f"T 支路 {result['T_loading']['max_current_loading_percent'] or 0:.2f}%；"
+                 f"T 支路最高视在功率容量比 {result['T_loading']['max_apparent_power_loading_percent'] or 0:.2f}%（独立口径）"})
     emit('log', {'message': f"本次计算结束：总耗时 {payload['run']['total_ms']:.1f} ms，{overloads} 个元件过载；越限按计算结果保留"})
     return payload

@@ -14,7 +14,7 @@ let paintPending = false, flowStats={eligible:0,animated:0,zero:0};
 let areaNodes=new Map(), areaEdges=new Map(), visibleBuses=[], visibleLines=[], visibleTrafos=[], interties=[], analysisEdges=null;
 function requestDraw(){if(paintPending)return;paintPending=true;requestAnimationFrame(now=>{paintPending=false;draw(now);});}
 function selectedSnapshot(){return state.dataset?.snapshots.find(s=>s.id===state.snapshot);}
-function datasetNote(){const snapshot=selectedSnapshot();$('datasetNote').textContent=!state.dataset?'尚未上传数据 · 一个文件夹作为一套数据集':snapshot?`当前数据集：${state.dataset.label} · 计算时刻／断面：${snapshot.label} · 使用 DAT 原始参数，过载完整保留`:'一套数据集已上传 · 请选择其中的计算时刻，再运行潮流校核';}
+function datasetNote(){const snapshot=selectedSnapshot();$('datasetNote').textContent=!state.dataset?'尚未上传数据 · 一个文件夹作为一套数据集':snapshot?`当前数据集：${state.dataset.label} · 计算时刻／断面：${snapshot.label} · T 卡按 100 MVA 假设解释；原文件不变，过载完整保留`:'一套数据集已上传 · 请选择其中的计算时刻，再运行潮流校核';}
 const colors = ['#358abd','#419d89','#bd914b','#9273b9','#c96c82','#5197a6','#849c4a','#b980aa','#5d80a8','#b78465'];
 const fmt = (v,d=2) => v == null || !Number.isFinite(Number(v)) ? '—' : Number(v).toLocaleString('zh-CN',{maximumFractionDigits:d});
 const exp = v => v == null ? '—' : Number(v).toExponential(3);
@@ -88,7 +88,7 @@ function renderSelection(){
     if(item.merged_group_count>1)rows.push(['理想连接合并节点数',String(item.merged_group_count)]);
   }else{
     $('detailTag').textContent=selected.kind==='line'?'线路':'变压器';
-    rows=[['起点',nodes.get(item.from)?.name||item.from],['终点',nodes.get(item.to)?.name||item.to],['首端有功',`${fmt(item.p,4)} MW`],['首端无功',`${fmt(item.q,4)} Mvar`],['末端有功',`${fmt(item.p_to,4)} MW`],['末端无功',`${fmt(item.q_to,4)} Mvar`],['电流负载率',`${fmt(item.loading,3)} %`],['输入额定容量',`${fmt(item.rate_mva,3)} MVA`],['R / X（输入标幺值）',`${fmt(item.r_pu,6)} / ${fmt(item.x_pu,6)}`],['本次输入 DAT 行号',String(item.source_line)]];
+    rows=[['起点',nodes.get(item.from)?.name||item.from],['终点',nodes.get(item.to)?.name||item.to],['电流负载率',`${fmt(item.loading,3)} %`],['视在功率容量比',`${fmt(item.apparent_power_loading_percent,3)} %`],['首端有功',`${fmt(item.p,4)} MW`],['首端无功',`${fmt(item.q,4)} Mvar`],['末端有功',`${fmt(item.p_to,4)} MW`],['末端无功',`${fmt(item.q_to,4)} Mvar`],['输入额定容量',`${fmt(item.rate_mva,3)} MVA`],['R / X（原文件标幺值）',`${fmt(item.input_r_pu,6)} / ${fmt(item.input_x_pu,6)}`],['原阻抗解释基准',`${fmt(item.impedance_base_mva)} MVA${selected.kind==='trafo'&&state.scene.impedance_policy?.is_assumption?' · 假设':''}`],['换算倍率',`${fmt(item.impedance_scale)} 倍`],['R / X（系统基准标幺值）',`${fmt(item.r_pu,6)} / ${fmt(item.x_pu,6)}`],['本次输入 DAT 行号',String(item.source_line)]];
   }
   if(item.area_id)rows.unshift(['复制区域 / 原始名称',`${item.area_id} 区 / ${item.original_name}`]);
   if(item.is_intertie)rows.unshift(['支路用途','研究扩展区域联络线']);
@@ -97,11 +97,11 @@ function renderSelection(){
 }
 function render(){
   datasetNote();
-  const s=state.scene,edges=[...s.lines,...s.trafos],rated=edges.filter(e=>e.loading!=null),max=rated.reduce((v,e)=>Math.max(v,e.loading),0),q=s.summary;
+  const s=state.scene,edges=[...s.lines,...s.trafos],rated=edges.filter(e=>e.loading!=null),ratedT=s.trafos.filter(e=>e.loading!=null),ratedL=s.lines.filter(e=>e.loading!=null),maxT=ratedT.reduce((v,e)=>Math.max(v,e.loading),0),maxL=ratedL.reduce((v,e)=>Math.max(v,e.loading),0),q=s.summary;
   const selected=selectedSnapshot();
   $('busKpi').textContent=s.buses.length?fmt(s.buses.length,0):selected?fmt(selected.bus_count,0):'—';$('busSub').textContent=s.buses.length?`母线 · 原始有功负荷 ${fmt(s.load_mw,1)} MW`:selected?'已识别母线 · 等待现场计算':'上传后识别网络规模';
   $('edgeKpi').textContent=s.buses.length?`${fmt(s.lines.length,0)} / ${s.trafos.length}`:'—';
-  $('loadingKpi').textContent=rated.length?`${fmt(max,2)}%`:'—';$('loadingSub').textContent=rated.length?`${rated.filter(e=>e.loading>100).length} 个元件过载 · 电流口径`:'尚无计算结果';
+  $('loadingKpi').textContent=ratedT.length?`${fmt(maxT,2)}%`:'—';$('loadingSub').textContent=rated.length?`线路最高 ${ratedL.length?fmt(maxL,2)+'%':'—'} · ${rated.filter(e=>e.loading>100).length} 个元件越限`:'线路与 T 支路分别统计';
   $('partitionKpi').textContent=s.buses.length?`${q.converged||0} / ${q.parts||0}`:'—';
   const recorded=state.run;
   $('partitionSub').textContent=recorded?.algorithm==='partitioned-nr'?`${recorded.workers} 个 CPU 线程 · ${recorded.boundary_iterations} 轮边界协调`:recorded?.partition_check==='not requested'?'普通全网算法；未另做局部校核':selected?'等待本次求解':'上传后计算分区';
@@ -128,6 +128,7 @@ function renderAnalysis(){
   $('partitionExplain').textContent=storedRun?.algorithm==='partitioned-nr'?'各分区并行消元 → 交流边界方程协调 → 电压修正回传':storedRun?.partition_check==='not requested'?'本次使用全网算法；未追加固定边界局部校核':'现场运行后显示本次分区求解记录';
   metrics('runRecord',r?[['求解算法',r.algorithm_label],['牛顿迭代次数',String(r.iterations)],['边界协调轮数',String(r.boundary_iterations||0)],['CPU 计算线程',String(r.workers||1)],['最终残差 MVA',exp(r.residual_mva)],['数值求解耗时（含结构准备）',`${fmt(r.solver_ms,2)} ms`],['任务总耗时',`${fmt(r.total_ms,2)} ms`],['分区失败',String(r.partition_failed)],['开始时间',new Date(r.started_at).toLocaleString('zh-CN')],['结束时间',new Date(r.completed_at).toLocaleString('zh-CN')],['数据集',r.dataset_name||'—'],['计算时刻／断面',r.snapshot_label||'—'],['输入范围',r.reference_file_count?`所选 DAT；${r.reference_file_count} 份 Excel 仅保存，未接入模型`:'所选 DAT'],['本次输入',r.source_name],['输入 SHA-256（求解前后相同）',r.source_sha256,true]]:[['结果来源',state.source],['现场计算',selectedSnapshot()?'点击运行开始新任务':state.dataset?'请先选择计算时刻':'请先上传原始数据集文件夹']]);
   $('runRecordTag').textContent=r?'本次现场运行':selectedSnapshot()?'等待运行':state.dataset?'等待选择时刻':'等待上传';
+  if(r?.impedance_policy){const row=document.createElement('div');row.className='detail-metric wide';traceText(row,'span','阻抗基准设置');traceText(row,'strong',r.impedance_policy.label);$('runRecord').append(row);}
   if(r?.algorithm==='partitioned-nr'&&r.solver_details){
     const d=r.solver_details;
     const rows=[['加权分区准备',`${fmt(r.partitioning.elapsed_ms,2)} ms${r.partitioning.structure_cache_hit?' · 复用已核对结构':''}`],['消元结构准备',`${fmt(d.setup_ms,2)} ms · ${d.structure_cache_hit?'复用结构索引':'本次构造'}`],['牛顿迭代及遥测',`${fmt(d.iteration_ms,2)} ms`]];
@@ -398,7 +399,7 @@ async function importFolder(event){
   finally{state.importing=false;disableControls(false);$('folderInput').value='';}
 }
 function download(name,text,type='text/plain;charset=utf-8'){const url=URL.createObjectURL(new Blob([text],{type})),a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),500);}
-function exportCSV(){const quote=v=>`"${String(v??'').replaceAll('"','""')}"`;const rows=[['type','source_line','name','from','to','rate_mva','p_from_mw','q_from_mvar','current_loading_percent'],...[...state.scene.lines.map(e=>({...e,type:'L'})),...state.scene.trafos.map(e=>({...e,type:'T'}))].map(e=>[e.type,e.source_line,e.name,nodes.get(e.from)?.name,nodes.get(e.to)?.name,e.rate_mva,e.p,e.q,e.loading])];download(`sjz_${state.dataset.id}_${(selectedSnapshot()?.time||selectedSnapshot()?.filename||'result').replaceAll(':','-')}_powerflow.csv`,'\ufeff'+rows.map(r=>r.map(quote).join(',')).join('\n'),'text/csv;charset=utf-8');}
+function exportCSV(){const quote=v=>`"${String(v??'').replaceAll('"','""')}"`;const rows=[['type','source_line','name','from','to','rate_mva','p_from_mw','q_from_mvar','current_loading_percent','apparent_power_loading_percent','input_r_pu','input_x_pu','input_impedance_base_mva','impedance_scale','system_r_pu','system_x_pu','system_base_mva','model_assumption'],...[...state.scene.lines.map(e=>({...e,type:'L'})),...state.scene.trafos.map(e=>({...e,type:'T'}))].map(e=>[e.type,e.source_line,e.name,nodes.get(e.from)?.name,nodes.get(e.to)?.name,e.rate_mva,e.p,e.q,e.loading,e.apparent_power_loading_percent,e.input_r_pu,e.input_x_pu,e.impedance_base_mva,e.impedance_scale,e.r_pu,e.x_pu,state.scene.base_mva,state.run.impedance_policy?.label||state.run.model_policy])];download(`sjz_${state.dataset.id}_${(selectedSnapshot()?.time||selectedSnapshot()?.filename||'result').replaceAll(':','-')}_powerflow.csv`,'\ufeff'+rows.map(r=>r.map(quote).join(',')).join('\n'),'text/csv;charset=utf-8');}
 $('datasetInfoBtn').onclick=()=>$('datasetDialog').showModal();$('closeDatasetInfo').onclick=()=>$('datasetDialog').close();
 $('runBtn').onclick=run;$('uploadBtn').onclick=()=>$('folderInput').click();$('folderInput').onchange=importFolder;
 $('elementSearch').oninput=()=>{state.elementPage=0;renderAnalysis();};$('search').oninput=e=>{state.search=e.target.value.trim();requestDraw();};$('colorSelect').onchange=e=>{state.color=e.target.value;requestDraw();};$('flowToggle').onchange=e=>setFlow(e.target.checked);$('labelToggle').onchange=e=>{state.labels=e.target.checked;requestDraw();};
@@ -422,5 +423,5 @@ disableControls(false);window.SJZ_BOOT?.ready();
 stage('等待上传原始数据','选择数据文件夹 → 识别 DAT → 运行潮流校核');
 renderDataset();
 addLog('等待上传原始数据文件夹；当前未加载任何数据集或计算结果。');
-addLog('所有原始阻抗、负荷、容量和控制设置保持不变；过载结果完整保留。');
+addLog('建模设置：T 卡阻抗按 100 MVA 假设解释，L 卡采用文件系统基准；原始文件、负荷、容量和控制不变，过载完整保留。');
 api('/health').then(()=>{$('connectionDot').className='online';$('connectionText').textContent='本地计算服务已连接';}).catch(error=>{$('connectionDot').className='offline';$('connectionText').textContent='计算服务未连接';addLog(error.message,'failed');});

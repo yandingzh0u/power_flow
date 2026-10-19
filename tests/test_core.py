@@ -36,8 +36,8 @@ class CoreTests(unittest.TestCase):
         with self.assertRaisesRegex(RuntimeError,'did not converge'):
             newton(100,buses,y,max_iterations=0)
 
-    def test_all_algorithms_preserve_original_overloads_and_verify_partitions(self):
-        for hour,expected in (('13',397.89571637),('20',489.25963521)):
+    def test_all_algorithms_use_explicit_t_base_and_verify_partitions(self):
+        for hour,expected in (('13',74.89468623),('20',83.57982937)):
             source=ROOT/f'raw_dataset/extracted/{hour}点sim2合并anony.dat'
             digest=hashlib.sha256(source.read_bytes()).hexdigest()
             for algorithm in ('nr','damped-nr','bpa-style','partitioned-nr'):
@@ -46,6 +46,13 @@ class CoreTests(unittest.TestCase):
                 scene=result['scenario']; run=result['run']; lookup={b['id']:b for b in scene['buses']}
                 target=next(t for t in scene['trafos'] if lookup[t['from']]['name']=='GXVS2' and lookup[t['to']]['name']=='GXVY2')
                 self.assertAlmostEqual(target['loading'],expected,places=5)
+                self.assertEqual(run['impedance_policy']['transformer_base_mva'],100.)
+                self.assertEqual(run['impedance_policy']['line_base_mva'],1000.)
+                self.assertTrue(run['impedance_policy']['is_assumption'])
+                self.assertEqual(target['input_x_pu'],.6802)
+                self.assertAlmostEqual(target['x_pu'],6.802)
+                self.assertTrue(all(e['impedance_scale']==1 for e in scene['lines']))
+                self.assertTrue(any('100 MVA' in e.get('message','') for _,e in events))
                 self.assertEqual(len(scene['trafos']),91)
                 self.assertTrue(run['converged']);self.assertTrue(run['source_unchanged'])
                 self.assertEqual(run['source_sha256'],digest)

@@ -1,4 +1,4 @@
-"""Fixed-column DAT parsing and unchanged AC network equations."""
+"""Fixed-column DAT parsing with explicit impedance-base interpretation."""
 from __future__ import annotations
 import re
 import warnings
@@ -7,12 +7,28 @@ from scipy.sparse import bmat, coo_matrix, diags
 from scipy.sparse.csgraph import connected_components
 from scipy.sparse.linalg import MatrixRankWarning, spsolve
 
-def read_dat(path):
+def impedance_policy(base, transformer_base_mva):
+    """Describe a chosen T-card interpretation, separate from the DAT base."""
+    assumed = transformer_base_mva is not None
+    transformer_base = float(transformer_base_mva) if assumed else base
+    if not np.isfinite(transformer_base) or transformer_base <= 0:
+        raise ValueError("Transformer impedance base must be finite and positive")
+    label = (f"T 卡阻抗按 {transformer_base:g} MVA 假设解释；L 卡按系统 {base:g} MVA；"
+             "该假设尚未经 PSD-BPA 结果验证") if assumed else f"L / T 卡阻抗均按 DAT 系统 {base:g} MVA 解释"
+    return {"mode": "assumed_transformer_base" if assumed else "system_base",
+            "system_base_mva": base, "line_base_mva": base,
+            "transformer_base_mva": transformer_base,
+            "transformer_scale": base / transformer_base,
+            "is_assumption": assumed, "label": label}
+
+
+def read_dat(path, transformer_base_mva=None):
     text = path.read_text(encoding="gbk")
     match = re.search(r"/MVA_BASE\s*=\s*([0-9.]+)", text)
     if not match:
         raise ValueError("System MVA base must be explicitly supplied")
     base = float(match.group(1))
+    policy = impedance_policy(base, transformer_base_mva)
     buses, branches, instructions = [], [], []
     def part(line, start, end):
         return line.ljust(end)[start - 1:end].strip()
@@ -46,7 +62,9 @@ def read_dat(path):
                 rate = num(line, 34, 37)
             else:
                 rate = np.sqrt(3) * f[1] * num(line, 34, 37) / 1000
-            r, x = num(line, 39, 44, 5), num(line, 45, 50, 5)
+            input_r, input_x = num(line, 39, 44, 5), num(line, 45, 50, 5)
+            scale = policy['transformer_scale'] if kind == "T" else 1.0
+            r, x = input_r * scale, input_x * scale
             regularized = kind == "L" and r == 0 and x == 0
             if regularized:
                 x = 1e-6
@@ -56,6 +74,9 @@ def read_dat(path):
             if kind == "T" and (g != 0 or b != 0):
                 raise ValueError("Nonzero transformer shunt needs a documented model")
             branches.append({"kind": kind, "from": f, "to": t, "r": r, "x": x,
+                             "input_r_pu": input_r, "input_x_pu": input_x,
+                             "impedance_base_mva": policy['transformer_base_mva'] if kind == "T" else base,
+                             "impedance_scale": scale,
                              "half_y": complex(g, b), "tap": tap, "rate_mva": rate,
                              "regularized": regularized, "source_line": line_number})
     if any(line.startswith(("R", "X", "BQ", "BG", "BX", "E ", "L+")) for line in text.splitlines()):
@@ -151,6 +172,10 @@ def branch_flow(branch, voltage, base):
         "from_name": branch["from"][0], "from_kv": branch["from"][1],
         "to_name": branch["to"][0], "to_kv": branch["to"][1],
         "rate_mva": rate, "r_pu": branch["r"], "x_pu": branch["x"],
+        "input_r_pu": branch.get("input_r_pu", branch["r"]),
+        "input_x_pu": branch.get("input_x_pu", branch["x"]),
+        "impedance_base_mva": branch.get("impedance_base_mva", base),
+        "impedance_scale": branch.get("impedance_scale", 1.0),
         "tap_ratio_pu": branch["tap"],
         "p_from_mw": float(s_from.real), "q_from_mvar": float(s_from.imag),
         "p_to_mw": float(s_to.real), "q_to_mvar": float(s_to.imag),

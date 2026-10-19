@@ -205,6 +205,9 @@ class HttpTests(unittest.TestCase):
         self.assertEqual(result['run']['task_id'],task['task_id'])
         self.assertEqual(result['run']['dataset_id'],dataset['id'])
         self.assertEqual(result['run']['algorithm'],'partitioned-nr')
+        self.assertEqual(result['run']['impedance_policy']['transformer_base_mva'],100.)
+        self.assertTrue(result['run']['impedance_policy']['is_assumption'])
+        self.assertEqual(result['scenario']['impedance_policy'],result['run']['impedance_policy'])
         self.assertEqual(result['scenario']['summary']['converged'],len(result['scenario']['partitions']))
         self.assertEqual(result['run']['partitioning']['strategy'],'weighted')
         phases=[e for e in events if e['type']=='phase']

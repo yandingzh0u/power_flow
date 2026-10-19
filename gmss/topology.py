@@ -51,6 +51,9 @@ def topology(model, parts, label, result=None, use_saved_layout=True, prepared_l
                'p': r.get('p_from_mw'), 'q': r.get('q_from_mvar'),
                'p_to': r.get('p_to_mw'), 'q_to': r.get('q_to_mvar'),
                'rate_mva': edge['rate_mva'], 'r_pu': edge['r'], 'x_pu': edge['x'],
+               'input_r_pu': edge['input_r_pu'], 'input_x_pu': edge['input_x_pu'],
+               'impedance_base_mva': edge['impedance_base_mva'], 'impedance_scale': edge['impedance_scale'],
+               'apparent_power_loading_percent': r.get('apparent_power_loading_percent'),
                'tap': edge['tap'], 'ideal': edge['regularized'],
                'half_g_pu': edge['half_y'].real, 'half_b_pu': edge['half_y'].imag,
                'from_layer': busmap[a]['layer'], 'to_layer': busmap[b]['layer'],
@@ -125,7 +128,9 @@ def topology(model, parts, label, result=None, use_saved_layout=True, prepared_l
                             'boundary_trafos': sum(t['is_interface'] for t in trafos),
                             'max_vm_error': max(finite_vm, default=None), 'max_va_error': max(finite_va, default=None)},
                 'result_status': 'computed' if result else 'waiting', 'coordinate_source': 'electrical_graph_layout',
-                'base_mva': model['base'], 'partitioning': model.get('partitioning'),
+                'base_mva': model['base'], 'impedance_policy': model.get('impedance_policy'),
+                'loading_summary': {k: result[k] for k in ('L_loading', 'T_loading')} if result else {},
+                'partitioning': model.get('partitioning'),
                 'microgrid_note': '假设微网 PCC，仅为研究设定；不增加微网注入，未展开微网内部模型。'}
     if expansion:
         scenario['expansion'] = expansion

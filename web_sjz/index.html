@@ -8,7 +8,7 @@
 </head>
 <body>
 <header class="topbar">
-  <div class="brand"><span class="brand-icon">ϟ</span><div><h1>石家庄电网潮流计算</h1><p>SHIJIAZHUANG · POWER FLOW LAB</p></div></div>
+  <div class="brand"><span class="brand-icon">ϟ</span><div><h1>石家庄电网潮流计算</h1><p>T 卡阻抗：100 MVA 假设 · L 卡：文件系统基准</p></div></div>
   <div class="connection"><i id="connectionDot"></i><span id="connectionText">正在加载页面脚本</span></div>
 </header>
 <main>
@@ -24,7 +24,7 @@
   <section class="kpis" aria-label="网络概况">
     <div class="kpi"><span>网络规模</span><strong id="busKpi">—</strong><small id="busSub">母线</small></div>
     <div class="kpi"><span>线路 / 变压器</span><strong id="edgeKpi">—</strong><small>全部 L / T 卡均计入统计</small></div>
-    <div class="kpi"><span>最高电流负载率</span><strong id="loadingKpi">—</strong><small id="loadingSub">计算结果未限幅</small></div>
+    <div class="kpi"><span>T 支路最高电流负载率</span><strong id="loadingKpi">—</strong><small id="loadingSub">线路与 T 支路分别统计</small></div>
     <div class="kpi"><span>配网分区收敛</span><strong id="partitionKpi">—</strong><small id="partitionSub">并行消元 · 边界协调 · 电压回传</small></div>
     <div class="kpi"><span>本次计算用时</span><strong id="timeKpi">—</strong><small id="timeSub">等待现场运行</small></div>
   </section>
@@ -62,7 +62,7 @@
     <article class="panel"><div class="panel-head"><h2>线路与变压器结果</h2><input id="elementSearch" placeholder="搜索元件名称或端点" aria-label="搜索结果"></div><div class="table-scroll"><table><thead><tr><th>类型</th><th>元件 / 输入行号</th><th>端点</th><th>额定容量 MVA</th><th>P / MW</th><th>Q / Mvar</th><th>电流负载率</th></tr></thead><tbody id="elementTable"></tbody></table></div><div class="table-pager"><span id="elementPageInfo"></span><div><button id="elementPrev" class="button secondary">上一页</button><button id="elementNext" class="button secondary">下一页</button></div></div></article>
     <article class="panel"><div class="panel-head"><h2>配网分区求解结果</h2><span id="partitionExplain" class="hint">各分区并行消元 → 交流边界方程协调 → 电压修正回传</span></div><div id="partitionMethod" class="partition-method"></div><div class="table-scroll"><table><thead><tr><th>分区</th><th>分区节点</th><th>自身边界 / 邻区节点</th><th>状态</th><th>方程残差 MVA</th><th>协调轮数</th><th>求解模式</th></tr></thead><tbody id="partitionTable"></tbody></table></div><div class="table-pager"><span id="partitionPageInfo"></span><div><button id="partitionPrev" class="button secondary">上一页</button><button id="partitionNext" class="button secondary">下一页</button></div></div></article>
   </section>
-  <footer class="page-footer"><span>石家庄 · 原始数据潮流分析</span><span>DAT 原始参数 / 全部支路结果 / 可追溯运行记录</span></footer>
+  <footer class="page-footer"><span>石家庄 · 潮流分析</span><span>T 卡 100 MVA 假设 / 原文件不变 / 可追溯运行记录</span></footer>
 </main>
 <dialog id="datasetDialog" class="dataset-dialog" aria-labelledby="datasetDialogTitle"><div class="panel-head"><h2 id="datasetDialogTitle">当前数据集详情</h2><button id="closeDatasetInfo" class="button secondary">关闭</button></div><div class="dataset-dialog-body">
   <section class="dataset-panel" aria-label="当前数据集">

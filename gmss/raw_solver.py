@@ -1,7 +1,8 @@
 """Solve supplied DAT cases directly, contracting ideal zero-impedance L cards.
 
-No converted network is read and no source data is changed. BE cards retain their
-unlimited-PV interpretation. This is an AC Newton solve, not PSD-BPA execution.
+No source data is changed. The project defaults to the user-selected 100 MVA
+T-card interpretation; None retains the declared system base for all cards.
+BE cards retain unlimited-PV control. This is not PSD-BPA execution.
 """
 
 from __future__ import annotations
@@ -17,10 +18,11 @@ from pathlib import Path
 import numpy as np
 from scipy.sparse import coo_matrix
 
-from .dat import read_dat, stamp, newton, branch_flow
+from .dat import read_dat, stamp, newton, branch_flow, impedance_policy
 from .bpa import SolutionOptions, solve_bpa_style, allocate_be_reactive
 
 ROOT = Path(__file__).resolve().parents[1]
+DEFAULT_TRANSFORMER_BASE_MVA = 100.0
 
 
 def save_csv(path, records):
@@ -63,9 +65,11 @@ def validate_bpa_scope(path, buses):
             raise ValueError("Nonzero QMIN on B-blank requires an explicit scheduling rule")
 
 
-def solve(path, output=None, algorithm="nr", observer=None, include_results=False):
+def solve(path, output=None, algorithm="nr", observer=None, include_results=False,
+          transformer_base_mva=DEFAULT_TRANSFORMER_BASE_MVA):
     digest = hashlib.sha256(path.read_bytes()).hexdigest()
-    base, buses, branches, instructions = read_dat(path)
+    base, buses, branches, instructions = read_dat(path, transformer_base_mva=transformer_base_mva)
+    policy = impedance_policy(base, transformer_base_mva)
     if algorithm not in ("nr", "damped-nr", "bpa-style", "partitioned-nr"):
         raise ValueError(f"Unknown algorithm: {algorithm}")
     validate_bpa_scope(path, buses)
@@ -123,7 +127,8 @@ def solve(path, output=None, algorithm="nr", observer=None, include_results=Fals
     y_original = stamp(base, buses, ordinary)
     y_reduced = (c.T @ y_original @ c).tocsr()
     model = {'kind': 'model', 'base': base, 'buses': buses, 'branches': branches,
-             'reduced': reduced, 'group_index': group_index, 'y_reduced': y_reduced}
+             'reduced': reduced, 'group_index': group_index, 'y_reduced': y_reduced,
+             'impedance_policy': policy}
     if observer:
         observer(model)
 
@@ -196,6 +201,8 @@ def solve(path, output=None, algorithm="nr", observer=None, include_results=Fals
                       "from_name": b["from"][0], "from_kv": b["from"][1],
                       "to_name": b["to"][0], "to_kv": b["to"][1],
                       "rate_mva": rate, "r_pu": 0.0, "x_pu": 0.0, "tap_ratio_pu": 1.0,
+                      "input_r_pu": b["input_r_pu"], "input_x_pu": b["input_x_pu"],
+                      "impedance_base_mva": b["impedance_base_mva"], "impedance_scale": b["impedance_scale"],
                       "p_from_mw": float(power.real), "q_from_mvar": float(power.imag),
                       "p_to_mw": float(-power.real), "q_to_mvar": float(-power.imag),
                       "current_loading_percent": float(current_equiv / rate * 100) if rate else None,
@@ -231,7 +238,8 @@ def solve(path, output=None, algorithm="nr", observer=None, include_results=Fals
     summary = {"numerical_solve_ms": numerical_solve_ms, "source": source_label, "source_sha256": digest,
                "computed_at_utc": datetime.now(timezone.utc).isoformat(),
                "solver": solver_details["solver"] if solver_details else ("damped polar Newton-Raphson" if algorithm == "damped-nr" else "standalone polar Newton-Raphson"), "PSD_BPA_executed": False,
-               "base_mva": base, "bus_count": len(buses), "branch_count": len(branches),
+               "base_mva": base, "impedance_policy": policy,
+               "bus_count": len(buses), "branch_count": len(branches),
                "ideal_zero_impedance_L_cards_contracted": len(ideal), "reduced_bus_count": len(reduced),
                "BE_control": "unlimited PV at raw voltage target", "raw_solution_instruction": instructions,
                "converged": True,
@@ -246,6 +254,8 @@ def solve(path, output=None, algorithm="nr", observer=None, include_results=Fals
         rated = [r for r in flows if r["kind"] == kind and r["current_loading_percent"] is not None]
         summary[kind + "_loading"] = {
             "count": sum(r["kind"] == kind for r in flows), "rated_count": len(rated),
+            "max_current_loading_percent": max((r["current_loading_percent"] for r in rated), default=None),
+            "max_apparent_power_loading_percent": max((r["apparent_power_loading_percent"] for r in rated), default=None),
             "above_100_percent": sum(r["current_loading_percent"] > 100 for r in rated),
             "above_200_percent": sum(r["current_loading_percent"] > 200 for r in rated),
             "top_5": sorted(rated, key=lambda r: r["current_loading_percent"], reverse=True)[:5]}

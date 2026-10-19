@@ -1,5 +1,9 @@
 # 原始 DAT 的 BPA 风格潮流流程
 
+本文的 397.90%／489.26% 等复算记录对应 L/T 均按系统基准解释。当前项目
+默认按用户指定采用 [T 卡 100 MVA 假设](../T卡100MVA建模设置.md)，原模型
+通过 `--transformer-base system` 复现。算法流程不因基准设置而改变。
+
 本实现只覆盖当前两个原始 DAT 中实际存在的 B、BE、BS、L、固定变比 T 卡。
 它依据公开 BPA/IPF 的说明和计算结构实现，不调用潮流软件，也不声称复刻
 PSD-BPA 闭源内核或已经与其输出完成验证。
@@ -37,7 +41,7 @@ BQ 的限无功切换、BG 的远方调压、R 卡自动分接、X 卡投切等�
 运行：
 
 ```bash
-/home/y/miniconda3/envs/powerflow/bin/python tools/run_raw_dat_powerflow.py --algorithm bpa-style
+/home/y/miniconda3/envs/powerflow/bin/python tools/run_raw_dat_powerflow.py --algorithm bpa-style --transformer-base system
 /home/y/miniconda3/envs/powerflow/bin/python -m unittest discover -s tests -p test_bpa_style_solver.py -v
 ```
 
