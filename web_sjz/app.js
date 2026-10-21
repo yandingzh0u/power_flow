@@ -113,6 +113,31 @@ function render(){
   $('flowToggle').disabled=!s.buses.length;
   renderSelection();renderAnalysis();requestDraw();
 }
+const SVG_NS='http://www.w3.org/2000/svg';
+function svgNode(tag,attrs={},text=''){const node=document.createElementNS(SVG_NS,tag);for(const [key,value] of Object.entries(attrs))node.setAttribute(key,value);if(text)node.textContent=text;return node;}
+function chartEmpty(root,message){root.replaceChildren();const box=document.createElement('div');box.className='chart-empty';box.textContent=message;root.append(box);}
+function renderCharts(edges){
+  const residualRoot=$('residualChart'),loadingRoot=$('loadingChart');
+  if(!residualRoot||!loadingRoot)return;
+  const frames=trace.frames.filter(frame=>Number.isFinite(Number(frame.residual_mva)));
+  if(!frames.length)chartEmpty(residualRoot,'运行潮流后显示每轮残差变化');
+  else{
+    const values=frames.map(frame=>Math.max(Number(frame.residual_mva),1e-12)),w=640,h=250,left=52,right=18,top=20,bottom=35;
+    const svg=svgNode('svg',{viewBox:`0 0 ${w} ${h}`,preserveAspectRatio:'none'}),min=Math.min(...values),max=Math.max(...values),lo=Math.log10(min),hi=Math.log10(max),span=Math.max(hi-lo,1);
+    for(let i=0;i<4;i++){const y=top+(h-top-bottom)*i/3,v=10**(hi-span*i/3);svg.append(svgNode('line',{x1:left,x2:w-right,y1:y,y2:y,class:'chart-grid'}));svg.append(svgNode('text',{x:left-8,y:y+4,'text-anchor':'end',class:'chart-axis'},v.toExponential(1)));}
+    const points=values.map((v,i)=>{const x=left+(w-left-right)*(frames.length===1?.5:i/(frames.length-1));const y=top+(h-top-bottom)*(hi-Math.log10(v))/span;return [x,y];});
+    svg.append(svgNode('line',{x1:left,x2:left,y1:top,y2:h-bottom,class:'chart-axis-line'}));svg.append(svgNode('line',{x1:left,x2:w-right,y1:h-bottom,y2:h-bottom,class:'chart-axis-line'}));
+    svg.append(svgNode('polyline',{points:points.map(p=>p.join(',')).join(' '),class:'chart-line'}));points.forEach(([x,y],i)=>svg.append(svgNode('circle',{cx:x,cy:y,r:3,class:'chart-point'})));
+    svg.append(svgNode('text',{x:left,y:h-10,class:'chart-axis'},'第 1 轮'));svg.append(svgNode('text',{x:w-right,y:h-10,'text-anchor':'end',class:'chart-axis'},`第 ${frames.at(-1).iteration??frames.length} 轮`));residualRoot.replaceChildren(svg);
+  }
+  const ranked=edges.filter(edge=>Number.isFinite(Number(edge.loading))).sort((a,b)=>Number(b.loading)-Number(a.loading)).slice(0,10);
+  if(!ranked.length)chartEmpty(loadingRoot,'运行潮流后显示设备负载率');
+  else{
+    const w=640,h=250,left=150,right=28,top=16,bottom=25,max=Math.max(100,...ranked.map(edge=>Number(edge.loading))),barH=Math.min(18,(h-top-bottom)/ranked.length-5),svg=svgNode('svg',{viewBox:`0 0 ${w} ${h}`,preserveAspectRatio:'none'});
+    [0,50,100].forEach(value=>{const x=left+(w-left-right)*value/max;svg.append(svgNode('line',{x1:x,x2:x,y1:top,y2:h-bottom,class:'chart-grid'}));svg.append(svgNode('text',{x,y:h-7,'text-anchor':'middle',class:'chart-axis'},`${value}%`));});
+    ranked.forEach((edge,i)=>{const y=top+i*((h-top-bottom)/ranked.length)+4,width=(w-left-right)*Number(edge.loading)/max,label=`${edge.name} · ${nodes.get(edge.from)?.name||''}→${nodes.get(edge.to)?.name||''}`;svg.append(svgNode('text',{x:left-8,y:y+barH-3,'text-anchor':'end',class:'chart-label'},label.length>27?`${label.slice(0,27)}…`:label));svg.append(svgNode('rect',{x:left,y,width,height:barH,rx:3,class:Number(edge.loading)>100?'chart-bar danger-bar':'chart-bar'}));svg.append(svgNode('text',{x:Math.min(left+width+6,w-right),y:y+barH-3,class:'chart-value'},`${fmt(edge.loading,1)}%`));});loadingRoot.replaceChildren(svg);
+  }
+}
 function renderAnalysis(){
   if(!$('view-analysis').classList.contains('active'))return;
   const r=state.run;
@@ -158,6 +183,7 @@ function renderAnalysis(){
   counts[0]+=edges.filter(e=>e.loading===0).length;
   const dist=$('loadingDistribution');dist.replaceChildren();
   bins.forEach(([label,,,color],i)=>{const row=document.createElement('div'),name=document.createElement('span'),bar=document.createElement('div'),fill=document.createElement('i'),count=document.createElement('b');row.className='dist-row';name.textContent=label;fill.style.width=`${counts[i]/Math.max(1,...counts)*100}%`;fill.style.background=color;count.textContent=counts[i];bar.append(fill);row.append(name,bar,count);dist.append(row);});
+  renderCharts(edges);
 }
 function pagedRows(rows,pageSize,key){
   const pages=Math.max(1,Math.ceil(rows.length/pageSize)),field=`${key}Page`;
@@ -475,6 +501,7 @@ $('archiveBtn').onclick=()=>$('archiveInput').click();$('archiveInput').onchange
 $('timingBtn').onclick=()=>{renderTiming();$('timingDialog').showModal();};$('closeTiming').onclick=()=>$('timingDialog').close();
 $('elementSearch').oninput=()=>{state.elementPage=0;renderAnalysis();};$('search').oninput=e=>{state.search=e.target.value.trim();requestDraw();};$('colorSelect').onchange=e=>{state.color=e.target.value;requestDraw();};$('flowToggle').onchange=e=>setFlow(e.target.checked);$('labelToggle').onchange=e=>{state.labels=e.target.checked;requestDraw();};
 $('areaSelect').onchange=e=>focusArea(e.target.value);
+$('toggleLog').onclick=()=>{const panel=document.querySelector('.log-panel'),workspace=document.querySelector('.workspace'),collapsed=!panel.classList.contains('is-collapsed');panel.classList.toggle('is-collapsed',collapsed);workspace.classList.toggle('log-collapsed',collapsed);const button=$('toggleLog');button.setAttribute('aria-expanded',String(!collapsed));$('toggleLog').querySelector('.log-toggle-label').textContent=collapsed?'展开日志':'收起日志';button.title=collapsed?'展开实时计算日志':'收起实时计算日志';requestAnimationFrame(()=>{resize();requestDraw();});};
 $('search').onkeydown=e=>{if(e.key!=='Enter'||!state.search)return;const query=state.search.toLowerCase(),bus=state.scene.buses.find(b=>b.name.toLowerCase()===query||String(b.id)===query)||state.scene.buses.find(b=>b.name.toLowerCase().includes(query));if(bus){select('bus',bus.id);return;}const edge=[...state.scene.lines,...state.scene.trafos].find(e=>e.name.toLowerCase()===query)||[...state.scene.lines,...state.scene.trafos].find(e=>e.name.toLowerCase().includes(query));if(edge)select(edge.kind,edge.id);};
 for(const key of ['element','partition'])for(const [suffix,delta] of [['Prev',-1],['Next',1]])$(`${key}${suffix}`).onclick=()=>{state[`${key}Page`]+=delta;renderAnalysis();};
 $('exportBtn').onclick=()=>{if(trace.viewing)restoreFinal();exportCSV();};$('clearLog').onclick=()=>{pendingLogRows=[];if(logFrame!==null)cancelAnimationFrame(logFrame);logFrame=null;$('log').replaceChildren();$('logCount').textContent=0;};$('downloadLog').onclick=()=>{if(state.task){const a=document.createElement('a');a.href=`/api/runs/${state.task}/trace`;a.download=`powerflow-${state.task}-trace.json`;a.click();}else download('sjz_session_log.json',JSON.stringify(state.log,null,2),'application/json');};
