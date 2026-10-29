@@ -1,0 +1,29 @@
+{
+  "id": "lv-four-bus-pq-v1",
+  "model_type": "multi_bus_research_microgrid",
+  "provenance": "研究假设；借鉴 CIGRE LV 的 UG1 电缆与住宅变压器阻抗，非完整 CIGRE 算例，非现场设备台账",
+  "pcc_names": ["QRTY2", "QRTY1", "OBFY1", "FUNY2", "LQTY1", "LAJY1"],
+  "voltage_kv": 0.4,
+  "transformer": {"sn_mva": 0.5, "r_pu_own_base": 0.01, "x_pu_own_base": 0.04, "tap": 1.0, "phase_shift_deg": 0},
+  "cable": {"r_ohm_per_km": 0.162, "x_ohm_per_km": 0.0832, "max_i_ka": 0.3},
+  "buses": [
+    {"name": "IN", "load_p_mw": 0, "load_q_mvar": 0},
+    {"name": "LOAD", "load_p_mw": 0.12, "load_q_mvar": 0.04},
+    {"name": "PV", "load_p_mw": 0.03, "load_q_mvar": 0.01},
+    {"name": "BESS", "load_p_mw": 0.05, "load_q_mvar": 0.02}
+  ],
+  "lines": [
+    {"from": "IN", "to": "LOAD", "length_km": 0.035},
+    {"from": "LOAD", "to": "PV", "length_km": 0.03},
+    {"from": "LOAD", "to": "BESS", "length_km": 0.025}
+  ],
+  "devices": [
+    {"kind": "pv", "bus": "PV", "control": "PQ", "p_mw": 0.1, "q_mvar": 0, "sn_mva": 0.12, "max_p_mw": 0.12},
+    {"kind": "bess", "bus": "BESS", "control": "PQ", "p_mw": 0.02, "q_mvar": 0.015, "sn_mva": 0.15, "max_p_mw": 0.1}
+  ],
+  "scope": "三相平衡、并网、单断面稳态 AC 潮流；统一给定光伏/储能 PQ；储能正 P 为放电；不含孤岛切换、构网控制、动态稳定性和 SOC 时序",
+  "sources": [
+    {"title": "DOE: The U.S. Department of Energy's Microgrid Initiative (2012), p.84", "url": "https://www.energy.gov/sites/default/files/2016/06/f32/The%20US%20Department%20of%20Energy%27s%20Microgrid%20Initiative.pdf"},
+    {"title": "pandapower CIGRE LV implementation: UG1 and R0-R1 transformer", "url": "https://github.com/e2nIEE/pandapower/blob/9361610ce353e23649ed2c3c80f93ab4abedafb7/pandapower/networks/cigre_networks.py"}
+  ]
+}

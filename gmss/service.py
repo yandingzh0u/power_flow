@@ -202,7 +202,7 @@ class JobService:
         self.emit(task, 'log', {'message': '任务已创建，等待求解器', 'status': 'queued'})
         self.emit(task, 'log', {'message': f"数据集：{dataset['label']}；计算时刻／断面：{snapshot['label']}；输入 DAT：{snapshot['filename']}"})
         if task['reference_file_count']:
-            self.emit(task, 'log', {'message': f"同一数据集的 {task['reference_file_count']} 份 Excel 已按原字节保存，当前未接入求解模型；本次仅使用所选 DAT"})
+            self.emit(task, 'log', {'message': f"同一数据集的 {task['reference_file_count']} 份 Excel 已按原字节保存，当前未接入求解模型；网架、断面和微网设备均取自所选 DAT"})
         self.executor.submit(self._work, task, source, f"{dataset['label']} · {snapshot['label']}", False)
         return task
 

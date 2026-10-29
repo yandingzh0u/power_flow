@@ -3,12 +3,12 @@ from __future__ import annotations
 from pathlib import Path
 import json
 import math
+from copy import deepcopy
 
 import networkx as nx
 from .expansion import expanded_layout, split_bus_name
 
 ROOT = Path(__file__).resolve().parents[1]
-PCC_NAMES = ('QRTY2', 'QRTY1', 'OBFY1', 'FUNY2', 'LQTY1', 'LAJY1')
 
 
 def topology(model, parts, label, result=None, use_saved_layout=True, prepared_layout=None):
@@ -26,7 +26,8 @@ def topology(model, parts, label, result=None, use_saved_layout=True, prepared_l
     for i, b in enumerate(model['buses']):
         r = rows[i] if rows else {}
         buses.append({'id': i+1, 'name': b['key'][0], 'kv': b['key'][1],
-                      'type': b['subtype'].strip() or 'PQ', 'layer': 'main' if b['key'][1] >= 35 else 'distribution',
+                      'type': b['subtype'].strip() or 'PQ', 'layer': 'microgrid' if b.get('microgrid_id') else 'main' if b['key'][1] >= 35 else 'distribution',
+                      'microgrid_id': b.get('microgrid_id'), 'data_origin': b.get('data_origin', 'source_dat'),
                       'partition_id': membership.get(i+1), 'is_boundary': i+1 in boundaries or b['key'][1] >= 35,
                       'solver_role': 'coordinator' if b['key'][1] >= 35 else 'boundary' if i+1 in boundaries else 'interior',
                       'merged_group_count': int(group_sizes[model['group_index'][i]]),
@@ -47,6 +48,8 @@ def topology(model, parts, label, result=None, use_saved_layout=True, prepared_l
         r = flows.get(edge['source_line'], {})
         row = {'id': edge['source_line'], 'source_line': edge['source_line'],
                'name': f"{'LINE' if edge['kind']=='L' else 'TRAFO'}-{edge['source_line']}",
+               'input_source_line': edge.get('input_source_line', edge['source_line']),
+               'data_origin': edge.get('data_origin', 'source_dat'), 'microgrid_id': edge.get('microgrid_id'),
                'from': a, 'to': b, 'loading': r.get('current_loading_percent'),
                'p': r.get('p_from_mw'), 'q': r.get('q_from_mvar'),
                'p_to': r.get('p_to_mw'), 'q_to': r.get('q_to_mvar'),
@@ -75,16 +78,19 @@ def topology(model, parts, label, result=None, use_saved_layout=True, prepared_l
         else:
             row.update(hv=a, lv=b, hv_kv=edge['from'][1], lv_kv=edge['to'][1], sn_mva=edge['rate_mva'],
                        p_hv=row['p'], q_hv=row['q'], hv_layer=row['from_layer'], lv_layer=row['to_layer'],
-                       is_interface=row['from_layer'] != row['to_layer'], vm_hv=busmap[a]['vm'], vm_lv=busmap[b]['vm'])
+                       is_interface={row['from_layer'], row['to_layer']} == {'main', 'distribution'},
+                       is_microgrid_interface='microgrid' in (row['from_layer'], row['to_layer']) and row['from_layer'] != row['to_layer'],
+                       vm_hv=busmap[a]['vm'], vm_lv=busmap[b]['vm'])
             trafos.append(row)
-    microgrids = []
-    for candidate in buses:
-        if candidate.get('original_name', candidate['name']) in PCC_NAMES:
-            name = candidate['name']
-            candidate['microgrid_name'] = f"PCC-{len(microgrids)+1}"
-            microgrids.append({'id': len(microgrids)+1, 'name': candidate['microgrid_name'],
-                               'pcc_bus': candidate['id'], 'pcc_name': name, 'partition_id': candidate['partition_id'],
-                               'model_type': 'hypothetical_interface', 'note': '研究假设接入点，未经实测确认，不向原始断面叠加额外注入'})
+    microgrids = deepcopy(model.get('microgrids', []))
+    for mg in microgrids:
+        busmap[mg['pcc_bus']]['microgrid_name'] = mg['name']
+        busmap[mg['pcc_bus']]['connected_microgrid_id'] = mg['id']
+        for node in mg['internal_buses']:
+            busmap[node]['microgrid_name'] = mg['name']
+        if expansion:
+            for node in mg['internal_buses']:
+                busmap[node]['area_id'] = busmap[mg['pcc_bus']]['area_id']
     saved = ROOT / 'data/demo_area/layout.json'
     if prepared_layout is not None:
         layout = prepared_layout
@@ -94,6 +100,14 @@ def topology(model, parts, label, result=None, use_saved_layout=True, prepared_l
         layout = json.loads(saved.read_text())
     else:
         layout = {}
+    layout = dict(layout)
+    # Keep existing coordinates stable when DAT contains additional buses.
+    # Spread each four-bus circuit beside its PCC; these are electrical drawings.
+    for mg in microgrids:
+        point = layout.get(str(mg['pcc_bus']))
+        if point is not None:
+            for node, (dx, dy) in zip(mg['internal_buses'], ((.04, .025), (.08, .025), (.12, .05), (.12, 0))):
+                layout.setdefault(str(node), [point[0] + dx, point[1] + dy])
     missing = {str(b['id']) for b in buses} - set(layout)
     if missing:
         graph = nx.Graph()
@@ -122,8 +136,12 @@ def topology(model, parts, label, result=None, use_saved_layout=True, prepared_l
                 'buses': buses, 'lines': lines, 'trafos': trafos, 'microgrids': microgrids, 'partitions': serial_parts,
                 'layers': {'main_bus_count': sum(b['layer']=='main' for b in buses),
                            'distribution_bus_count': sum(b['layer']=='distribution' for b in buses),
+                           'microgrid_bus_count': sum(b['layer']=='microgrid' for b in buses),
+                           'microgrid_interface_count': len(microgrids),
                            'interface_trafo_count': sum(t['is_interface'] for t in trafos)},
                 'summary': {'parts': len(parts), 'converged': sum(p['converged'] is True for p in parts),
+                            'distribution_parts': sum(p.get('subsystem_type') != 'microgrid' for p in parts),
+                            'microgrid_parts': len(microgrids),
                             'boundary_buses': len(boundaries), 'cut_edges': sum(e['is_cut_edge'] for e in lines),
                             'boundary_trafos': sum(t['is_interface'] for t in trafos),
                             'max_vm_error': max(finite_vm, default=None), 'max_va_error': max(finite_va, default=None)},
@@ -131,7 +149,9 @@ def topology(model, parts, label, result=None, use_saved_layout=True, prepared_l
                 'base_mva': model['base'], 'impedance_policy': model.get('impedance_policy'),
                 'loading_summary': {k: result[k] for k in ('L_loading', 'T_loading')} if result else {},
                 'partitioning': model.get('partitioning'),
-                'microgrid_note': '假设微网 PCC，仅为研究设定；不增加微网注入，未展开微网内部模型。'}
+                'source_bus_count': model.get('source_bus_count', len(buses)),
+                'source_branch_count': model.get('source_branch_count', len(lines) + len(trafos)),
+                'microgrid_note': f"DAT 包含 {len(microgrids)} 个微网子系统" if microgrids else 'DAT 未定义微网子系统'}
     if expansion:
         scenario['expansion'] = expansion
         scenario['areas'] = []

@@ -16,6 +16,7 @@ from .raw_solver import solve, DEFAULT_TRANSFORMER_BASE_MVA
 from .topology import topology
 from .expansion import read_expansion
 from .telemetry import IterationTrace
+from .microgrid import microgrid_states
 
 ROOT = Path(__file__).resolve().parents[1]
 ALGORITHMS = {'partitioned-nr': '加权分区 + 并行 Newton–Schur', 'nr': '普通牛顿法',
@@ -53,16 +54,21 @@ def run_case(source, algorithm='partitioned-nr', emit=None, label=None, builtin=
             context['parts'] = build_partitions(event)
             event['parts'] = context['parts']
             context['trace'] = IterationTrace(event, context['parts'])
-            emit('log', {'message': f"模型已建立：{len(event['buses'])} 母线、{len(event['branches'])} 支路；零阻抗理想连接精确合并；负荷、容量和控制不变；阻抗采用已记录的基准解释"})
+            emit('log', {'message': f"读取 DAT：{len(event['buses'])} 母线、{len(event['branches'])} 支路；零阻抗理想连接精确合并"})
+            if event['microgrids']:
+                emit('log', {'message': f"DAT 包含 {len(event['microgrids'])} 个独立微网子系统，内部母线、线路、变压器、光伏、储能及负荷直接从文件读取"})
+                emit('log', {'message': '配网向微网传递 PCC 电压/相角，微网反馈随电压变化的 P/Q 及 Schur 线性响应；各微网独立消元，与配网共同协调收敛，无额外嵌套定点迭代'})
+            else:
+                emit('log', {'message': '当前 DAT 未定义微网子系统'})
             context['initial_payload'] = topology(event, context['parts'], label, use_saved_layout=known_layout)
             emit('network', context['initial_payload'])
             info = event['partitioning']
-            emit('log', {'message': f"加权分区（{'复用已核对结构' if info['structure_cache_hit'] else '本次构造'}，{info['elapsed_ms']:.2f} ms）：{info['distribution_components']} 个配网连通块 → {info['partition_count']} 个计算分区；"
+            emit('log', {'message': f"加权分区（{'复用已核对结构' if info['structure_cache_hit'] else '本次构造'}，{info['elapsed_ms']:.2f} ms）：{info['distribution_components']} 个配网连通块 → {info['distribution_partition_count']} 个配网域 + {info['microgrid_partition_count']} 个独立微网域；"
                          f"粒度候选 {[r['target_size'] for r in info['candidates']]}，结构成本选择 {info['target_size']}；"
                          f"边界未知量 {info['interface_unknowns']}，节点数 {info['size_min']}～{info['size_max']}（中位 {info['size_median']:g}）；"
                          f"可用逻辑 CPU {info['available_cpus']}；权重仅用于分区，不修改电气参数", 'partitioning': info})
             if algorithm == 'partitioned-nr':
-                emit('log', {'message': f"进入分区并行求解：{len(context['parts'])} 个配网分区；每轮局部消元 → 边界方程协调 → 电压修正回传；从平坦初值开始，不先做全网牛顿求解"})
+                emit('log', {'message': f"进入分区并行求解：{len(context['parts'])} 个配网/微网计算域；每轮局部消元 → 边界方程协调 → 电压修正回传；从平坦初值开始，不先做全网牛顿求解"})
         elif kind == 'setup':
             emit('log', {'message': f"消元结构{'复用' if event['structure_cache_hit'] else '首次构造'}："
                          f"本次准备 {event['setup_ms']:.2f} ms；结构索引 {event['structure_bytes'] / 1024:.1f} KiB；"
@@ -97,7 +103,7 @@ def run_case(source, algorithm='partitioned-nr', emit=None, label=None, builtin=
     result = solve(source, algorithm=algorithm, observer=observe, include_results=True,
                    transformer_base_mva=transformer_base_mva)
     solve_ms = result['numerical_solve_ms']
-    emit('log', {'message': f"全网潮流收敛：{result['iterations']} 次牛顿迭代；原始节点方程残差 {result['original_bus_equation_residual_mva']:.6e} MVA"})
+    emit('log', {'message': f"全网潮流收敛：{result['iterations']} 次牛顿迭代；全部节点方程残差 {result['original_bus_equation_residual_mva']:.6e} MVA"})
     if algorithm == 'partitioned-nr':
         model = context['model']
         _, anchors = np.unique(model['group_index'], return_index=True)
@@ -110,11 +116,18 @@ def run_case(source, algorithm='partitioned-nr', emit=None, label=None, builtin=
             residual = float(np.max(constraints[p['internal']], initial=0))
             p.update(converged=residual < 1e-4, max_equation_residual_mva=residual,
                      iterations=result['iterations'], solve_mode='coupled Schur Newton', elapsed_ms=None)
-        emit('log', {'message': f"{len(context['parts'])} 个配网分区已共同收敛；逐区检查原始 AC 功率方程，跨区线路保留；没有额外全网参考求解"})
+        emit('log', {'message': f"{len(context['parts'])} 个配网/微网计算域已共同收敛；逐区检查 AC 功率方程，跨区线路保留；没有额外全网参考求解"})
     elif partitioned:
         emit('log', {'message': f"开始 {len(context['parts'])} 个配网分区的固定边界牛顿校核；边界电压来自本次全网求解"})
         verify_partitions(context['model'], context['parts'], context['voltage'], emit)
     payload = topology(context['model'], context['parts'], label, result, use_saved_layout=known_layout, prepared_layout=context['initial_payload']['layout'])
+    mg_states = microgrid_states(context['model'], context['voltage'])
+    for mg, row in zip(payload['scenario']['microgrids'], mg_states):
+        mg.update(row, converged=row['max_equation_residual_mva'] < 1e-4)
+    if mg_states:
+        emit('log', {'message': f"微网方程残差最大 {max(m['max_equation_residual_mva'] for m in mg_states):.3e} MVA；"
+                     f"PCC 总购电 {sum(m['import_p_mw'] for m in mg_states):.6f} MW，"
+                     f"总无功交换 {sum(m['import_q_mvar'] for m in mg_states):.6f} Mvar（正值为配网供给微网）"})
     assert hashlib.sha256(source.read_bytes()).hexdigest() == before, '原始输入意外发生变化'
     payload['run'] = {'algorithm': algorithm, 'algorithm_label': ALGORITHMS[algorithm], 'converged': True,
                       'iterations': result['iterations'], 'residual_mva': result['original_bus_equation_residual_mva'],
@@ -127,11 +140,15 @@ def run_case(source, algorithm='partitioned-nr', emit=None, label=None, builtin=
                       'partitioning': context['model'].get('partitioning'),
                       'workers': result.get('solver_details', {}).get('workers', 1),
                       'boundary_iterations': result['iterations'] if algorithm == 'partitioned-nr' else 0,
+                      'microgrid_count': len(mg_states),
+                      'source_bus_count': result['source_bus_count'], 'source_branch_count': result['source_branch_count'],
+                      'microgrid_template_sha256': [m['template_sha256'] for m in context['model']['microgrids']],
+                      'microgrid_boundary_iterations': result['iterations'] if algorithm == 'partitioned-nr' and mg_states else 0,
                       'timing_scope': 'solver includes domain plan and iteration callbacks; total includes DAT parsing, partitioning and display payloads',
                       'impedance_policy': result['impedance_policy'],
-                      'model_policy': result['impedance_policy']['label'] + '；不回写负荷曲线，不新增微网注入'}
+                      'model_policy': result['impedance_policy']['label'] + '；网架、负荷及微网设备直接读取 DAT；不回写 Excel 负荷曲线'}
     if expansion:
-        payload['run']['model_policy'] = expansion['policy']
+        payload['run']['model_policy'] += '；' + expansion['policy']
         payload['run']['expansion'] = expansion
     overloads = sum((e['loading'] or 0)>100 for e in payload['scenario']['lines']+payload['scenario']['trafos'])
     emit('log', {'message': f"最高电流负载率：线路 {result['L_loading']['max_current_loading_percent'] or 0:.2f}%；"

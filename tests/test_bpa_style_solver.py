@@ -16,6 +16,7 @@ sys.path.insert(0, str(ROOT))
 from gmss.bpa import SolutionOptions, allocate_be_reactive, solve_bpa_style
 from gmss.raw_solver import solve, validate_bpa_scope
 from gmss.dat import read_dat
+from original_fixtures import original_dat
 
 
 def two_bus(kind=" ", vm=1.0, p=-80.0, q=-30.0):
@@ -86,7 +87,8 @@ class OriginalDatRegressionTests(unittest.TestCase):
     def test_both_original_cases_preserve_data_and_balance_all_raw_buses(self):
         for hour, expected_loading in (("13", 397.89571637), ("20", 489.25963521)):
             with self.subTest(hour=hour), tempfile.TemporaryDirectory() as folder:
-                source = ROOT / f"raw_dataset/extracted/{hour}点sim2合并anony.dat"
+                source = Path(folder) / f'{hour}点.dat'
+                source.write_bytes(original_dat(hour).read_bytes())
                 before = hashlib.sha256(source.read_bytes()).hexdigest()
                 output = Path(folder)
                 result = solve(source, output, "bpa-style", transformer_base_mva=None)

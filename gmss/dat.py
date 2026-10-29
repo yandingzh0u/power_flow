@@ -81,6 +81,8 @@ def read_dat(path, transformer_base_mva=None):
                              "regularized": regularized, "source_line": line_number})
     if any(line.startswith(("R", "X", "BQ", "BG", "BX", "E ", "L+")) for line in text.splitlines()):
         raise ValueError("Additional control/branch cards require explicit support")
+    from .microgrid import attach_microgrid_metadata
+    attach_microgrid_metadata(text, buses, branches, base)
     return base, buses, branches, instructions
 
 def stamp(base, buses, branches):

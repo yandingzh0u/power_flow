@@ -10,14 +10,23 @@ from scipy.sparse import csr_matrix
 
 from gmss.core import ROOT, run_case
 from gmss.dat import newton
+from original_fixtures import original_dat
 
 
 class CoreTests(unittest.TestCase):
     def test_original_dat_and_xls_bytes_match_cleanup_manifest(self):
         manifest=json.loads((ROOT/'doc/repository_cleanup.json').read_text())
         self.assertEqual(len(manifest['preserved_raw_sha256']),21)
+        migration=json.loads((ROOT/'data/backups/before_microgrid/manifest.json').read_text())
+        changed={row['path']:row for row in migration['files']}
         for name,expected in manifest['preserved_raw_sha256'].items():
-            self.assertEqual(hashlib.sha256((ROOT/name).read_bytes()).hexdigest(),expected,name)
+            source=ROOT/name
+            if name in changed:
+                row=changed[name]
+                self.assertEqual(hashlib.sha256(source.read_bytes()).hexdigest(),row['after_sha256'],name)
+                self.assertEqual(row['before_sha256'],expected)
+                source=ROOT/row['backup']
+            self.assertEqual(hashlib.sha256(source.read_bytes()).hexdigest(),expected,name)
 
     def test_classic_algorithms_agree_and_callbacks_contain_actual_voltages(self):
         buses=[{'subtype':'S','vm':1.,'va':0.,'p':0.,'q':0.},
@@ -38,7 +47,7 @@ class CoreTests(unittest.TestCase):
 
     def test_all_algorithms_use_explicit_t_base_and_verify_partitions(self):
         for hour,expected in (('13',74.89468623),('20',83.57982937)):
-            source=ROOT/f'raw_dataset/extracted/{hour}点sim2合并anony.dat'
+            source=original_dat(hour)
             digest=hashlib.sha256(source.read_bytes()).hexdigest()
             for algorithm in ('nr','damped-nr','bpa-style','partitioned-nr'):
                 events=[]

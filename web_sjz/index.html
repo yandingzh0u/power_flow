@@ -28,23 +28,23 @@
   </section>
   <section class="kpis" aria-label="网络概况">
     <div class="kpi"><span>网络规模</span><strong id="busKpi">—</strong><small id="busSub">母线</small></div>
-    <div class="kpi"><span>线路 / 变压器</span><strong id="edgeKpi">—</strong><small>全部 L / T 卡均计入统计</small></div>
+    <div class="kpi"><span>线路 / 变压器</span><strong id="edgeKpi">—</strong><small>全部线路及变压器</small></div>
     <div class="kpi"><span>T 支路最高电流负载率</span><strong id="loadingKpi">—</strong><small id="loadingSub">线路与 T 支路分别统计</small></div>
-    <div class="kpi"><span>配网分区收敛</span><strong id="partitionKpi">—</strong><small id="partitionSub">并行消元 · 边界协调 · 电压回传</small></div>
+    <div class="kpi"><span>配网 / 微网计算域收敛</span><strong id="partitionKpi">—</strong><small id="partitionSub">并行消元 · 边界协调 · 电压回传</small></div>
     <div class="kpi" title="从点击运行到结果就绪，包含排队、网络传输和页面处理"><span>本次总用时 <button id="timingBtn" class="text-button timing-button" disabled>明细</button></span><strong id="timeKpi">—</strong><small id="timeSub">等待现场运行</small></div>
   </section>
   <nav class="tabs"><button class="tab active" data-tab="topology">主配微拓扑</button><button class="tab" data-tab="analysis">潮流与分区分析</button><span id="resultOrigin" class="result-origin">等待上传数据</span></nav>
   <section id="view-topology" class="view active">
     <div class="workspace log-collapsed">
       <article class="panel topology-panel">
-        <div class="panel-head"><div><span class="eyebrow">NETWORK OVERVIEW</span><h2>主网—配网分区—微网 PCC 全景</h2></div><div class="layer-strip">
+        <div class="panel-head"><div><span class="eyebrow">NETWORK OVERVIEW</span><h2>主网—配网—微网子系统全景</h2></div><div class="layer-strip">
           <button class="layer active" data-layer="main"><i class="main-dot"></i>主网 <b id="mainCount">—</b></button>
           <button class="layer active" data-layer="interface"><i class="interface-dot"></i>主配接口 <b id="interfaceCount">—</b></button>
           <button class="layer active" data-layer="distribution"><i class="distribution-dot"></i>配网分区 <b id="distributionCount">—</b></button>
-          <button class="layer active" data-layer="microgrid"><i class="micro-dot"></i>假设微网 PCC <b id="microCount">—</b></button>
+          <button class="layer active" data-layer="microgrid"><i class="micro-dot"></i>微网子系统 <b id="microCount">—</b></button>
         </div><button id="exportBtn" class="text-button">导出结果 CSV ↗</button></div>
 
-        <div class="map-toolbar"><input id="search" placeholder="搜索名称后按 Enter 定位" aria-label="搜索元件"><select id="colorSelect" aria-label="拓扑着色"><option value="partition">按配网分区着色</option><option value="voltage">按电压等级着色</option><option value="vm">按节点电压着色</option><option value="loading">按负载率着色</option></select><label title="计算时自动开启，完成后停止；可手动开启以展示最终结果"><input type="checkbox" id="flowToggle" disabled>电流动画</label><label><input type="checkbox" id="labelToggle">节点名称</label></div>
+        <div class="map-toolbar"><input id="search" placeholder="搜索名称后按 Enter 定位" aria-label="搜索元件"><button id="clearMicrogridFocus" class="text-button" hidden>返回全网</button><select id="colorSelect" aria-label="拓扑着色"><option value="partition">按计算域着色</option><option value="voltage">按电压等级着色</option><option value="vm">按节点电压着色</option><option value="loading">按负载率着色</option></select><label title="计算时自动开启，完成后停止；可手动开启以展示最终结果"><input type="checkbox" id="flowToggle" disabled>电流动画</label><label><input type="checkbox" id="labelToggle">节点名称</label></div>
         <div class="area-toolbar" id="areaControl" hidden><label>区域视图 <select id="areaSelect" aria-label="选择复制区域"></select></label><span id="areaHint">区域总览聚合显示；选择区域查看区内全部母线，跨区联络在总览中查看。</span></div>
         <div class="map-wrap" id="mapWrap"><canvas id="topology" aria-label="电气网络拓扑"></canvas>
           <div class="map-status"><span class="stage-dot" id="stageDot"></span><div><strong id="stageText">等待上传原始数据</strong><small id="stageSub">上传文件夹或压缩包 → 识别 DAT → 运行潮流校核</small></div></div>
@@ -66,9 +66,10 @@
     <div class="analysis-top"><article class="panel"><div class="panel-head"><h2>本次运行记录</h2><span id="runRecordTag" class="badge">等待上传</span></div><div id="runRecord" class="record-grid"></div></article><article class="panel"><div class="panel-head"><h2>负载率统计</h2></div><div id="loadingDistribution" class="distribution-bars"></div><p class="note">电流负载率采用两侧电流与额定电流之比的最大值。数值收敛与设备是否越限分别报告。</p></article></div>
     <div class="analysis-charts"><article class="panel chart-panel"><div class="panel-head"><h2>迭代残差变化</h2><span class="hint">每轮最大不平衡 · MVA</span></div><div id="residualChart" class="chart" role="img" aria-label="迭代残差折线图"></div></article><article class="panel chart-panel"><div class="panel-head"><h2>设备负载率排行</h2><span class="hint">电流负载率 · 前 10 项</span></div><div id="loadingChart" class="chart" role="img" aria-label="设备负载率柱状图"></div></article></div>
     <article class="panel"><div class="panel-head"><h2>线路与变压器结果</h2><input id="elementSearch" placeholder="搜索元件名称或端点" aria-label="搜索结果"></div><div class="table-scroll"><table><thead><tr><th>类型</th><th>元件 / 输入行号</th><th>端点</th><th>额定容量 MVA</th><th>P / MW</th><th>Q / Mvar</th><th>电流负载率</th></tr></thead><tbody id="elementTable"></tbody></table></div><div class="table-pager"><span id="elementPageInfo"></span><div><button id="elementPrev" class="button secondary">上一页</button><button id="elementNext" class="button secondary">下一页</button></div></div></article>
-    <article class="panel"><div class="panel-head"><h2>配网分区求解结果</h2><span id="partitionExplain" class="hint">各分区并行消元 → 交流边界方程协调 → 电压修正回传</span></div><div id="partitionMethod" class="partition-method"></div><div class="table-scroll"><table><thead><tr><th>分区</th><th>分区节点</th><th>自身边界 / 邻区节点</th><th>状态</th><th>方程残差 MVA</th><th>协调轮数</th><th>求解模式</th></tr></thead><tbody id="partitionTable"></tbody></table></div><div class="table-pager"><span id="partitionPageInfo"></span><div><button id="partitionPrev" class="button secondary">上一页</button><button id="partitionNext" class="button secondary">下一页</button></div></div></article>
+    <article class="panel"><div class="panel-head"><h2>微网子系统与 PCC 交换</h2><span class="hint">购电 / 无功正值：配网 → 微网</span></div><div class="table-scroll"><table><thead><tr><th>子系统 / PCC</th><th>内部节点</th><th>配网计算域</th><th>PCC 电压 pu</th><th>购电 MW</th><th>无功 Mvar</th><th>含接入变压器损耗 MW</th><th>内部最低电压 pu</th><th>方程残差 MVA</th></tr></thead><tbody id="microgridTable"></tbody></table></div></article>
+    <article class="panel"><div class="panel-head"><h2>配网 / 微网计算域求解结果</h2><span id="partitionExplain" class="hint">各分区并行消元 → 交流边界方程协调 → 电压修正回传</span></div><div id="partitionMethod" class="partition-method"></div><div class="table-scroll"><table><thead><tr><th>分区</th><th>分区节点</th><th>自身边界 / 邻区节点</th><th>状态</th><th>方程残差 MVA</th><th>协调轮数</th><th>求解模式</th></tr></thead><tbody id="partitionTable"></tbody></table></div><div class="table-pager"><span id="partitionPageInfo"></span><div><button id="partitionPrev" class="button secondary">上一页</button><button id="partitionNext" class="button secondary">下一页</button></div></div></article>
   </section>
-  <footer class="page-footer"><span>石家庄 · 潮流分析</span><span>T 卡 100 MVA 假设 / 原文件不变 / 可追溯运行记录</span></footer>
+  <footer class="page-footer"><span>石家庄 · 潮流分析</span><span>DAT 设备直接读取 / 可追溯运行记录</span></footer>
 </main>
 <dialog id="timingDialog" class="dataset-dialog timing-dialog" aria-labelledby="timingTitle"><div class="panel-head"><h2 id="timingTitle">本次用时明细</h2><button id="closeTiming" class="button secondary">关闭</button></div><div class="dataset-dialog-body">
   <div class="timing-total">页面总用时 <strong id="timingTotal">—</strong></div>

@@ -69,7 +69,7 @@ class HttpTests(unittest.TestCase):
         dataset = response['dataset']
         self.assertEqual(dataset['label'], 'extracted')
         self.assertNotIn('bus_count', dataset)
-        self.assertEqual([(s['label'],s['bus_count']) for s in dataset['snapshots']], [('13:00',2121),('20:00',2122)])
+        self.assertEqual([(s['label'],s['bus_count']) for s in dataset['snapshots']], [('13:00',2145),('20:00',2146)])
         self.assertTrue(all('path' not in s for s in dataset['snapshots']))
         self.assertEqual(dataset['summary'], {'file_count':21,'snapshot_count':2,'feeder_file_count':18,
                                                'catalog_file_count':1,'supplement_file_count':0})
@@ -285,7 +285,7 @@ class HttpTests(unittest.TestCase):
         self.assertTrue(all('partition_states' in e and 'boundary_flows' in e for e in iterations))
         trace=self.request(f"/api/runs/{task['task_id']}/trace")
         self.assertEqual(trace['events'],events)
-        self.assertEqual(len(result['scenario']['trafos']),91)
+        self.assertEqual(len(result['scenario']['trafos']),97)
         # A second run is a new calculation, not reuse of the first task.
         second=self.submit_dataset(dataset,'damped-nr')
         self.assertNotEqual(task['task_id'],second['task_id'])
@@ -293,6 +293,34 @@ class HttpTests(unittest.TestCase):
         ordinary=self.request(f"/api/runs/{second['task_id']}/result")
         self.assertEqual(ordinary['run']['partition_check'],'not requested')
         self.assertEqual(ordinary['run']['boundary_iterations'],0)
+
+    def test_microgrids_are_read_from_dat_by_default_without_duplicate_equipment(self):
+        dataset = self.upload_original()
+        snapshot = dataset['snapshots'][0]
+        task = self.submit_dataset(dataset)
+        events = self.events(task)
+        self.assertEqual(events[-1]['type'], 'completed')
+        result = self.request(f"/api/runs/{task['task_id']}/result")
+        self.assertNotIn('microgrid_mode', result['run'])
+        self.assertEqual(result['run']['microgrid_count'], 6)
+        self.assertEqual(result['scenario']['bus_count'], snapshot['bus_count'])
+        self.assertEqual(len(result['scenario']['trafos']), 97)
+        for e in (e for e in events if e['type'] == 'iteration'):
+            self.assertEqual(len(e['microgrid_states']), 6)
+        final = [e for e in events if e['type'] == 'iteration'][-1]
+        for state, mg in zip(final['microgrid_states'], result['scenario']['microgrids']):
+            self.assertAlmostEqual(state['import_p_mw'], mg['import_p_mw'])
+            self.assertLess(mg['max_equation_residual_mva'], 1e-5)
+        repeated = self.submit_dataset(dataset)
+        self.assertEqual(self.events(repeated)[-1]['type'], 'completed')
+        again = self.request(f"/api/runs/{repeated['task_id']}/result")
+        self.assertEqual(again['scenario']['bus_count'], snapshot['bus_count'])
+        self.assertEqual(again['run']['microgrid_count'], 6)
+        self.assertEqual(again['run']['source_sha256'], snapshot['sha256'])
+        self.assertEqual(again['run']['source_sha256'], result['run']['source_sha256'])
+        html = (ROOT / 'web_sjz/index.html').read_text()
+        self.assertNotIn('microgridMode', html)
+        self.assertNotIn('microgridModelNote', html)
 
     def test_compressed_catalog_keeps_all_data_and_respects_encoding(self):
         self.upload_original()
@@ -328,15 +356,15 @@ class HttpTests(unittest.TestCase):
         dataset=result['dataset'];snapshot=dataset['snapshots'][0]
         self.assertEqual(snapshot['sha256'],hashlib.sha256(data).hexdigest())
         self.assertNotIn('path',dataset)
-        self.assertEqual(snapshot['bus_count'],2122)
-        self.assertEqual(snapshot['branch_count'],2129)
+        self.assertEqual(snapshot['bus_count'],2146)
+        self.assertEqual(snapshot['branch_count'],2153)
         self.assertEqual(dataset['folder_name'],'my-folder')
         self.assertEqual(len(dataset['files']),2)
         task=self.submit_dataset(dataset,'nr')
         self.assertEqual(self.events(task)[-1]['type'],'completed')
         computed=self.request(f"/api/runs/{task['task_id']}/result")
         self.assertEqual(computed['run']['source_sha256'],snapshot['sha256'])
-        self.assertEqual(computed['scenario']['bus_count'],2122)
+        self.assertEqual(computed['scenario']['bus_count'],2146)
         files=list(Path(self.directory.name).rglob('feeder.xls'))
         self.assertEqual(files[0].read_bytes(),b'unchanged fixture')
 
@@ -384,7 +412,7 @@ class HttpTests(unittest.TestCase):
             self.assertEqual(held_reference['events'],original_events)
             self.assertEqual(self.events(first),original_events)
             result=self.request(f"/api/runs/{first['task_id']}/result")
-            self.assertEqual(result['scenario']['bus_count'],2121)
+            self.assertEqual(result['scenario']['bus_count'],2145)
             trace=self.request(f"/api/runs/{first['task_id']}/trace")
             self.assertEqual(trace['events'],original_events)
         finally:

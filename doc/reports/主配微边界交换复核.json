@@ -1,0 +1,66 @@
+{
+  "scope": "Check actual current DATs, coordinator interface inclusion, per-iteration telemetry, and direct B-card load perturbation",
+  "cases": [
+    {
+      "hour": "13",
+      "main_distribution_interfaces": 70,
+      "distribution_microgrid_interfaces": 6,
+      "all_interfaces_both_ends_in_coordinator": true,
+      "all_interfaces_measured_every_iteration": true,
+      "iterations": 5,
+      "all_six_microgrids_eliminated_every_iteration": true,
+      "max_schur_linear_residual_pu": 2.268255028248234e-13,
+      "all_bus_kcl_residual_mva": 2.636191329352323e-07,
+      "example_path": {
+        "main_transformer": [
+          [
+            "QRT12",
+            115.0
+          ],
+          [
+            "QRTY2",
+            10.5
+          ]
+        ],
+        "distribution_partition": 83,
+        "microgrid": "MG06",
+        "microgrid_partition": 89
+      }
+    },
+    {
+      "hour": "20",
+      "main_distribution_interfaces": 70,
+      "distribution_microgrid_interfaces": 6,
+      "all_interfaces_both_ends_in_coordinator": true,
+      "all_interfaces_measured_every_iteration": true,
+      "iterations": 5,
+      "all_six_microgrids_eliminated_every_iteration": true,
+      "max_schur_linear_residual_pu": 3.121426728203147e-13,
+      "all_bus_kcl_residual_mva": 2.8271209867418313e-08,
+      "example_path": {
+        "main_transformer": [
+          [
+            "QRT12",
+            115.0
+          ],
+          [
+            "QRTY2",
+            10.5
+          ]
+        ],
+        "distribution_partition": 83,
+        "microgrid": "MG06",
+        "microgrid_partition": 89
+      }
+    }
+  ],
+  "direct_dat_perturbation": {
+    "modified_bus": "MG06-LD",
+    "extra_load_mw": 0.04,
+    "microgrid_pcc_import_increase_mw": 0.04048342292561137,
+    "pcc_angle_change_degree": -0.008464386768743282,
+    "main_transformer_from_p_change_mw": 0.04069758185014649,
+    "main_slack_p_increase_mw": 0.040873252742585464,
+    "max_voltage_difference_vs_nr_pu": 1.5011325515956742e-12
+  }
+}

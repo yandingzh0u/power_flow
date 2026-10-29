@@ -73,6 +73,9 @@ def solve(path, output=None, algorithm="nr", observer=None, include_results=Fals
     if algorithm not in ("nr", "damped-nr", "bpa-style", "partitioned-nr"):
         raise ValueError(f"Unknown algorithm: {algorithm}")
     validate_bpa_scope(path, buses)
+    source_bus_count, source_branch_count = len(buses), len(branches)
+    from .microgrid import microgrids_from_dat
+    microgrids = microgrids_from_dat(buses, branches)
     lookup = {b["key"]: i for i, b in enumerate(buses)}
     if len(lookup) != len(buses):
         raise ValueError("Duplicate bus identifiers")
@@ -128,7 +131,8 @@ def solve(path, output=None, algorithm="nr", observer=None, include_results=Fals
     y_reduced = (c.T @ y_original @ c).tocsr()
     model = {'kind': 'model', 'base': base, 'buses': buses, 'branches': branches,
              'reduced': reduced, 'group_index': group_index, 'y_reduced': y_reduced,
-             'impedance_policy': policy}
+             'impedance_policy': policy, 'microgrids': microgrids,
+             'source_bus_count': source_bus_count, 'source_branch_count': source_branch_count}
     if observer:
         observer(model)
 
@@ -145,6 +149,7 @@ def solve(path, output=None, algorithm="nr", observer=None, include_results=Fals
         parts = model.get('parts')
         if parts is None:
             parts = build_partitions(model)
+            model['parts'] = parts
         v_reduced, solver_details = solve_coupled(base, reduced, y_reduced, parts, progress)
         history = solver_details['history']
     elif algorithm == "bpa-style":
@@ -236,6 +241,8 @@ def solve(path, output=None, algorithm="nr", observer=None, include_results=Fals
                 row.update(allocate_be_reactive(row["be_q_mvar"], bus["raw_qmax_mvar"], bus["raw_qmin_mvar"]))
     source_label = str(path.relative_to(ROOT)) if path.is_relative_to(ROOT) else str(path)
     summary = {"numerical_solve_ms": numerical_solve_ms, "source": source_label, "source_sha256": digest,
+               'microgrids': microgrids,
+               'source_bus_count': source_bus_count, 'source_branch_count': source_branch_count,
                "computed_at_utc": datetime.now(timezone.utc).isoformat(),
                "solver": solver_details["solver"] if solver_details else ("damped polar Newton-Raphson" if algorithm == "damped-nr" else "standalone polar Newton-Raphson"), "PSD_BPA_executed": False,
                "base_mva": base, "impedance_policy": policy,

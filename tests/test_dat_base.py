@@ -8,11 +8,12 @@ import numpy as np
 from gmss.core import ROOT
 from gmss.dat import read_dat, stamp, newton
 from gmss.raw_solver import solve
+from original_fixtures import original_dat
 
 
 class ImpedanceBaseTests(unittest.TestCase):
     def test_only_t_impedance_is_converted_and_input_values_are_retained(self):
-        source = ROOT / 'raw_dataset/extracted/13点sim2合并anony.dat'
+        source = original_dat('13')
         _, _, original, _ = read_dat(source)
         _, _, converted, _ = read_dat(source, transformer_base_mva=100.)
         for raw, used in zip(original, converted):
@@ -60,7 +61,7 @@ class ImpedanceBaseTests(unittest.TestCase):
                 ('13', 206.36082638, 199.33434043, 74.89468623),
                 ('20', 288.72305320, 273.62637358, 83.57982937)):
             with self.subTest(hour=hour):
-                result = solve(ROOT / f'raw_dataset/extracted/{hour}点sim2合并anony.dat')
+                result = solve(original_dat(hour))
                 self.assertAlmostEqual(result['T_loading']['max_current_loading_percent'], current, places=5)
                 self.assertAlmostEqual(result['T_loading']['max_apparent_power_loading_percent'], apparent, places=5)
                 self.assertAlmostEqual(result['target_GXVS2_GXVY2']['current_loading_percent'], target, places=5)

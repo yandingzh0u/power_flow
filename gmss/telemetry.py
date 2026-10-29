@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import base64
 import numpy as np
+from .microgrid import microgrid_states
 
 
 class IterationTrace:
@@ -50,6 +51,7 @@ class IterationTrace:
         workers = dict(zip(coordination.get('domain_part_ids', []), coordination.get('domain_worker_ids', [])))
         times = dict(zip(coordination.get('domain_part_ids', []), coordination.get('domain_local_ms', [])))
         partitions = [{'id': p['id'], 'residual_mva': float(residuals[p['id']]),
+                       'subsystem_type': p.get('subsystem_type', 'distribution'),
                        'delta_vm_pu': float(dv[p['id']]), 'delta_va_deg': float(da[p['id']]),
                        'worker_id': workers.get(p['id']), 'local_ms': times.get(p['id'])} for p in self.parts]
         ifrom = self.yff * voltage[self.f] + self.yft * voltage[self.t]
@@ -64,6 +66,7 @@ class IterationTrace:
         states = np.column_stack((abs(voltage), np.rad2deg(np.angle(voltage)),
                                   injection.real[self.group], injection.imag[self.group]))
         result = {'partition_states': partitions, 'boundary_flows': boundaries,
+                  'microgrid_states': microgrid_states(self.model, voltage),
                   'node_state_scope': 'iteration voltage; P/Q is reduced-bus aggregate net injection (includes shunts)',
                   'boundary_flow_columns': ['source_line', 'p_from_mw', 'q_from_mvar', 'p_to_mw', 'q_to_mvar', 'loading_percent']}
         # A full small-grid iteration used to create two nested Python lists

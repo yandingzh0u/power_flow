@@ -1,0 +1,24 @@
+{
+  "date": "2026-10-29",
+  "reason": "User requested direct dataset modification; six four-bus microgrids persisted as B/L/T cards",
+  "files": [
+    {
+      "path": "raw_dataset/extracted/13点sim2合并anony.dat",
+      "before_sha256": "ae840c888ccac947ac76cd4a43d3fa4352495685690ee3467998c09ba0918e9c",
+      "backup": "data/backups/before_microgrid/ae840c888ccac947ac76cd4a43d3fa4352495685690ee3467998c09ba0918e9c.dat",
+      "after_sha256": "981333ad393163b9eb93fe2b5486ff321a9fc594cc63453e8f835eaa7b2ee3f9",
+      "bus_count": 2145,
+      "branch_count": 2151,
+      "microgrid_count": 6
+    },
+    {
+      "path": "raw_dataset/extracted/20点sim2合并anony.dat",
+      "before_sha256": "f9712bf7c5e03185b77d8648f3ffc4c550ee383dca6df07003e17eff0c890dc5",
+      "backup": "data/backups/before_microgrid/f9712bf7c5e03185b77d8648f3ffc4c550ee383dca6df07003e17eff0c890dc5.dat",
+      "after_sha256": "0df5f7e2d96586e8e178a99dc2c75dc18108fa32befadf1c62817070da6c1de4",
+      "bus_count": 2146,
+      "branch_count": 2153,
+      "microgrid_count": 6
+    }
+  ]
+}

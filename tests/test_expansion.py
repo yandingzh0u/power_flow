@@ -10,12 +10,13 @@ import numpy as np
 from gmss.core import ROOT, run_case
 from gmss.dat import read_dat
 from gmss.expansion import build_expansion, read_expansion, split_bus_name
+from original_fixtures import original_dat
 
 
 class ExpansionTests(unittest.TestCase):
     def test_copies_preserve_internal_parameters_and_form_one_island(self):
         for hour, copies in (('13', 5), ('20', 5), ('13', 50), ('20', 50)):
-            source = ROOT / f'raw_dataset/extracted/{hour}点sim2合并anony.dat'
+            source = original_dat(hour)
             before = source.read_bytes()
             base, original, edges, _ = read_dat(source)
             with tempfile.TemporaryDirectory() as directory:
@@ -50,7 +51,7 @@ class ExpansionTests(unittest.TestCase):
             self.assertEqual(before, source.read_bytes())
 
     def test_ring_chain_and_original_overwrite_protection(self):
-        source = ROOT / 'raw_dataset/extracted/13点sim2合并anony.dat'
+        source = original_dat('13')
         with self.assertRaises(ValueError):
             build_expansion(source, source)
         with tempfile.TemporaryDirectory() as directory:
@@ -82,7 +83,7 @@ class ExpansionTests(unittest.TestCase):
                     self.assertEqual(len(scene['partitions']),run['partitioning']['partition_count'])
                     self.assertGreaterEqual(len(scene['partitions']),run['partitioning']['distribution_components'])
                     self.assertEqual(run['partition_failed'], 0)
-                    self.assertEqual(len(scene['microgrids']), 30)
+                    self.assertEqual(len(scene['microgrids']), 0)
                     self.assertEqual(set(result['layout']), {str(b['id']) for b in scene['buses']})
                     ties = [e for e in scene['lines'] if e['is_intertie']]
                     self.assertEqual(len(ties), 5)
@@ -115,7 +116,7 @@ class ExpansionTests(unittest.TestCase):
                 self.assertGreater(run['workers'], 1)
                 self.assertTrue(all(s['active_worker_threads']>1 for s in run['solver_details']['steps']))
                 self.assertEqual(run['partition_failed'], 0)
-                self.assertEqual(len(scene['microgrids']), 300)
+                self.assertEqual(len(scene['microgrids']), 0)
                 self.assertEqual(sum(b['type'] == 'S' for b in scene['buses']), 1)
                 self.assertEqual(set(result['layout']), {str(b['id']) for b in scene['buses']})
                 self.assertEqual(sum(e['is_intertie'] for e in scene['lines']), 50)

@@ -5,7 +5,7 @@ const state = {
   selected:null, color:'partition', layers:{main:true,interface:true,distribution:true,microgrid:true},
   scale:1, offset:{x:0,y:0}, search:'', running:false, importing:false, flow:false, labels:false,
   log:[], run:null, source:'等待上传数据', phase:'等待上传数据', activePartition:null, task:null, dragging:false,
-  focusArea:null, elementPage:0, partitionPage:0, clientElapsedMs:null,
+  focusArea:null, microgridFocus:null, elementPage:0, partitionPage:0, clientElapsedMs:null,
 };
 const canvas = $('topology'), ctx = canvas.getContext('2d');
 let size = {w:0,h:0}, nodes = new Map(), edgeLookup = new Map(), stream = null, timer = null, started = null;
@@ -14,10 +14,12 @@ let paintPending = false, flowStats={eligible:0,animated:0,zero:0};
 let areaNodes=new Map(), areaEdges=new Map(), visibleBuses=[], visibleLines=[], visibleTrafos=[], interties=[], analysisEdges=null;
 function requestDraw(){if(paintPending)return;paintPending=true;requestAnimationFrame(now=>{paintPending=false;draw(now);});}
 function selectedSnapshot(){return state.dataset?.snapshots.find(s=>s.id===state.snapshot);}
-function datasetNote(){const snapshot=selectedSnapshot();$('datasetNote').textContent=!state.dataset?'尚未上传数据 · 每次上传作为一套数据集':snapshot?`当前数据集：${state.dataset.label} · 计算时刻／断面：${snapshot.label} · T 卡按 100 MVA 假设解释；原文件不变，过载完整保留`:'一套数据集已上传 · 请选择其中的计算时刻，再运行潮流校核';}
+function datasetNote(){const snapshot=selectedSnapshot();$('datasetNote').textContent=!state.dataset?'尚未上传数据 · 每次上传作为一套数据集':snapshot?`当前数据集：${state.dataset.label} · 计算时刻／断面：${snapshot.label} · T 卡按 100 MVA 假设解释；设备按 DAT 读取，过载完整保留`:'一套数据集已上传 · 请选择其中的计算时刻，再运行潮流校核';}
 const colors = ['#358abd','#419d89','#bd914b','#9273b9','#c96c82','#5197a6','#849c4a','#b980aa','#5d80a8','#b78465'];
 const fmt = (v,d=2) => v == null || !Number.isFinite(Number(v)) ? '—' : Number(v).toLocaleString('zh-CN',{maximumFractionDigits:d});
 const exp = v => v == null ? '—' : Number(v).toExponential(3);
+const busTypeLabel = type => type === 'E' ? 'PV' : type === 'S' ? '平衡' : type === 'PQ' || !type ? 'PQ' : type;
+const partLabel = id => trace.partIndex.get(id)?.display_name||`P${String(id).padStart(2,'0')}`;
 function emptyScene(){return {label:'未计算',result_status:'waiting',buses:[],lines:[],trafos:[],partitions:[],microgrids:[],layers:{},summary:{}};}
 function element(kind,id){return kind==='bus' ? nodes.get(id) : edgeLookup.get(`${kind}:${id}`);}
 function largeScene(){return state.scene.buses.length>20000&&state.scene.areas?.length>0;}
@@ -33,6 +35,7 @@ function rebuildIndex(){
   }
   interties=state.scene.lines.filter(e=>e.is_intertie);
   indexTrace();
+  if(!state.scene.microgrids.some(m=>m.id===state.microgridFocus))state.microgridFocus=null;
   if(!largeScene()||!areaNodes.has(state.focusArea))state.focusArea=null;
   const selector=$('areaSelect');selector.replaceChildren(new Option('全部区域 · 互联总览',''));
   for(const area of state.scene.areas||[])selector.add(new Option(`${area.label} · ${fmt(area.bus_count,0)} 母线`,area.id));
@@ -40,12 +43,15 @@ function rebuildIndex(){
 }
 function syncView(){
   const focus=largeScene()&&state.focusArea;
-  visibleBuses=focus?areaNodes.get(focus):state.scene.buses;
-  visibleLines=focus?areaEdges.get(focus).lines:state.scene.lines;
-  visibleTrafos=focus?areaEdges.get(focus).trafos:state.scene.trafos;
+  const mg=state.scene.microgrids.find(m=>m.id===state.microgridFocus);
+  const mgNodes=mg?new Set([mg.pcc_bus,...mg.internal_buses]):null;
+  visibleBuses=mg?state.scene.buses.filter(b=>mgNodes.has(b.id)):focus?areaNodes.get(focus):state.scene.buses;
+  visibleLines=mg?state.scene.lines.filter(e=>mg.internal_branch_ids.includes(e.id)):focus?areaEdges.get(focus).lines:state.scene.lines;
+  visibleTrafos=mg?state.scene.trafos.filter(e=>e.id===mg.interface_branch_id):focus?areaEdges.get(focus).trafos:state.scene.trafos;
+  $('clearMicrogridFocus').hidden=!mg;
   $('areaControl').hidden=!largeScene();$('areaSelect').value=state.focusArea||'';
   const s=state.scene;
-  $('mapMeta').textContent=`${fmt(s.buses.length,0)} 母线 / ${fmt(s.lines.length+s.trafos.length,0)} 支路 · ${overview()?'区域总览，点击区域展开':focus?`${focus} 区 ${fmt(visibleBuses.length,0)} 母线，跨区联络见总览`:'拖动平移 / 滚轮缩放'}`;
+  $('mapMeta').textContent=mg?`${mg.name} / PCC ${mg.pcc_name} · ${mg.internal_buses.length} 个内部母线 + 配网 PCC · ${visibleLines.length+visibleTrafos.length} 支路`:`${fmt(s.buses.length,0)} 母线 / ${fmt(s.lines.length+s.trafos.length,0)} 支路 · ${overview()?'区域总览，点击区域展开':focus?`${focus} 区 ${fmt(visibleBuses.length,0)} 母线，跨区联络见总览`:'拖动平移 / 滚轮缩放'}`;
 }
 function focusArea(id){state.focusArea=id||null;syncView();updateVisibleFlows();fit();}
 function setScene(payload,source){const same=state.scene.buses.length===payload.scenario.buses.length&&state.scene.buses.every((b,i)=>b.name===payload.scenario.buses[i].name&&b.kv===payload.scenario.buses[i].kv);state.scene=payload.scenario;state.layout=payload.layout;state.source=source;rebuildIndex();if(state.selected&&!element(state.selected.kind,state.selected.id))state.selected=null;render();resize();if(!same)fit();}
@@ -83,12 +89,14 @@ function renderSelection(){
   $('detailTitle').textContent=item.name;
   let rows;
   if(selected.kind==='bus'){
-    $('detailTag').textContent=item.microgrid_name?'假设微网 PCC':item.layer==='main'?'主网母线':'配网母线';
-    rows=[['母线 / 电压等级',`${item.id} / ${fmt(item.kv)} kV · ${item.type||'PQ'}`],['所属分区',item.partition_id?`P${String(item.partition_id).padStart(2,'0')}`:'主网 / 协调器'],['求解角色',item.solver_role==='coordinator'?'主网协调变量':item.is_boundary?'分区边界节点':'分区内部节点'],['相邻分区',[...(item.neighbor_partition_ids||[]).map(id=>`P${id}`),...(item.has_main_interface?['主网']:[])].join('、')||'无跨区连接'],['电压幅值',`${fmt(item.vm,6)} pu`],['电压相角',`${fmt(item.va,5)}°`],[iterative?'组有功净注入':'有功净注入',`${fmt(item.p,4)} MW`],[iterative?'组无功净注入':'无功净注入',`${fmt(item.q,4)} Mvar`]];
+    $('detailTag').textContent=item.layer==='microgrid'?'微网内部母线':item.connected_microgrid_id?'配网 / 微网 PCC':item.layer==='main'?'主网母线':'配网母线';
+    rows=[['母线 / 电压等级',`${item.id} / ${fmt(item.kv)} kV · ${busTypeLabel(item.type)}`],['所属计算域',item.partition_id?partLabel(item.partition_id):'主网 / 协调器'],['求解角色',item.solver_role==='coordinator'?'主网协调变量':item.is_boundary?'分区边界节点':'分区内部节点'],['相邻计算域',[...(item.neighbor_partition_ids||[]).map(partLabel),...(item.has_main_interface?['主网']:[])].join('、')||'无跨区连接'],['电压幅值',`${fmt(item.vm,6)} pu`],['电压相角',`${fmt(item.va,5)}°`],[iterative?'组有功净注入':'有功净注入',`${fmt(item.p,4)} MW`],[iterative?'组无功净注入':'无功净注入',`${fmt(item.q,4)} Mvar`]];
+    if(item.microgrid_name)rows.push(['关联微网',`${item.microgrid_name} · 微网子系统`]);
+    if(item.layer==='microgrid')rows.push(['参数来源','DAT 设备卡片'],['光伏 / 储能控制','并网 PQ 给定']);
     if(item.merged_group_count>1)rows.push(['理想连接合并节点数',String(item.merged_group_count)]);
   }else{
     $('detailTag').textContent=selected.kind==='line'?'线路':'变压器';
-    rows=[['起点',nodes.get(item.from)?.name||item.from],['终点',nodes.get(item.to)?.name||item.to],['电流负载率',`${fmt(item.loading,3)} %`],['视在功率容量比',`${fmt(item.apparent_power_loading_percent,3)} %`],['首端有功',`${fmt(item.p,4)} MW`],['首端无功',`${fmt(item.q,4)} Mvar`],['末端有功',`${fmt(item.p_to,4)} MW`],['末端无功',`${fmt(item.q_to,4)} Mvar`],['输入额定容量',`${fmt(item.rate_mva,3)} MVA`],['R / X（原文件标幺值）',`${fmt(item.input_r_pu,6)} / ${fmt(item.input_x_pu,6)}`],['原阻抗解释基准',`${fmt(item.impedance_base_mva)} MVA${selected.kind==='trafo'&&state.scene.impedance_policy?.is_assumption?' · 假设':''}`],['换算倍率',`${fmt(item.impedance_scale)} 倍`],['R / X（系统基准标幺值）',`${fmt(item.r_pu,6)} / ${fmt(item.x_pu,6)}`],['本次输入 DAT 行号',String(item.source_line)]];
+    rows=[['起点',nodes.get(item.from)?.name||item.from],['终点',nodes.get(item.to)?.name||item.to],['电流负载率',`${fmt(item.loading,3)} %`],['视在功率容量比',`${fmt(item.apparent_power_loading_percent,3)} %`],['首端有功',`${fmt(item.p,4)} MW`],['首端无功',`${fmt(item.q,4)} Mvar`],['末端有功',`${fmt(item.p_to,4)} MW`],['末端无功',`${fmt(item.q_to,4)} Mvar`],['输入额定容量',`${fmt(item.rate_mva,3)} MVA`],['R / X（设备标幺值）',`${fmt(item.input_r_pu,6)} / ${fmt(item.input_x_pu,6)}`],['设备阻抗基准',`${fmt(item.impedance_base_mva)} MVA${selected.kind==='trafo'&&item.data_origin==='source_dat'&&state.scene.impedance_policy?.is_assumption?' · 假设':''}`],['换算倍率',`${fmt(item.impedance_scale)} 倍`],['R / X（系统基准标幺值）',`${fmt(item.r_pu,6)} / ${fmt(item.x_pu,6)}`],['参数来源',`DAT 第 ${item.source_line} 行`]];
   }
   if(item.area_id)rows.unshift(['复制区域 / 原始名称',`${item.area_id} 区 / ${item.original_name}`]);
   if(item.is_intertie)rows.unshift(['支路用途','研究扩展区域联络线']);
@@ -99,13 +107,13 @@ function render(){
   datasetNote();
   const s=state.scene,edges=[...s.lines,...s.trafos],rated=edges.filter(e=>e.loading!=null),ratedT=s.trafos.filter(e=>e.loading!=null),ratedL=s.lines.filter(e=>e.loading!=null),maxT=ratedT.reduce((v,e)=>Math.max(v,e.loading),0),maxL=ratedL.reduce((v,e)=>Math.max(v,e.loading),0),q=s.summary;
   const selected=selectedSnapshot();
-  $('busKpi').textContent=s.buses.length?fmt(s.buses.length,0):selected?fmt(selected.bus_count,0):'—';$('busSub').textContent=s.buses.length?`母线 · 原始有功负荷 ${fmt(s.load_mw,1)} MW`:selected?'已识别母线 · 等待现场计算':'上传后识别网络规模';
+  $('busKpi').textContent=s.buses.length?fmt(s.buses.length,0):selected?fmt(selected.bus_count,0):'—';$('busSub').textContent=s.buses.length?`本次总负荷 ${fmt(s.load_mw,2)} MW · DAT ${s.source_bus_count} 节点`:selected?'已识别母线 · 等待计算':'上传后识别网络规模';
   $('edgeKpi').textContent=s.buses.length?`${fmt(s.lines.length,0)} / ${s.trafos.length}`:'—';
   $('loadingKpi').textContent=ratedT.length?`${fmt(maxT,2)}%`:'—';$('loadingSub').textContent=rated.length?`线路最高 ${ratedL.length?fmt(maxL,2)+'%':'—'} · ${rated.filter(e=>e.loading>100).length} 个元件越限`:'线路与 T 支路分别统计';
   $('partitionKpi').textContent=s.buses.length?`${q.converged||0} / ${q.parts||0}`:'—';
   const recorded=state.run;
   $('partitionSub').textContent=recorded?.algorithm==='partitioned-nr'?`${recorded.workers} 个 CPU 线程 · ${recorded.boundary_iterations} 轮边界协调`:recorded?.partition_check==='not requested'?'普通全网算法；未另做局部校核':selected?'等待本次求解':'上传后计算分区';
-  $('mainCount').textContent=s.layers.main_bus_count||0;$('interfaceCount').textContent=s.layers.interface_trafo_count||0;$('distributionCount').textContent=q.parts||0;$('microCount').textContent=s.microgrids.length;
+  $('mainCount').textContent=s.layers.main_bus_count||0;$('interfaceCount').textContent=s.layers.interface_trafo_count||0;$('distributionCount').textContent=q.distribution_parts||0;$('microCount').textContent=s.microgrids.length;
   syncView();
   $('mapEmpty').hidden=!!s.buses.length;
   $('mapEmpty').textContent=selected?`已选择 ${selected.label} 运行断面，点击“运行潮流校核”生成拓扑与结果`:state.dataset?'数据集已上传，请先选择本次计算时刻':'请先上传数据文件夹或压缩包（内含 DAT）';
@@ -141,17 +149,23 @@ function renderCharts(edges){
 function renderAnalysis(){
   if(!$('view-analysis').classList.contains('active'))return;
   const r=state.run;
+  const mgBody=$('microgridTable');mgBody.replaceChildren();
+  for(const m of state.scene.microgrids){
+    const row=mgBody.insertRow();
+    for(const value of [`${m.name} / ${m.pcc_name}`,m.internal_buses.length,partLabel(m.parent_partition_id),fmt(m.pcc_vm_pu,6),fmt(m.import_p_mw,6),fmt(m.import_q_mvar,6),fmt(m.loss_p_mw,6),fmt(m.voltage_min_pu,6),exp(m.max_equation_residual_mva)])row.insertCell().textContent=value;
+    row.title='点击查看微网内部网架';row.onclick=()=>focusMicrogrid(m);
+  }
   const partitioning=r?.partitioning||state.scene.partitioning;
   const method=$('partitionMethod');method.replaceChildren();
   if(partitioning){
-    traceText(method,'div',`加权 METIS：${partitioning.distribution_components} 个连通块 → ${partitioning.partition_count} 个计算分区；每区 ${partitioning.size_min}～${partitioning.size_max} 节点，中位 ${partitioning.size_median}。CPU 可用 ${partitioning.available_cpus}。分区为电气计算域，不代表供电公司行政分区。`);
+    traceText(method,'div',`加权 METIS：${partitioning.distribution_components} 个连通块 → ${partitioning.distribution_partition_count??partitioning.partition_count} 个配网域 + ${partitioning.microgrid_partition_count||0} 个独立微网域；每区 ${partitioning.size_min}～${partitioning.size_max} 节点，中位 ${partitioning.size_median}。CPU 可用 ${partitioning.available_cpus}。分区为电气计算域，不代表供电公司行政分区。`);
     traceText(method,'div','边权：归一化串联导纳的平方根；点权：交流未知量数 × (连接度 + 1)²。保持连通性；小分区成批调度。');
     for(const c of partitioning.candidates){const n=traceText(method,'span',`粒度 ${c.target_size}：${c.partition_count} 区 / ${c.interface_unknowns} 边界未知量 / 预计负载比 ${fmt(c.estimated_schedule_imbalance,3)} / 成本估计 ${fmt(c.estimated_cost,0)}${c.target_size===partitioning.target_size?' ✓':''}`,'candidate');if(c.target_size===partitioning.target_size)n.style.color='#247cae';}
     traceText(method,'div',`结构估计用于选型；分区准备 ${fmt(partitioning.elapsed_ms,2)} ms，实测时间见运行记录。`);
   }else method.textContent=state.dataset?'现场运行后显示加权分区依据和候选评价。':'请先上传原始数据文件夹或压缩包。';
   const storedRun=r;
   $('partitionExplain').textContent=storedRun?.algorithm==='partitioned-nr'?'各分区并行消元 → 交流边界方程协调 → 电压修正回传':storedRun?.partition_check==='not requested'?'本次使用全网算法；未追加固定边界局部校核':'现场运行后显示本次分区求解记录';
-  metrics('runRecord',r?[['求解算法',r.algorithm_label],['牛顿迭代次数',String(r.iterations)],['边界协调轮数',String(r.boundary_iterations||0)],['CPU 计算线程',String(r.workers||1)],['最终残差 MVA',exp(r.residual_mva)],['数值求解耗时（含结构准备）',`${fmt(r.solver_ms,2)} ms`],['页面总用时（含排队与传输）',state.clientElapsedMs===null?'—':`${(state.clientElapsedMs/1000).toFixed(3)} s`],['后端建模与计算（含数值求解）',`${fmt(r.total_ms,2)} ms`],['分区失败',String(r.partition_failed)],['开始时间',new Date(r.started_at).toLocaleString('zh-CN')],['结束时间',new Date(r.completed_at).toLocaleString('zh-CN')],['数据集',r.dataset_name||'—'],['计算时刻／断面',r.snapshot_label||'—'],['输入范围',r.reference_file_count?`所选 DAT；${r.reference_file_count} 份 Excel 仅保存，未接入模型`:'所选 DAT'],['本次输入',r.source_name],['输入 SHA-256（求解前后相同）',r.source_sha256,true]]:[['结果来源',state.source],['现场计算',selectedSnapshot()?'点击运行开始新任务':state.dataset?'请先选择计算时刻':'请先上传原始数据集文件夹']]);
+  metrics('runRecord',r?[['求解算法',r.algorithm_label],['牛顿迭代次数',String(r.iterations)],['边界协调轮数',String(r.boundary_iterations||0)],['CPU 计算线程',String(r.workers||1)],['最终残差 MVA',exp(r.residual_mva)],['数值求解耗时（含结构准备）',`${fmt(r.solver_ms,2)} ms`],['页面总用时（含排队与传输）',state.clientElapsedMs===null?'—':`${(state.clientElapsedMs/1000).toFixed(3)} s`],['后端建模与计算（含数值求解）',`${fmt(r.total_ms,2)} ms`],['分区失败',String(r.partition_failed)],['开始时间',new Date(r.started_at).toLocaleString('zh-CN')],['结束时间',new Date(r.completed_at).toLocaleString('zh-CN')],['数据集',r.dataset_name||'—'],['计算时刻／断面',r.snapshot_label||'—'],['微网子系统',r.microgrid_count?`${r.microgrid_count} 个`:'无'],['输入范围',r.reference_file_count?`所选 DAT；${r.reference_file_count} 份 Excel 仅保存，未接入模型`:'所选 DAT'],['本次输入',r.source_name],['输入 SHA-256（求解前后相同）',r.source_sha256,true]]:[['结果来源',state.source],['现场计算',selectedSnapshot()?'点击运行开始新任务':state.dataset?'请先选择计算时刻':'请先上传原始数据集文件夹']]);
   const timing=timingBreakdown();if(timing)for(const [label,ms] of timing.rows){const row=traceText($('runRecord'),'div','','detail-metric');traceText(row,'span',label);traceText(row,'strong',`${ms.toFixed(1)} ms`);}
   $('runRecordTag').textContent=r?'本次现场运行':selectedSnapshot()?'等待运行':state.dataset?'等待选择时刻':'等待上传';
   if(r?.impedance_policy){const row=document.createElement('div');row.className='detail-metric wide';traceText(row,'span','阻抗基准设置');traceText(row,'strong',r.impedance_policy.label);$('runRecord').append(row);}
@@ -198,9 +212,9 @@ function screen(id){const p=state.layout[String(id)]||[0,0];return {x:state.offs
 function areaScreen(id){const p=state.scene.areas.find(a=>a.id===id).center;return {x:state.offset.x+p[0]*state.scale,y:state.offset.y-p[1]*state.scale};}
 function resize(){const box=canvas.getBoundingClientRect(),dpr=window.devicePixelRatio||1;if(size.w&&size.h&&box.width&&box.height){state.offset.x+=(box.width-size.w)/2;state.offset.y+=(box.height-size.h)/2;}size={w:box.width,h:box.height};canvas.width=Math.round(size.w*dpr);canvas.height=Math.round(size.h*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);requestDraw();}
 function fit(){const pts=overview()?state.scene.areas.map(a=>a.center):visibleBuses.map(b=>state.layout[String(b.id)]).filter(Boolean);if(!pts.length)return;let minX=Infinity,maxX=-Infinity,minY=Infinity,maxY=-Infinity;for(const [x,y] of pts){minX=Math.min(minX,x);maxX=Math.max(maxX,x);minY=Math.min(minY,y);maxY=Math.max(maxY,y);}state.scale=Math.min(Math.max(size.w-70,20)/Math.max(maxX-minX,1e-8),Math.max(size.h-96,20)/Math.max(maxY-minY,1e-8));state.offset={x:(size.w-(minX+maxX)*state.scale)/2,y:(size.h+(minY+maxY)*state.scale)/2+6};requestDraw();}
-function busVisible(b){return b.layer==='main'?state.layers.main:state.layers.distribution||(b.is_boundary&&state.layers.interface);}
-function edgeVisible(e){return e.from_layer!==e.to_layer?state.layers.interface:e.from_layer==='main'?state.layers.main:state.layers.distribution;}
-function nodeColor(b){if(state.color==='vm')return b.vm==null?'#acbac6':b.vm<.95||b.vm>1.05?'#ce5969':b.vm<.98?'#c99e45':'#43a389';if(state.color==='voltage')return b.kv>=200?'#ce7f65':b.kv>=100?'#bba24d':b.kv>=35?'#3289bb':b.kv>=10?'#4aa28c':'#9a82bc';return b.layer==='main'?'#267cb8':colors[((b.partition_id||1)-1)%colors.length];}
+function busVisible(b){return b.layer==='microgrid'?state.layers.microgrid:b.connected_microgrid_id&&state.layers.microgrid?true:b.layer==='main'?state.layers.main:state.layers.distribution||(b.is_boundary&&state.layers.interface);}
+function edgeVisible(e){return [e.from_layer,e.to_layer].includes('microgrid')?state.layers.microgrid:e.from_layer!==e.to_layer?state.layers.interface:e.from_layer==='main'?state.layers.main:state.layers.distribution;}
+function nodeColor(b){if(state.color==='vm')return b.vm==null?'#acbac6':b.vm<.95||b.vm>1.05?'#ce5969':b.vm<.98?'#c99e45':'#43a389';if(state.color==='voltage')return b.kv>=200?'#ce7f65':b.kv>=100?'#bba24d':b.kv>=35?'#3289bb':b.kv>=10?'#4aa28c':'#9a82bc';return b.layer==='microgrid'?'#9671bb':b.layer==='main'?'#267cb8':colors[((b.partition_id||1)-1)%colors.length];}
 function setFlow(enabled){state.flow=enabled;$('flowToggle').checked=enabled;requestDraw();}
 function branchCurrent(e){
   if(!Number.isFinite(e.p)||!Number.isFinite(e.q))return null;
@@ -263,7 +277,7 @@ function draw(now=performance.now()){
     for(let index=0;index<edges.length;index++){
       const e=edges[index];if(!edgeVisible(e))continue;const a=points.get(e.from),b=points.get(e.to);if(!a||!b)continue;
       const active=(selected?.kind===kind&&selected.id===e.id)||selectedBus===e.from||selectedBus===e.to||(query&&e.name.toLowerCase().includes(query))||(highlighted.has(e.from)&&highlighted.has(e.to));
-      ctx.strokeStyle=active?'#0d78b4':state.color==='loading'?(e.loading==null?'#c6d1db':e.loading>100?'#cf6471':e.loading>80?'#c6a159':'#74ab9c'):e.from_layer!==e.to_layer?'#d0a267':e.from_layer==='main'?'#6d9fbe':e.is_cut_edge?'#cba463':'#bdcbd7';
+      ctx.strokeStyle=active?'#0d78b4':state.color==='loading'?(e.loading==null?'#c6d1db':e.loading>100?'#cf6471':e.loading>80?'#c6a159':'#74ab9c'):e.microgrid_id?'#9671bb':e.from_layer!==e.to_layer?'#d0a267':e.from_layer==='main'?'#6d9fbe':e.is_cut_edge?'#cba463':'#bdcbd7';
       ctx.globalAlpha=active?1:.8;ctx.lineWidth=active?2.2:kind==='trafo'?1.2:e.from_layer==='main'?1:.65;
       if(e.is_intertie){ctx.strokeStyle=active?'#0d78b4':'#159b8e';ctx.lineWidth=active?3:2;ctx.globalAlpha=1;}
       ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();
@@ -273,7 +287,7 @@ function draw(now=performance.now()){
     }
   }
   ctx.globalAlpha=1;
-  for(const b of visibleBuses){if(!busVisible(b))continue;const p=points.get(b.id),match=query&&(b.name.toLowerCase().includes(query)||String(b.id)===query),active=selectedBus===b.id||match,r=active?4.5:b.layer==='main'?2.5:1.5;ctx.fillStyle=nodeColor(b);ctx.beginPath();ctx.arc(p.x,p.y,r,0,Math.PI*2);ctx.fill();
+  for(const b of visibleBuses){if(!busVisible(b))continue;const p=points.get(b.id),match=query&&(b.name.toLowerCase().includes(query)||String(b.id)===query),active=selectedBus===b.id||match,r=active?4.5:b.layer==='main'?2.5:b.layer==='microgrid'?2.6:1.5;ctx.fillStyle=nodeColor(b);ctx.beginPath();ctx.arc(p.x,p.y,r,0,Math.PI*2);ctx.fill();
     if(active||b.is_boundary&&state.layers.interface){ctx.strokeStyle=active?'#176c9c':'#c59e60';ctx.lineWidth=active?1.4:.7;ctx.beginPath();ctx.arc(p.x,p.y,r+2.2,0,Math.PI*2);ctx.stroke();}
     if(highlighted.has(b.id)||neighbors.has(b.id)){ctx.strokeStyle=highlighted.has(b.id)?'#157bab':'#ab7cc2';ctx.lineWidth=1.2;ctx.beginPath();ctx.arc(p.x,p.y,r+3.2,0,Math.PI*2);ctx.stroke();}
     if(active||state.labels&&(b.kv>=100||b.microgrid_name)){ctx.font='10px system-ui';ctx.fillStyle='#44647c';ctx.fillText(`${b.name} · ${b.kv}kV`,p.x+6,p.y-6);}
@@ -289,6 +303,18 @@ function select(kind,id){
   state.selected={kind,id};
   if(largeScene()){const item=element(kind,id),area=kind==='bus'?item?.area_id:item?.is_intertie?null:nodes.get(item?.from)?.area_id;if(area!==state.focusArea)focusArea(area);}
   renderSelection();requestDraw();
+}
+function focusMicrogrid(mg){
+  state.microgridFocus=mg.id;syncView();
+  select('bus',mg.internal_buses[0]);activateTab('topology');
+  requestAnimationFrame(()=>{
+    resize();
+    const points=[mg.pcc_bus,...mg.internal_buses].map(id=>state.layout[String(id)]);
+    const xs=points.map(p=>p[0]),ys=points.map(p=>p[1]);
+    state.scale=Math.min(Math.max(40,size.w-110)/Math.max(.08,Math.max(...xs)-Math.min(...xs)),Math.max(40,size.h-110)/Math.max(.08,Math.max(...ys)-Math.min(...ys)));
+    state.offset={x:size.w/2-(Math.max(...xs)+Math.min(...xs))/2*state.scale,y:size.h/2+(Math.max(...ys)+Math.min(...ys))/2*state.scale};
+    requestDraw();
+  });
 }
 function segmentDistance(x,y,a,b){const dx=b.x-a.x,dy=b.y-a.y,t=Math.max(0,Math.min(1,((x-a.x)*dx+(y-a.y)*dy)/(dx*dx+dy*dy||1)));return Math.hypot(x-a.x-t*dx,y-a.y-t*dy);}
 function pick(x,y){
@@ -494,13 +520,14 @@ async function importFolder(event,archive=false){
   finally{state.importing=false;disableControls(false);event.target.value='';}
 }
 function download(name,text,type='text/plain;charset=utf-8'){const url=URL.createObjectURL(new Blob([text],{type})),a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),500);}
-function exportCSV(){const quote=v=>`"${String(v??'').replaceAll('"','""')}"`;const rows=[['type','source_line','name','from','to','rate_mva','p_from_mw','q_from_mvar','current_loading_percent','apparent_power_loading_percent','input_r_pu','input_x_pu','input_impedance_base_mva','impedance_scale','system_r_pu','system_x_pu','system_base_mva','model_assumption'],...[...state.scene.lines.map(e=>({...e,type:'L'})),...state.scene.trafos.map(e=>({...e,type:'T'}))].map(e=>[e.type,e.source_line,e.name,nodes.get(e.from)?.name,nodes.get(e.to)?.name,e.rate_mva,e.p,e.q,e.loading,e.apparent_power_loading_percent,e.input_r_pu,e.input_x_pu,e.impedance_base_mva,e.impedance_scale,e.r_pu,e.x_pu,state.scene.base_mva,state.run.impedance_policy?.label||state.run.model_policy])];download(`sjz_${state.dataset.id}_${(selectedSnapshot()?.time||selectedSnapshot()?.filename||'result').replaceAll(':','-')}_powerflow.csv`,'\ufeff'+rows.map(r=>r.map(quote).join(',')).join('\n'),'text/csv;charset=utf-8');}
+function exportCSV(){const quote=v=>`"${String(v??'').replaceAll('"','""')}"`;const rows=[['type','branch_id','input_dat_line','data_origin','name','from','to','rate_mva','p_from_mw','q_from_mvar','current_loading_percent','apparent_power_loading_percent','input_r_pu','input_x_pu','input_impedance_base_mva','impedance_scale','system_r_pu','system_x_pu','system_base_mva','model_assumption'],...[...state.scene.lines.map(e=>({...e,type:'L'})),...state.scene.trafos.map(e=>({...e,type:'T'}))].map(e=>[e.type,e.source_line,e.input_source_line,e.data_origin,e.name,nodes.get(e.from)?.name,nodes.get(e.to)?.name,e.rate_mva,e.p,e.q,e.loading,e.apparent_power_loading_percent,e.input_r_pu,e.input_x_pu,e.impedance_base_mva,e.impedance_scale,e.r_pu,e.x_pu,state.scene.base_mva,state.run.model_policy])];download(`sjz_${state.dataset.id}_${(selectedSnapshot()?.time||selectedSnapshot()?.filename||'result').replaceAll(':','-')}_powerflow.csv`,'\ufeff'+rows.map(r=>r.map(quote).join(',')).join('\n'),'text/csv;charset=utf-8');}
 $('datasetInfoBtn').onclick=()=>$('datasetDialog').showModal();$('closeDatasetInfo').onclick=()=>$('datasetDialog').close();
 $('runBtn').onclick=run;$('uploadBtn').onclick=()=>$('folderInput').click();$('folderInput').onchange=event=>importFolder(event);
 $('archiveBtn').onclick=()=>$('archiveInput').click();$('archiveInput').onchange=event=>importFolder(event,true);
 $('timingBtn').onclick=()=>{renderTiming();$('timingDialog').showModal();};$('closeTiming').onclick=()=>$('timingDialog').close();
 $('elementSearch').oninput=()=>{state.elementPage=0;renderAnalysis();};$('search').oninput=e=>{state.search=e.target.value.trim();requestDraw();};$('colorSelect').onchange=e=>{state.color=e.target.value;requestDraw();};$('flowToggle').onchange=e=>setFlow(e.target.checked);$('labelToggle').onchange=e=>{state.labels=e.target.checked;requestDraw();};
 $('areaSelect').onchange=e=>focusArea(e.target.value);
+$('clearMicrogridFocus').onclick=()=>{state.microgridFocus=null;syncView();fit();};
 $('toggleLog').onclick=()=>{const panel=document.querySelector('.log-panel'),workspace=document.querySelector('.workspace'),collapsed=!panel.classList.contains('is-collapsed');panel.classList.toggle('is-collapsed',collapsed);workspace.classList.toggle('log-collapsed',collapsed);const button=$('toggleLog');button.setAttribute('aria-expanded',String(!collapsed));$('toggleLog').querySelector('.log-toggle-label').textContent=collapsed?'展开日志':'收起日志';button.title=collapsed?'展开实时计算日志':'收起实时计算日志';requestAnimationFrame(()=>{resize();requestDraw();});};
 $('search').onkeydown=e=>{if(e.key!=='Enter'||!state.search)return;const query=state.search.toLowerCase(),bus=state.scene.buses.find(b=>b.name.toLowerCase()===query||String(b.id)===query)||state.scene.buses.find(b=>b.name.toLowerCase().includes(query));if(bus){select('bus',bus.id);return;}const edge=[...state.scene.lines,...state.scene.trafos].find(e=>e.name.toLowerCase()===query)||[...state.scene.lines,...state.scene.trafos].find(e=>e.name.toLowerCase().includes(query));if(edge)select(edge.kind,edge.id);};
 for(const key of ['element','partition'])for(const [suffix,delta] of [['Prev',-1],['Next',1]])$(`${key}${suffix}`).onclick=()=>{state[`${key}Page`]+=delta;renderAnalysis();};
@@ -521,5 +548,5 @@ disableControls(false);window.SJZ_BOOT?.ready();
 stage('等待上传原始数据','上传文件夹或压缩包 → 识别 DAT → 运行潮流校核');
 renderDataset();
 addLog('等待上传原始数据文件夹或压缩包；当前未加载任何数据集或计算结果。');
-addLog('建模设置：T 卡阻抗按 100 MVA 假设解释，L 卡采用文件系统基准；原始文件、负荷、容量和控制不变，过载完整保留。');
+addLog('建模设置：T 卡阻抗按 100 MVA 假设解释，L 卡采用文件系统基准；所有母线、支路及微网设备直接读取 DAT；过载完整保留。');
 api('/health').then(()=>{$('connectionDot').className='online';$('connectionText').textContent='计算服务已连接';}).catch(error=>{$('connectionDot').className='offline';$('connectionText').textContent='计算服务未连接';addLog(error.message,'failed');});

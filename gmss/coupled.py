@@ -529,7 +529,10 @@ def solve_coupled(base, buses, ybus, parts, observer=None, workers=None, toleran
                           'interface_unknowns': len(plan.interface), 'boundary_exchange': iteration > 0,
                           'coordination': timings[-1] if timings else None}, voltage.copy())
             if norm < tolerance:
-                return voltage, {'solver': 'parallel distribution Schur-complement AC Newton',
+                return voltage, {'solver': 'parallel distribution/microgrid Schur-complement AC Newton',
+                                 'microgrid_domains': sum(p.get('subsystem_type') == 'microgrid' for p in parts),
+                                 'distribution_domains': sum(p.get('subsystem_type') != 'microgrid' for p in parts),
+                                 'microgrid_coupling': 'independent microgrid AC domains; exact Schur response in the shared Newton coordinator; no separate fixed-point outer loop',
                                  'newton_iterations': iteration, 'history': history, 'workers': actual_workers,
                                  'partition_count': len(parts), 'local_domains': len(plan.domains),
                                  'interface_bus_count': len(plan.interface_buses), 'interface_unknowns': len(plan.interface),

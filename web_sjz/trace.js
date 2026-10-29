@@ -44,7 +44,7 @@ function decodeFrame(event){
   }
   return {iteration:event.iteration,stage:event.stage,residual_mva:event.residual_mva,
     workers:event.workers,available_cpus:event.available_cpus,coordination:event.coordination,
-    partition_states:event.partition_states||[],boundary_flows:event.boundary_flows||[],values};
+    partition_states:event.partition_states||[],boundary_flows:event.boundary_flows||[],microgrid_states:event.microgrid_states||[],values};
 }
 function receiveFrame(event){
   const frame=decodeFrame(event);trace.frames.push(frame);trace.index=trace.frames.length-1;
@@ -136,11 +136,30 @@ function selectedPartition(){
   return nodes.get(item?.from)?.partition_id||nodes.get(item?.to)?.partition_id||trace.selectedPart;
 }
 function traceText(parent,tag,text,className=''){const el=document.createElement(tag);el.textContent=text;if(className)el.className=className;parent.append(el);return el;}
+function selectedMicrogrid(){
+  const item=state.selected&&element(state.selected.kind,state.selected.id);
+  const id=item?.microgrid_id||item?.connected_microgrid_id;
+  return state.scene.microgrids.find(m=>m.id===id);
+}
 function renderPartitionTrace(){
   const root=$('partitionTrace');if(!root)return;root.replaceChildren();
+  const mg=selectedMicrogrid();
+  if(mg){
+    const m=(state.running||trace.viewing)?trace.current?.microgrid_states.find(m=>m.id===mg.id):mg;
+    traceText(root,'p',`${mg.name} · 独立微网子系统 · ${mg.internal_buses.length} 个内部母线 · PCC ${mg.pcc_name}`);
+    if(state.microgridFocus!==mg.id)traceText(root,'button','查看微网内部网架','text-button').onclick=()=>focusMicrogrid(mg);
+    const details=traceText(root,'div','','trace-metrics');
+    for(const text of [`配网 → 微网：V=${fmt(m?.pcc_vm_pu,6)} pu，θ=${fmt(m?.pcc_va_degree,5)}°`,
+      `微网 → 配网：购电 ${fmt(m?.import_p_mw,6)} MW / ${fmt(m?.import_q_mvar,6)} Mvar`,
+      `入口 P/Q 残差 ${exp(m?.boundary_mismatch_p_mw)} / ${exp(m?.boundary_mismatch_q_mvar)}`,
+      `微网方程残差 ${exp(m?.max_equation_residual_mva)} MVA`,
+      `有功平衡误差 ${exp(m?.balance_p_mw)} MW`,
+      `内部最低电压 ${fmt(m?.voltage_min_pu,6)} pu`])traceText(details,'span',text);
+    traceText(root,'div','内部网架、负荷、光伏与储能 PQ 参与求解；独立消元并反馈 Schur 响应，与配网共同迭代。','trace-note');
+  }
   const id=selectedPartition(),part=trace.partIndex.get(id),measurement=trace.parts.get(id);
   if(!part){root.textContent='点击配网节点或分区结果行，查看分区、工作线程和真实边界交换。主网节点由边界协调器统一求解。';return;}
-  traceText(root,'p',`${part.display_name} · ${part.internal_buses.length} 节点 · 自身边界 ${part.boundary_internal_buses?.length??'—'} · 邻区 ${(part.neighbor_partition_ids||[]).map(p=>`P${p}`).join('、')||'无'}${part.has_main_interface?' · 连接主网':''}`);
+  traceText(root,'p',`${part.display_name} · ${part.subsystem_type==='microgrid'?'微网计算域':'配网计算域'} · ${part.internal_buses.length} 节点 · 自身边界 ${part.boundary_internal_buses?.length??'—'} · 邻区 ${(part.neighbor_partition_ids||[]).map(p=>trace.partIndex.get(p)?.display_name||`P${p}`).join('、')||'无'}${part.has_main_interface?' · 连接主网':''}`);
   const grid=traceText(root,'div','','trace-metrics');
   for(const text of [`第 ${trace.current?.iteration??'—'} 轮 · 线程 ${measurement?.worker_id??'—'}（从 0 编号）`,
     `局部消元 ${fmt(measurement?.local_ms,4)} ms`,`分区残差 ${exp(measurement?.residual_mva)} MVA`,

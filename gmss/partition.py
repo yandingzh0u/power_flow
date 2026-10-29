@@ -18,6 +18,7 @@ from scipy.sparse import coo_matrix
 from scipy.sparse.csgraph import connected_components
 
 from .dat import newton
+from .microgrid import bind_microgrid_partitions
 
 
 _partition_cache = OrderedDict()
@@ -43,7 +44,9 @@ def build_partitions(model, target_size=None, strategy=None):
     if target_size is not None and target_size < 2:
         raise ValueError('Partition target must be at least 2')
     reduced = model['reduced']
-    distribution = np.flatnonzero([bus['key'][1] < 35 for bus in reduced])
+    distribution = np.flatnonzero([bus['key'][1] < 35 and not bus.get('microgrid_id') for bus in reduced])
+    microgrid_groups = [[i for i, bus in enumerate(reduced) if bus.get('microgrid_id') == mg['id']]
+                        for mg in model.get('microgrids', [])]
     group = model['group_index']
     original_by_group = {}
     for index, node in enumerate(group):
@@ -69,6 +72,7 @@ def build_partitions(model, target_size=None, strategy=None):
     work = np.maximum(1, dof * (degree + 1) ** 2).astype(np.int64)
     # Exact model structure/weights, not a filename or a previous solved state.
     cache_key = (strategy, target_size, available_cpus(), group.tobytes(), distribution.tobytes(),
+                 tuple(tuple(g) for g in microgrid_groups),
                  graph.indptr.tobytes(), graph.indices.tobytes(), weights.data.tobytes(),
                  dof.tobytes(), work.tobytes(), coupling.tobytes())
     with _partition_cache_lock:
@@ -78,7 +82,7 @@ def build_partitions(model, target_size=None, strategy=None):
             parts, info = deepcopy(cached)
             info.update(elapsed_ms=(time.perf_counter() - started) * 1000, structure_cache_hit=True)
             model['partitioning'] = info
-            return parts
+            return bind_microgrid_partitions(model, parts)
     low = graph[distribution][:, distribution]
     component_count, labels = connected_components(low, directed=False)
     order = np.argsort(labels, kind='stable')
@@ -112,6 +116,9 @@ def build_partitions(model, target_size=None, strategy=None):
                     local_groups.extend(members[lc == c] for c in range(nc))
                 cache[key] = local_groups
             groups.extend(nodes[members].tolist() for members in cache[key])
+        # A microgrid is one protected physical subsystem, never a METIS shard
+        # and never absorbed into its parent distribution partition.
+        groups.extend(microgrid_groups)
         labels_all = np.full(len(reduced), -1, dtype=int)
         for i, members in enumerate(groups):
             labels_all[members] = i
@@ -144,15 +151,19 @@ def build_partitions(model, target_size=None, strategy=None):
         own_boundary = [i for node in internal if interface[node] for i in original_by_group[node]]
         neighbors = sorted({int(labels_all[b]) + 1 for b in boundary if labels_all[b] >= 0})
         parts.append({'id': len(parts) + 1, 'internal': internal, 'boundary': boundary,
+                      'subsystem_type': 'distribution',
                       'internal_buses': original_ids, 'boundary_buses': boundary_ids,
                       'boundary_internal_buses': own_boundary, 'neighbor_partition_ids': neighbors,
                       'has_main_interface': any(labels_all[b] < 0 for b in boundary),
                       'estimated_work': int(work[internal].sum()),
                       'display_name': f"P{len(parts) + 1:02d}", 'converged': None,
                       'graph_algorithm': 'weighted METIS + connectivity check' if strategy == 'weighted' else 'unweighted METIS + connectivity check'})
+    bind_microgrid_partitions(model, parts)
     sizes = [len(p['internal_buses']) for p in parts]
     model['partitioning'] = {'strategy': strategy, 'algorithm': parts[0]['graph_algorithm'] if parts else 'no distribution domains',
         'distribution_components': int(component_count), 'partition_count': len(parts),
+        'distribution_partition_count': len(parts) - len(microgrid_groups),
+        'microgrid_partition_count': len(microgrid_groups),
         'target_size': selected['target_size'], 'interface_unknowns': selected['interface_unknowns'],
         'available_cpus': workers, 'size_min': min(sizes, default=0), 'size_max': max(sizes, default=0),
         'size_median': float(np.median(sizes)) if sizes else 0, 'small_domains': sum(s <= 10 for s in sizes),
